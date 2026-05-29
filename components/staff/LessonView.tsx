@@ -1,0 +1,92 @@
+'use client';
+
+import { ChevronLeft, Clock, Zap, BookOpen, Target, Play } from 'lucide-react';
+import type { Module, Lesson } from '@/lib/curriculum';
+import LearnPhase from './LearnPhase';
+import PracticePhase from './PracticePhase';
+import ApplyPhase from './ApplyPhase';
+
+type Phase = 'learn' | 'practice' | 'apply';
+
+function PhaseTab({
+  id, current, setPhase, icon: Icon, label, desc,
+}: {
+  id: Phase; current: Phase; setPhase: (p: Phase) => void;
+  icon: React.ElementType; label: string; desc: string;
+}) {
+  const isActive = current === id;
+  return (
+    <button
+      className={`phase-tab${isActive ? ' is-active' : ''}`}
+      onClick={() => setPhase(id)}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <Icon size={18} />
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontWeight: 700, fontSize: 14 }}>{label}</div>
+          <div style={{ fontSize: 11, opacity: 0.7 }}>{desc}</div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+interface LessonViewProps {
+  module: Module;
+  lesson: Lesson;
+  lessonIndex: number;
+  phase: Phase;
+  setPhase: (p: Phase) => void;
+  onBack: () => void;
+}
+
+export default function LessonView({
+  module, lesson, lessonIndex, phase, setPhase, onBack,
+}: LessonViewProps) {
+  return (
+    <div className="page animate-fade-up">
+      <div className="container">
+        <button className="back-btn" onClick={onBack}>
+          <ChevronLeft size={16} /> {module.title}
+        </button>
+
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <div className="label-mono">
+              Lesson {lessonIndex + 1} of {module.lessons.length}
+            </div>
+            <h1 className="display" style={{ fontSize: 36, color: 'var(--brand-deep)', margin: '6px 0 0', lineHeight: 1.1 }}>
+              {lesson.title}
+            </h1>
+          </div>
+          <div style={{ display: 'flex', gap: 16, color: 'var(--ink-soft)', fontSize: 13 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Clock size={13} /> {lesson.duration}
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Zap size={13} color="var(--brand)" /> {lesson.xp} XP
+            </span>
+          </div>
+        </div>
+
+        {/* Phase nav */}
+        <div className="phase-nav">
+          <PhaseTab id="learn" current={phase} setPhase={setPhase} icon={BookOpen} label="Learn" desc="Read & absorb" />
+          <PhaseTab id="practice" current={phase} setPhase={setPhase} icon={Target} label="Practice" desc="Drill & quiz" />
+          <PhaseTab id="apply" current={phase} setPhase={setPhase} icon={Play} label="Apply" desc="Live roleplay" />
+        </div>
+
+        {phase === 'learn' && (
+          <LearnPhase lesson={lesson} onAdvance={() => setPhase('practice')} />
+        )}
+        {phase === 'practice' && (
+          <PracticePhase lesson={lesson} onAdvance={() => setPhase('apply')} />
+        )}
+        {phase === 'apply' && (
+          <ApplyPhase lesson={lesson} onComplete={onBack} />
+        )}
+      </div>
+    </div>
+  );
+}
