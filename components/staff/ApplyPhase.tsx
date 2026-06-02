@@ -507,7 +507,7 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
   const maxPerKey = Math.max(turnCount * 10, 10);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24, animation: 'fadeUp 0.4s ease' }}>
+    <div className="apply-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 24, animation: 'fadeUp 0.4s ease' }}>
       {/* Chat panel */}
       <div>
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -563,6 +563,7 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
           {/* Messages */}
           <div
             ref={scrollRef}
+            className="chat-messages"
             style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 12, maxHeight: 360, minHeight: 280, overflowY: 'auto' }}
           >
             {messages.map((m, i) =>

@@ -645,3 +645,209 @@ body {
   .hero-title { font-size: 30px; }
   .roster-head, .roster-row { gap: 10px; padding: 12px 14px; }
 }
+
+/* ============================================================
+   PREVENT HORIZONTAL OVERFLOW
+   ============================================================ */
+html, body { overflow-x: hidden; }
+
+/* Prevent double-tap zoom on interactive elements */
+button, a, [role="button"] { touch-action: manipulation; }
+
+/* ============================================================
+   BOTTOM TAB BAR — hidden on desktop, shown on mobile
+   ============================================================ */
+.bottom-tab-bar { display: none; }
+
+/* ============================================================
+   MOBILE — max-width: 768px
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* ─ Layout ─ */
+  .page { padding: 16px 16px 100px; }
+  .mgr-page { padding: 16px 16px 100px; }
+  .container { max-width: 100%; }
+
+  /* ─ Bottom tab bar ─ */
+  .bottom-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: white;
+    border-top: 1px solid var(--sand-deeper);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 8px 0;
+    transition: color 0.2s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .bottom-tab.is-active { color: var(--brand-deep); }
+
+  /* ─ Top nav ─ */
+  .role-switcher { display: none; }
+  .nav-avatar { display: none; }
+  .property-pill { display: none; }
+  .brand-tag { display: none; }
+  .top-nav-inner { padding: 10px 16px; }
+  .brand-name { font-size: 16px; }
+
+  /* ─ General touch targets ─ */
+  .btn-brand { min-height: 44px; }
+  .btn-ghost { min-height: 44px; }
+  .btn-brand-sm { min-height: 40px; }
+  .btn-ghost-sm { min-height: 40px; }
+
+  /* ─ Font sizes ─ */
+  body { font-size: 14px; }
+
+  /* ─ Hero banner ─ */
+  .hero-banner { padding: 26px 20px; border-radius: 18px; }
+  .hero-title { font-size: 26px; }
+  .hero-sub { font-size: 14px; margin-bottom: 20px; }
+  .hero-deco { display: none; }
+  .hero-content { max-width: 100%; }
+
+  /* ─ Module grid — single column ─ */
+  .module-grid { grid-template-columns: 1fr; gap: 14px; }
+  .module-card:hover:not(.is-locked) { transform: none; box-shadow: none; }
+  .module-card:active:not(.is-locked) { transform: translateY(1px); }
+
+  /* ─ Lesson rows — min 56px tap target ─ */
+  .lesson-row { min-height: 56px; padding: 14px 16px; border-radius: 12px; }
+  .lesson-row:hover:not(.is-locked) { transform: none; border-color: var(--sand-deeper); }
+  .lesson-row.is-current:hover { border-color: var(--brand); }
+  .lesson-row:active:not(.is-locked) { background: var(--sand-warm); }
+  .exam-card { padding: 16px; }
+  .exam-card:hover:not(.is-locked) { background: white; color: var(--brand-deep); }
+  .exam-card:active:not(.is-locked) { background: var(--brand-deep); color: white; }
+
+  /* ─ Module hero ─ */
+  .module-hero { padding: 20px; border-radius: 16px; }
+  .module-stats { flex-wrap: wrap; gap: 16px; }
+
+  /* ─ Phase nav — full width ─ */
+  .phase-nav { margin: 16px 0 20px; }
+  .phase-tab { padding: 10px 6px; }
+
+  /* ─ Learn phase content ─ */
+  .lang-grid { grid-template-columns: 1fr; }
+  .lang-card:hover { transform: none; }
+  .principles-grid { grid-template-columns: 1fr; }
+  .culture-grid { grid-template-columns: 1fr; }
+  .do-dont-grid { grid-template-columns: 1fr; }
+
+  /* ─ Phrase table — horizontal scroll ─ */
+  .phrase-table-card { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .phrase-table-head, .phrase-row { grid-template-columns: repeat(4, 120px); }
+
+  /* ─ Apply phase — flex column, scoring panel below chat ─ */
+  .apply-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .chat-messages {
+    max-height: 38vh !important;
+    min-height: 140px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Timer bar — taller for visibility */
+  .timer-bar-track { height: 8px; }
+
+  /* Think button — larger tap target */
+  .think-btn { min-height: 40px; padding: 8px 16px; font-size: 13px; }
+
+  /* Send button — 44px touch target */
+  .send-btn { width: 44px; height: 44px; right: 12px; bottom: 12px; }
+  .input-field { padding-right: 60px; }
+
+  /* ─ KPI row — 2x2 grid ─ */
+  .kpi-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .kpi-value { font-size: 26px; }
+  .kpi-card { padding: 16px; }
+
+  /* ─ Chart row — full width, reduced height ─ */
+  .chart-row { grid-template-columns: 1fr; }
+  .chart-card { padding: 16px; }
+  .chart-area-container { height: 150px !important; }
+
+  /* ─ Insight cards — single column ─ */
+  .insight-row { grid-template-columns: 1fr; }
+
+  /* ─ Manager header ─ */
+  .mgr-title { font-size: 26px; }
+  .mgr-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .mgr-meta { flex-wrap: wrap; }
+
+  /* ─ Section header ─ */
+  .section-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .section-title { font-size: 20px; }
+
+  /* ─ Roster table — show only avatar/name, score, chevron ─ */
+  .roster-head { padding: 10px 14px; gap: 8px; }
+  .roster-row { padding: 12px 14px; gap: 8px; }
+  /* Hide: Dept(2), Level(3), Progress(5), Last active(6), Status(7) */
+  .roster-head > div:nth-child(2),
+  .roster-head > div:nth-child(3),
+  .roster-head > div:nth-child(5),
+  .roster-head > div:nth-child(6),
+  .roster-head > div:nth-child(7) { display: none; }
+  .roster-row > div:nth-child(2),
+  .roster-row > div:nth-child(3),
+  .roster-row > div:nth-child(5),
+  .roster-row > div:nth-child(6),
+  .roster-row > div:nth-child(7) { display: none; }
+  .roster-table { -webkit-overflow-scrolling: touch; }
+
+  /* ─ Staff detail ─ */
+  .staff-hero { padding: 20px; border-radius: 16px; }
+  .staff-hero-inner { flex-direction: column !important; gap: 16px !important; }
+  .staff-hero-actions { width: 100% !important; flex-direction: row !important; flex-wrap: wrap !important; }
+  .staff-hero-actions button, .staff-hero-actions a { flex: 1; justify-content: center; min-width: 100px; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .staff-stats { flex-wrap: wrap; gap: 16px; padding-top: 16px; margin-top: 16px; }
+  .div-vert { display: none; }
+
+  /* ─ Back button ─ */
+  .back-btn { min-height: 44px; padding: 8px 0; }
+
+  /* ─ Filter group ─ */
+  .filter-group { flex-wrap: wrap; gap: 6px; }
+}
+
+/* ============================================================
+   SMALL MOBILE — max-width: 480px
+   ============================================================ */
+@media (max-width: 480px) {
+  .page { padding: 12px 12px 96px; }
+  .mgr-page { padding: 12px 12px 96px; }
+  .hero-banner { padding: 20px 16px; border-radius: 14px; }
+  .hero-title { font-size: 22px; }
+  .kpi-value { font-size: 22px; }
+  .kpi-card { padding: 12px; }
+  .phase-tab { padding: 8px 4px; }
+  .top-nav-inner { padding: 8px 12px; }
+  .mgr-title { font-size: 22px; }
+}

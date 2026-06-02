@@ -119,7 +119,7 @@ function SectionPhraseTable({ rows }: { rows: PhraseRow[] }) {
       <h3 className="display" style={{ fontSize: 22, color: 'var(--brand-deep)', marginBottom: 16 }}>
         Key phrases — quick reference
       </h3>
-      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="card phrase-table-card" style={{ padding: 0, overflow: 'hidden' }}>
         <div className="phrase-table-head">
           <div>English</div><div>Dutch</div><div>Spanish</div><div>Papiamentu</div>
         </div>

@@ -262,7 +262,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
               </div>
               <div className="trend-chip up"><TrendingUp size={12} /> +15 pts in 30 days</div>
             </div>
-            <div style={{ height: 200, marginTop: 16 }}>
+            <div className="chart-area-container" style={{ height: 200, marginTop: 16 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={TREND_DATA} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                   <defs>

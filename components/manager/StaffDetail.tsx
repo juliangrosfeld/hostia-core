@@ -66,7 +66,7 @@ export default function StaffDetail({ staff: s, onBack, onViewAs }: StaffDetailP
 
         {/* ─ Hero ─ */}
         <div className="staff-hero">
-          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+          <div className="staff-hero-inner" style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
             <div className="hero-avatar" style={{ background: s.color }}>{s.initials}</div>
             <div style={{ flex: 1 }}>
               <h1 className="display" style={{ fontSize: 36, color: 'var(--brand-deep)', margin: 0, lineHeight: 1.1 }}>
@@ -81,7 +81,7 @@ export default function StaffDetail({ staff: s, onBack, onViewAs }: StaffDetailP
                 <span className="chip"><Trophy size={11} color="#D4A574" /> {s.badges} badges</span>
               </div>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+            <div className="staff-hero-actions" style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
               <button className="btn-brand-sm" onClick={() => onViewAs(s)}>
                 <Eye size={13} /> View as {s.name.split(' ')[0]}
               </button>
