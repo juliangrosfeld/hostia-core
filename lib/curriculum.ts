@@ -604,7 +604,7 @@ export const CURRICULUM: Module[] = [
     id: 'service-flow',
     title: 'The Service Flow',
     subtitle: 'Brgr Haus\'s 10-step standard, start to finish',
-    iconName: 'ArrowRight',
+    iconName: 'BookOpen',
     color: '#111111',
     progress: 0,
     totalLessons: 5,

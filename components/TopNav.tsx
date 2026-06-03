@@ -22,12 +22,7 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
         <div className="top-nav-inner">
           {/* Brand */}
           <Link href="/manager" className="brand" style={{ textDecoration: 'none' }}>
-            <img
-              src="/Brgrlogo.png"
-              alt="Brgr Haus"
-              style={{ height: 28, width: 28, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }}
-            />
-            <span className="display brand-name">Hostia</span>
+            <span className="display brand-name">Hostia<span className="brand-dot">·</span></span>
             <span className="brand-tag">BY GLAD AI</span>
             <div className="property-pill" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <img

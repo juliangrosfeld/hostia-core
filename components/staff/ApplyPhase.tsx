@@ -342,7 +342,7 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
         <h2 className="display" style={{ fontSize: 30, color: 'var(--brand-deep)', margin: '8px 0 16px', lineHeight: 1.15 }}>
           {scenario.title}
         </h2>
-        <p style={{ fontSize: 15.5, lineHeight: 1.65, color: 'var(--ink-soft)', marginBottom: 20, maxWidth: 600 }}>
+        <p className="scenario-brief" style={{ fontSize: 15.5, lineHeight: 1.65, color: 'var(--ink-soft)', marginBottom: 20, maxWidth: 600 }}>
           {scenario.description}
         </p>
 
@@ -370,11 +370,11 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
           </span>
         </div>
 
-        <div style={{ padding: '14px 18px', background: 'var(--sand-warm)', borderRadius: 12, marginBottom: 28, fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6 }}>
+        <div className="how-it-works" style={{ padding: '14px 18px', background: 'var(--sand-warm)', borderRadius: 12, marginBottom: 28, fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6 }}>
           <b style={{ color: 'var(--brand-deep)' }}>How it works:</b> Type your response as the server. You have <b>{timerSeconds} seconds</b> per turn and <b>{MAX_TURNS} turns total</b>. Respond quickly for a ⚡ speed bonus. Use the <b>Think</b> button (once) to pause and collect your thoughts. Hit warmth 9/10 early to earn a bonus.
         </div>
 
-        <button className="btn-brand" onClick={startScenario}>
+        <button className="btn-brand scenario-start-btn" onClick={startScenario}>
           <Play size={14} /> Begin scenario
         </button>
       </div>

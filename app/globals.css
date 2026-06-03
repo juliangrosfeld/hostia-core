@@ -125,7 +125,8 @@ body {
   display: flex; align-items: center; justify-content: center;
   color: var(--brand);
 }
-.brand-name { font-size: 17px; color: var(--brand-deep); }
+.brand-name { font-size: 20px; color: var(--ocean); }
+.brand-dot { color: var(--coral); font-size: 20px; margin-left: 1px; }
 .brand-tag { font-size: 10px; letter-spacing: 0.2em; color: var(--ink-soft); margin-left: 4px; }
 .property-pill {
   margin-left: 16px; padding: 5px 12px;
@@ -422,6 +423,17 @@ body {
   padding: 3px 8px; border-radius: 999px;
 }
 
+/* Module card layout helpers */
+.module-card-body { padding: 24px; }
+.module-card-inner {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.module-icon-wrap {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
 /* ============================================================
    MODULE VIEW
    ============================================================ */
@@ -707,10 +719,10 @@ button, a, [role="button"] { touch-action: manipulation; }
   /* ─ Top nav ─ */
   .role-switcher { display: none; }
   .nav-avatar { display: none; }
-  .property-pill { display: none; }
   .brand-tag { display: none; }
   .top-nav-inner { padding: 10px 16px; }
-  .brand-name { font-size: 16px; }
+  .brand-name { font-size: 18px; }
+  .brand-dot { font-size: 18px; }
 
   /* ─ General touch targets ─ */
   .btn-brand { min-height: 44px; }
@@ -728,16 +740,42 @@ button, a, [role="button"] { touch-action: manipulation; }
   .hero-deco { display: none; }
   .hero-content { max-width: 100%; }
 
-  /* ─ Module grid — single column ─ */
+  /* ─ Module grid — single column, horizontal card layout ─ */
   .module-grid { grid-template-columns: 1fr; gap: 14px; }
   .module-card:hover:not(.is-locked) { transform: none; box-shadow: none; }
   .module-card:active:not(.is-locked) { transform: translateY(1px); }
+  .module-band { display: none; }
+  .module-card-body {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    grid-template-areas: "icon text" "icon progress";
+    column-gap: 12px;
+    row-gap: 6px;
+    padding: 14px 16px;
+    align-items: center;
+  }
+  .module-card-inner { grid-area: icon; margin-bottom: 0; justify-content: flex-start; }
+  .module-icon-wrap { width: 48px !important; height: 48px !important; }
+  .module-certified-badge { display: none; }
+  .module-card-text { grid-area: text; min-width: 0; }
+  .module-progress-row { grid-area: progress; }
+  .module-title { font-size: 15px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+  .module-sub { font-size: 12px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: unset; margin-bottom: 0; }
 
-  /* ─ Lesson rows — min 56px tap target ─ */
-  .lesson-row { min-height: 56px; padding: 14px 16px; border-radius: 12px; }
+  /* ─ Curriculum header — subtitle on own line ─ */
+  .curriculum-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 32px; }
+  .curriculum-sub { font-size: 13px; }
+
+  /* ─ Lesson rows — mobile compact ─ */
+  .lesson-row { min-height: 72px; padding: 16px; border-radius: 12px; gap: 12px; }
   .lesson-row:hover:not(.is-locked) { transform: none; border-color: var(--sand-deeper); }
   .lesson-row.is-current:hover { border-color: var(--brand); }
   .lesson-row:active:not(.is-locked) { background: var(--sand-warm); }
+  .lesson-num { width: 40px; height: 40px; }
+  .lesson-clock { display: none !important; }
+  .lesson-title-row { min-width: 0; }
+  .lesson-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+  .lesson-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .exam-card { padding: 16px; }
   .exam-card:hover:not(.is-locked) { background: white; color: var(--brand-deep); }
   .exam-card:active:not(.is-locked) { background: var(--brand-deep); color: white; }
@@ -771,6 +809,23 @@ button, a, [role="button"] { touch-action: manipulation; }
     max-height: 38vh !important;
     min-height: 140px !important;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Apply pre-screen: hide "How it works" block, brief 2 lines, full-width start btn */
+  .how-it-works { display: none !important; }
+  .scenario-brief {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 16px !important;
+  }
+  .scenario-start-btn {
+    width: 100% !important;
+    min-height: 56px !important;
+    border-radius: 14px !important;
+    justify-content: center !important;
+    font-size: 16px !important;
   }
 
   /* Timer bar — taller for visibility */

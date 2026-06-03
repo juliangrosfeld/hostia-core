@@ -2,18 +2,18 @@
 
 import { ChevronLeft, Clock, Zap, Check, ChevronRight, Trophy } from 'lucide-react';
 import {
-  Hand, ArrowRight, MessageSquare, Shield, Users,
+  Hand, BookOpen, MessageSquare, Shield, Users, Brain,
 } from 'lucide-react';
 import type { Module, Lesson } from '@/lib/curriculum';
 
 // Icon map matching curriculum iconName strings
 const ICON_MAP: Record<string, React.ElementType> = {
   Hand,
-  ArrowRight,
+  BookOpen,
   MessageSquare,
   Shield,
   Users,
-  Brain: MessageSquare, // fallback — lucide has no Brain in older versions
+  Brain,
 };
 
 function LessonRow({
@@ -33,19 +33,19 @@ function LessonRow({
         {isDone ? <Check size={16} /> : num}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-          <span style={{ fontWeight: 700, fontSize: 15 }}>{lesson.title}</span>
-          {isCurrent && <span className="badge-pill">Continue</span>}
+        <div className="lesson-title-row" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span className="lesson-title" style={{ fontWeight: 700, fontSize: 15 }}>{lesson.title}</span>
+          {isCurrent && <span className="badge-pill" style={{ flexShrink: 0 }}>Continue</span>}
           {isDone && (
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--sage-deep)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--sage-deep)', letterSpacing: '0.08em', textTransform: 'uppercase', flexShrink: 0 }}>
               ✓ Done
             </span>
           )}
         </div>
-        <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{lesson.desc}</div>
+        <div className="lesson-desc" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{lesson.desc}</div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'var(--ink-soft)', fontSize: 12, flexShrink: 0 }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <span className="lesson-clock" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <Clock size={12} /> {lesson.duration}
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

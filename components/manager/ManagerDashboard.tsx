@@ -228,7 +228,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             <Sparkline data={TREND_DATA.map((d) => d.score)} color="#81B29A" />
           </KpiCard>
 
-          <KpiCard label="Active this week" value={`${activeStaff}/${n}`} delta={`${atRisk} at risk`} trend={atRisk > 1 ? 'warn' : 'flat'} icon={Users} accent="#111111">
+          <KpiCard label="Active" value={`${activeStaff}/${n}`} delta={`${atRisk} at risk`} trend={atRisk > 1 ? 'warn' : 'flat'} icon={Users} accent="#111111">
             <div className="avatar-stack">
               {staffList.slice(0, 6).map((s) => (
                 <div key={s.id} className="mini-avatar" style={{ background: s.color }}>{s.initials}</div>
@@ -237,7 +237,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             </div>
           </KpiCard>
 
-          <KpiCard label="Lessons this week" value="38" delta="+22% vs last week" trend="up" icon={GraduationCap} accent="#D4A574">
+          <KpiCard label="Lessons" value="38" delta="+22% vs last week" trend="up" icon={GraduationCap} accent="#D4A574">
             <div className="micro-bars">
               {[4, 6, 5, 8, 7, 6, 5].map((v, i) => (
                 <div key={i} className="micro-bar" style={{ height: `${v * 5}px`, background: '#D4A574' }} />
@@ -245,7 +245,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             </div>
           </KpiCard>
 
-          <KpiCard label="Certified for guests" value={`${certified}/${n}`} delta="2 close to certification" trend="flat" icon={Award} accent="#F5A623">
+          <KpiCard label="Certified" value={`${certified}/${n}`} delta="2 close to certification" trend="flat" icon={Award} accent="#F5A623">
             <div className="cert-progress">
               <div style={{ width: `${n > 0 ? (certified / n) * 100 : 0}%` }} />
             </div>

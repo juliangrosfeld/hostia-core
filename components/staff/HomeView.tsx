@@ -2,7 +2,7 @@
 
 import { Play } from 'lucide-react';
 import {
-  Hand, ArrowRight, MessageSquare, Shield, Users,
+  Hand, BookOpen, MessageSquare, Shield, Users, Brain,
 } from 'lucide-react';
 import type { Module } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
@@ -11,34 +11,31 @@ import { PROPERTY } from '@/lib/config';
 // Icon map
 const ICON_MAP: Record<string, React.ElementType> = {
   Hand,
-  ArrowRight,
+  BookOpen,
   MessageSquare,
   Shield,
   Users,
-  Brain: MessageSquare,
+  Brain,
 };
 
 function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
   return (
-    <div
-      className="module-card"
-      onClick={onClick}
-    >
+    <div className="module-card" onClick={onClick}>
       <div className="module-band" style={{ background: module.color }} />
-      <div style={{ padding: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${module.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="module-card-body">
+        <div className="module-card-inner">
+          <div className="module-icon-wrap" style={{ background: `${module.color}18` }}>
             <Icon size={22} color={module.color} />
           </div>
           {module.completedLessons === module.totalLessons && (
-            <span className="module-certified-badge">
-              ✓ Complete
-            </span>
+            <span className="module-certified-badge">✓ Complete</span>
           )}
         </div>
-        <h3 className="display module-title">{module.title}</h3>
-        <p className="module-sub">{module.subtitle}</p>
+        <div className="module-card-text">
+          <h3 className="display module-title">{module.title}</h3>
+          <p className="module-sub">{module.subtitle}</p>
+        </div>
         <div className="module-progress-row">
           <div className="module-progress-bar">
             <div
@@ -117,9 +114,9 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
         </div>
 
         {/* Curriculum header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, marginTop: 48 }}>
+        <div className="curriculum-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, marginTop: 48 }}>
           <h2 className="display" style={{ fontSize: 28, color: 'var(--brand-deep)' }}>Curriculum</h2>
-          <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
+          <span className="curriculum-sub" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
             {curriculum.length} modules · {totalLessons} lessons · ~4 hours total
           </span>
         </div>
