@@ -20,23 +20,41 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
     <>
       <div className="top-nav">
         <div className="top-nav-inner">
-          {/* Brand */}
+
+          {/* Left: Hostia logo + BY GLAD AI */}
           <Link href="/manager" className="brand" style={{ textDecoration: 'none' }}>
-            <span className="display brand-name">Hostia<span className="brand-dot">·</span></span>
+            <img
+              src="/hostia-logo.png"
+              alt="Hostia"
+              style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+            />
             <span className="brand-tag">BY GLAD AI</span>
-            <div className="property-pill" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <img
-                src="/Brgrlogo.png"
-                alt="Brgr Haus"
-                style={{ height: 18, width: 18, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }}
-              />
-              {PROPERTY.name}
-            </div>
           </Link>
 
-          {/* Right side */}
+          {/* Center: Brgr Haus pill — absolutely centered in nav bar */}
+          <div
+            className="property-pill"
+            style={{
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              margin: 0,
+              pointerEvents: 'none',
+            }}
+          >
+            <img
+              src="/Brgrlogo.png"
+              alt="Brgr Haus"
+              style={{ height: 18, width: 18, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }}
+            />
+            {PROPERTY.name}
+          </div>
+
+          {/* Right: role switcher + avatar */}
           <div className="nav-right">
-            {/* Viewing-as badge */}
             {viewingAs && (
               <div className="viewing-as">
                 <Eye size={12} />
@@ -51,7 +69,6 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
               </div>
             )}
 
-            {/* Role switcher — hidden on mobile, replaced by bottom tab bar */}
             <div className="role-switcher">
               <Link
                 href="/manager"
@@ -71,15 +88,15 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
               </Link>
             </div>
 
-            {/* Manager avatar */}
             <div className="nav-avatar" title="Omar Elias — Manager">
               OE
             </div>
           </div>
+
         </div>
       </div>
 
-      {/* Bottom tab bar — mobile only, replaces role switcher */}
+      {/* Bottom tab bar — mobile only */}
       <nav className="bottom-tab-bar">
         <Link
           href="/staff"

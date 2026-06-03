@@ -117,6 +117,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  position: relative;
 }
 .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
 .brand-mark {
@@ -125,8 +126,6 @@ body {
   display: flex; align-items: center; justify-content: center;
   color: var(--brand);
 }
-.brand-name { font-size: 20px; color: var(--ocean); }
-.brand-dot { color: var(--coral); font-size: 20px; margin-left: 1px; }
 .brand-tag { font-size: 10px; letter-spacing: 0.2em; color: var(--ink-soft); margin-left: 4px; }
 .property-pill {
   margin-left: 16px; padding: 5px 12px;
@@ -721,8 +720,6 @@ button, a, [role="button"] { touch-action: manipulation; }
   .nav-avatar { display: none; }
   .brand-tag { display: none; }
   .top-nav-inner { padding: 10px 16px; }
-  .brand-name { font-size: 18px; }
-  .brand-dot { font-size: 18px; }
 
   /* ─ General touch targets ─ */
   .btn-brand { min-height: 44px; }
