@@ -27,14 +27,14 @@ export const SCENARIOS: Record<string, Scenario> = {
     title: 'The Local Family',
     subtitle: 'Module 1 · The 5-Second Rule',
     description:
-      'A local Curaçaoan family — parents and two teenage kids — just walked through the door of Brgr Haus. They look around expecting to be greeted. They\'ve been here before. They know good service when they see it. You have 5 seconds. Go.',
+      'A local Curaçaoan family — parents and two teenage kids — just walked through the door of [Property]. They look around expecting to be greeted. They\'ve been here before. They know good service when they see it. You have 5 seconds. Go.',
     tags: ['🇨🇼 Local', '👨‍👩‍👧‍👦 Family', '⚡ Timed'],
     timerSeconds: 45,
     goal: 'Greet the family within 5 seconds with genuine warmth. A Papiamentu attempt earns a big bonus. Hit warmth 9/10 in 4 exchanges or fewer.',
     startingWarmth: 6,
     opening:
-      'A local Curaçaoan family — parents and two teenage kids — just stepped through the door of Brgr Haus. They look around, expecting to be greeted. The parents make eye contact with you. Greet them.',
-    systemPrompt: `You are simulating a greeting scenario at Brgr Haus, Otrobanda, Curaçao. A local family just walked in.
+      'A local Curaçaoan family — parents and two teenage kids — just stepped through the door of [Property]. They look around, expecting to be greeted. The parents make eye contact with you. Greet them.',
+    systemPrompt: `You are simulating a greeting scenario at [Property], Curaçao. A local family just walked in.
 
 CHARACTERS: Local Curaçaoan family. Parents speak Papiamentu and Dutch. Teens speak English. They know good service when they see it — they've been here before.
 
@@ -69,10 +69,10 @@ Return ONLY valid JSON:
     goal: 'Guide the couple physically to their table — say "follow me" or "right this way", never point. Offer the menu and make small talk. Hit warmth 9/10 in 4 exchanges or fewer.',
     startingWarmth: 7,
     opening:
-      'An American tourist couple — 30s, first time at Brgr Haus — are standing near the entrance looking a bit lost. Tables are available. They spot you and smile hopefully. Lead them.',
-    systemPrompt: `You are simulating a seating scenario at Brgr Haus.
+      'An American tourist couple — 30s, first time at [Property] — are standing near the entrance looking a bit lost. Tables are available. They spot you and smile hopefully. Lead them.',
+    systemPrompt: `You are simulating a seating scenario at [Property].
 
-CHARACTERS: American tourist couple (30s), first time at Brgr Haus. They look a bit lost. They respond well to warmth and confidence. They came because a friend recommended it.
+CHARACTERS: American tourist couple (30s), first time at [Property]. They look a bit lost. They respond well to warmth and confidence. They came because a friend recommended it.
 
 STANDARDS BEING TESTED:
 - Guide physically (staff should say "follow me" or "right this way" — not "over there" or "just go to table 4")
@@ -101,18 +101,18 @@ Return ONLY valid JSON:
     title: 'The Dutch Couple',
     subtitle: 'Module 1 · Greetings',
     description:
-      'A Dutch couple in their late 30s — smartly dressed — just walked through the door of Brgr Haus. They\'re looking around, getting their bearings. It\'s a busy Tuesday evening. Apply everything: 5 seconds, lead in Dutch if you can, guide them — never point.',
+      'A Dutch couple in their late 30s — smartly dressed — just walked through the door of [Property]. They\'re looking around, getting their bearings. It\'s a busy Tuesday evening. Apply everything: 5 seconds, lead in Dutch if you can, guide them — never point.',
     tags: ['🇳🇱 Dutch', '💑 Couple', '⚡ Timed'],
     timerSeconds: 45,
     goal: 'Greet the Dutch couple warmly in Dutch, guide them to the table, and reach warmth 9/10 in 7 turns or fewer.',
     startingWarmth: 6,
     opening:
       'A Dutch couple — Erik and Marieke, late 30s, smartly dressed — just walked through the door. They look around and find your eyes. Greet them.',
-    systemPrompt: `You are running a hospitality greeting training simulation at Brgr Haus, a premium burger restaurant in Kura Hulanda Village, Curaçao.
+    systemPrompt: `You are running a hospitality greeting training simulation at [Property], a hospitality property in Curaçao.
 
-SCENARIO: A Dutch couple (Erik and Marieke, late 30s) just arrived. They speak Dutch natively, excellent English. They heard about Brgr Haus from a friend and are excited but slightly tired from sightseeing.
+SCENARIO: A Dutch couple (Erik and Marieke, late 30s) just arrived. They speak Dutch natively, excellent English. They heard about [Property] from a friend and are excited but slightly tired from sightseeing.
 
-BRGR HAUS STANDARDS being evaluated:
+[PROPERTY] STANDARDS being evaluated:
 - Greeting within 5 seconds (simulated by how quickly the staff message arrives)
 - Use of Dutch language earns strong warmth boost
 - Guidance to table (not pointing) — staff should say they'll walk them there
@@ -144,16 +144,16 @@ After the staff's response, return ONLY valid JSON. Exact shape:
     title: 'The Follow-Up Check',
     subtitle: 'Module 3 · Language',
     description:
-      'You just served a Venezuelan couple their burgers 3 minutes ago. They look like they\'re enjoying it. Time for your follow-up check. Use the right language — or lose the moment.',
+      'You just served a Venezuelan couple their menu items 3 minutes ago. They look like they\'re enjoying it. Time for your follow-up check. Use the right language — or lose the moment.',
     tags: ['🇻🇪 Venezuelan', '🗣️ Language Focus', '⏱️ 25s'],
     timerSeconds: 45,
     goal: 'Use a flavor-focused question (no banned phrases like "¿Todo bien?") and push warmth from 7 to 9/10 in 7 turns.',
     startingWarmth: 7,
     opening:
-      'Andrés and Camila — a Venezuelan couple in their mid-30s — are 3 minutes into their burgers. They look pleased. You approach. What do you say?',
-    systemPrompt: `You are running a language training simulation at Brgr Haus in Curaçao.
+      'Andrés and Camila — a Venezuelan couple in their mid-30s — are 3 minutes into their meal. They look pleased. You approach. What do you say?',
+    systemPrompt: `You are running a language training simulation at [Property] in Curaçao.
 
-BRGR HAUS LANGUAGE RULES being tested:
+[PROPERTY] LANGUAGE RULES being tested:
 BANNED PHRASES (trigger immediate coaching note and warmth drop of 2):
 - "¿Todo bien?"
 - "Is everything OK?"
@@ -163,8 +163,8 @@ BANNED PHRASES (trigger immediate coaching note and warmth drop of 2):
 
 CORRECT APPROACH (trigger warmth increase and high language score):
 - "¿Cómo percibieron el balance de sabores?"
-- "¿Qué les pareció la burger?"
-- "¿Pudimos superar sus expectativas esta noche?"
+- "¿Qué les pareció el plato?"
+- "¿Pudieron superar sus expectativas esta noche?"
 - Any flavor-specific, experience-focused question
 - Using Spanish earns bonus warmth
 
@@ -198,11 +198,11 @@ After the staff's response, return ONLY valid JSON:
     startingWarmth: 5,
     opening:
       'A family of four sits at table 6. As you approach, the mother — Linda, early 40s — speaks first: "Before we order, I need to let you know I have celiac disease. Serious gluten intolerance." Her husband and two teenagers are watching how you handle this.',
-    systemPrompt: `You are running an order-taking simulation at Brgr Haus in Curaçao. A declared celiac allergy is in play.
+    systemPrompt: `You are running an order-taking simulation at [Property] in Curaçao. A declared celiac allergy is in play.
 
-BRGR HAUS STANDARDS being evaluated:
+[PROPERTY] STANDARDS being evaluated:
 1. Acknowledge the restriction IMMEDIATELY and with appropriate gravity ("absolutely, thank you for telling me")
-2. Know the options: bun can be swapped to lettuce wrap, fries are cooked in a dedicated fryer (safe), sauces — must confirm each one
+2. Know the options: dishes can be modified, certain items are safe, sauces — must confirm each one
 3. NEVER dismiss or minimize the allergy
 4. Confirm with kitchen before promising anything
 5. Take the full order systematically, confirm every item
@@ -211,7 +211,7 @@ BRGR HAUS STANDARDS being evaluated:
 CHARACTERS:
 - Linda (mom, celiac): Anxious about restaurants. Relaxes visibly when handled properly. Has had bad experiences — will be watching closely.
 - David (dad, impatient): Wants to order quickly. Loses patience if the process takes too long without clear direction.
-- Teenagers (Maya 16, Jack 14): Just want burgers. Will take their cue from parents.
+- Teenagers (Maya 16, Jack 14): Just want to order. Will take their cue from parents.
 - Warmth increases when: allergy is taken seriously, staff is knowledgeable and confident, process is clear
 - Warmth decreases when: staff seems unsure, minimizes the allergy, or can't answer basic questions
 
@@ -231,7 +231,7 @@ After the staff's response, return ONLY valid JSON:
   'overcooked-burger': {
     id: 'overcooked-burger',
     moduleId: 'complaints',
-    title: 'The Overcooked Burger',
+    title: 'The Overcooked Menu Item',
     subtitle: 'Module 4 · Complaints',
     description:
       'A guest ordered medium-rare. What arrived is clearly well-done. He\'s not screaming, but he\'s not happy. Apply the 4-step protocol — and avoid the phrases that end relationships.',
@@ -240,10 +240,10 @@ After the staff's response, return ONLY valid JSON:
     goal: 'Own the mistake immediately, no excuses, and turn Hans\'s warmth from 4 to 8+ in 7 turns.',
     startingWarmth: 4,
     opening:
-      'Hans — a Dutch businessman in his 50s, dining alone — flags you down. He holds up his burger: "I specifically ordered medium-rare. This is well-done. I can see it." He is calm. He is waiting.',
-    systemPrompt: `You are running a complaint-handling simulation at Brgr Haus in Curaçao.
+      'Hans — a Dutch businessman in his 50s, dining alone — flags you down. He holds up his dish: "I specifically ordered medium-rare. This is well-done. I can see it." He is calm. He is waiting.',
+    systemPrompt: `You are running a complaint-handling simulation at [Property] in Curaçao.
 
-BRGR HAUS 4-STEP ERROR PROTOCOL being evaluated:
+[PROPERTY] 4-STEP ERROR PROTOCOL being evaluated:
 1. Listen without interrupting — let the guest say their piece
 2. Accept responsibility — NEVER blame the kitchen, NEVER justify
 3. Resolve immediately — "I'll fix this right now" not "I'll check"
@@ -256,7 +256,7 @@ PROHIBITED RESPONSES that drop warmth immediately:
 - Any justification or blame-shifting
 - "I'm sorry but..."
 
-CHARACTER: Hans, Dutch businessman, 50s. Direct, not aggressive. Has been to Brgr Haus before and likes it. He expected better. He is testing whether the staff knows what to do — he has seen bad service elsewhere. A proper apology and immediate action will fully recover this. A justification will end the evening.
+CHARACTER: Hans, Dutch businessman, 50s. Direct, not aggressive. Has been to [Property] before and likes it. He expected better. He is testing whether the staff knows what to do — he has seen bad service elsewhere. A proper apology and immediate action will fully recover this. A justification will end the evening.
 
 Warmth starts low (4/10).
 - Proper ownership + immediate action → warmth rises to 8-9
@@ -290,14 +290,14 @@ After the staff's response, return ONLY valid JSON:
     startingWarmth: 7,
     opening:
       'A Venezuelan couple — mid-30s, clearly on a date — is at table 2, deep in conversation. They\'ve been seated about 3 minutes and haven\'t ordered drinks. You approach the table.',
-    systemPrompt: `You are simulating a floor scenario at Brgr Haus, Otrobanda, Curaçao.
+    systemPrompt: `You are simulating a floor scenario at [Property], Curaçao.
 
 CHARACTERS: Venezuelan couple on a date (mid-30s). They speak Spanish primarily, decent English. They are happy but slightly aware they've been waiting for drinks. They are in conversation.
 
-BRGR HAUS STANDARDS BEING TESTED:
+[PROPERTY] STANDARDS BEING TESTED:
 - Discrete, soft approach — don't interrupt mid-sentence
 - Match intimate couple energy — not loud, not intrusive
-- Offer water immediately (Brgr Haus standard)
+- Offer water immediately ([Property] standard)
 - Proactive drink suggestion before they ask
 - Spanish attempt earns warmth bonus
 
@@ -339,17 +339,17 @@ Return ONLY valid JSON:
     startingWarmth: 7,
     opening:
       'A group of 5 friends — mix of locals and tourists, early 30s, clearly in a good mood — just sat down. They\'re looking at menus but nobody has asked for drinks. This is your moment to lead.',
-    systemPrompt: `You are running a proactive drinks suggestion simulation at Brgr Haus in Curaçao.
+    systemPrompt: `You are running a proactive drinks suggestion simulation at [Property] in Curaçao.
 
-BRGR HAUS STANDARD being evaluated:
+[PROPERTY] STANDARD being evaluated:
 - Proactive suggestion (don't wait to be asked — this is a cardinal rule)
-- Brief recommendation with a reason ("our craft beer pairs perfectly with the burgers because...")
+- Brief recommendation with a reason ("our craft beer pairs perfectly with the menu items because...")
 - Not pushy — enthusiastic and knowledgeable
 - Match the group's energy (they're in a good mood — be warm and social)
 - Specific product knowledge: craft beers, house cocktails, fresh lemonades, water
 
-BRGR HAUS MENU CONTEXT:
-- House craft lager: "cut through the richness of the burger, great session beer"
+[PROPERTY] MENU CONTEXT:
+- House craft lager: "cut through the richness of the dish, great session beer"
 - House IPA: "hoppy, pairs well with the spicy options"
 - House lemonade: "made fresh daily, light and citrus — popular on hot evenings"
 - House cocktail of the day (staff can invent a name): "tonight's special"
@@ -368,5 +368,227 @@ After the staff's response, return ONLY valid JSON:
     scoreKeys: ['proactivity', 'product_knowledge', 'energy_match'],
     scoreLabels: { proactivity: 'Proactivity', product_knowledge: 'Product Knowledge', energy_match: 'Energy Match' },
     scoreColors: { proactivity: '#F5A623', product_knowledge: '#81B29A', energy_match: '#D4A574' },
+  },
+
+  'full-service-run': {
+    id: 'full-service-run',
+    moduleId: 'service-flow',
+    title: 'Table 4 — Full Service Run',
+    subtitle: 'Module 2 · The 10-Step Sequence',
+    description:
+      'A couple has just been seated at table 4 for their anniversary dinner. They look relaxed and happy. Walk them through the complete service experience — from first contact to close.',
+    tags: ['💑 Anniversary', '🎯 Full Run', '⭐ Complete Flow'],
+    timerSeconds: 45,
+    goal: 'Run the full service sequence — offer water, suggest drinks, take the order, follow up, offer dessert, and close personally. Reach warmth 9/10.',
+    startingWarmth: 7,
+    opening:
+      'Sophie and Marco — a couple in their mid-40s celebrating their anniversary — have just been seated at table 4. They look relaxed and happy. They\'ve been here before and are looking forward to the evening. You approach.',
+    systemPrompt: `You are simulating a complete service scenario at [Property].
+
+CHARACTERS: Sophie and Marco, mid-40s, celebrating their anniversary. They are warm and easy to please but notice the small details of service quality. They've been here before — they know what good service feels like.
+
+STANDARDS BEING TESTED:
+- Offer water immediately without being asked
+- Proactive drink suggestion with brief explanation
+- Confirm order accurately
+- Check back 2-3 minutes after food arrives with a flavor-focused question (never "is everything okay?")
+- Never interrupt their conversation mid-sentence
+- Offer dessert before they ask
+- Close with their names and a personal touch
+
+WARMTH INCREASES WITH: anticipating needs before asked, smooth non-intrusive service, personal touches (mentioning the anniversary), using their names.
+WARMTH DECREASES WITH: waiting to be asked for everything, interrupting conversations, rushing them, generic check-ins ("is everything okay?").
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Sophie or Marco responding, 1-2 sentences",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": {
+    "anticipation": <0-10>,
+    "flow": <0-10>,
+    "professionalism": <0-10>
+  },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 7 exchanges or warmth reaches 9+>
+}`,
+    scoreKeys: ['anticipation', 'flow', 'professionalism'],
+    scoreLabels: { anticipation: 'Anticipation', flow: 'Service Flow', professionalism: 'Professionalism' },
+    scoreColors: { anticipation: '#F5A623', flow: '#81B29A', professionalism: '#D4A574' },
+  },
+
+  'two-minute-check': {
+    id: 'two-minute-check',
+    moduleId: 'service-flow',
+    title: 'The 2-Minute Check',
+    subtitle: 'Module 2 · Language of Service',
+    description:
+      'A table of 4 just received their food 2 minutes ago. They\'re eating and seem to be enjoying it. Time for your check-in. Choose your words carefully.',
+    tags: ['👥 Group', '🗣️ Language', '⏱️ Timed'],
+    timerSeconds: 45,
+    goal: 'Use a specific, flavor-focused check-in (no banned phrases). Push warmth from 7 to 9/10 in 5 exchanges.',
+    startingWarmth: 7,
+    opening:
+      'A table of 4 friends — mix of ages, clearly enjoying themselves — received their food 2 minutes ago. They\'re eating and seem pleased. You approach for your follow-up check.',
+    systemPrompt: `You are running a language-of-service simulation at [Property].
+
+[PROPERTY] LANGUAGE RULES being tested:
+BANNED PHRASES (trigger warmth drop of 2 and coaching note):
+- "Is everything okay?"
+- "Everything good?"
+- "Did you enjoy it?"
+- Any generic OK-check
+
+CORRECT APPROACH (trigger warmth increase):
+- "How are you finding the flavors?"
+- "What do you think of the [specific dish]?"
+- Any flavor-specific or experience-focused question
+- Mentioning a specific dish by name earns warmth bonus
+
+CHARACTERS: Four friends (mix of 30s-40s), relaxed and happy. They respond warmly to genuine interest in their experience. A generic check-in gets a polite "yes, fine" and no more. A specific, flavor-focused question opens a real conversation.
+
+After the staff's response, return ONLY valid JSON:
+{
+  "guest_reply": "one of the four responding, 1-2 sentences. Flat if banned phrase was used. Engaged if specific language was used.",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": { "language_quality": <0-10>, "specificity": <0-10>, "professionalism": <0-10> },
+  "violation": <true if banned phrase was used, false otherwise>,
+  "coach_tip": "one precise sentence of feedback",
+  "conversation_complete": <true after 3 exchanges>
+}`,
+    scoreKeys: ['language_quality', 'specificity', 'professionalism'],
+    scoreLabels: { language_quality: 'Language Quality', specificity: 'Specificity', professionalism: 'Professionalism' },
+    scoreColors: { language_quality: '#F5A623', specificity: '#81B29A', professionalism: '#D4A574' },
+  },
+
+  'proactive-floor-signal': {
+    id: 'proactive-floor-signal',
+    moduleId: 'service-flow',
+    title: 'The Non-Verbal Signal',
+    subtitle: 'Module 2 · Proactive Service',
+    description:
+      'A guest at table 7 is showing clear non-verbal signals that they need attention — without waving or calling out. Will you catch it before they have to ask?',
+    tags: ['👁️ Observation', '⚡ Proactive', '🎯 Anticipation'],
+    timerSeconds: 45,
+    goal: 'Read and act on the non-verbal signal before the guest has to verbally ask. Reach warmth 9/10 in 5 exchanges.',
+    startingWarmth: 6,
+    opening:
+      'You\'re scanning the floor. At table 7, a solo guest — a Dutch businesswoman in her 40s — has finished her meal, placed her cutlery neatly down, and has been looking around the room for about 30 seconds. She hasn\'t waved. She hasn\'t called out. She\'s waiting.',
+    systemPrompt: `You are simulating a proactive service scenario at [Property].
+
+CHARACTERS: Ineke — Dutch businesswoman, 40s, dining alone. Direct but not unkind. She notices when service is proactive vs reactive. She has been waiting 30 seconds without anyone approaching — warmth starts slightly below neutral.
+
+STANDARDS BEING TESTED:
+- Reading the non-verbal signal before being asked
+- Approaching with intention and the right offer (dessert menu? bill? coffee?)
+- Matching her direct, efficient communication style
+- Not hovering — read the signal, act, then give space
+
+WARMTH INCREASES WITH:
+- Approaching before she has to ask
+- Correctly reading what she needs (she's done with the meal — offer dessert menu or the close)
+- Efficient, direct service matching her Dutch communication style
+- Not over-explaining or over-talking
+
+WARMTH DECREASES WITH:
+- Making her wait any longer
+- Approaching and asking "can I help you?" without reading the room
+- Over-enthusiastic or lengthy service exchange
+- Missing what she actually needs
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Ineke responding, 1-2 sentences. Direct. Slightly warmer if staff read the room correctly.",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "anticipation": <0-10>, "reading": <0-10>, "efficiency": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth reaches 9>
+}`,
+    scoreKeys: ['anticipation', 'reading', 'efficiency'],
+    scoreLabels: { anticipation: 'Anticipation', reading: 'Signal Reading', efficiency: 'Efficiency' },
+    scoreColors: { anticipation: '#F5A623', reading: '#81B29A', efficiency: '#D4A574' },
+  },
+
+  'nonverbal-observation': {
+    id: 'nonverbal-observation',
+    moduleId: 'service-flow',
+    title: 'The Floor Scan',
+    subtitle: 'Module 2 · Reading Signals',
+    description:
+      'Your floor trainer walks the floor with you and describes three tables. For each one: tell her what\'s happening and what you\'d do.',
+    tags: ['👁️ Observation', '📋 Assessment', '🎓 Training'],
+    timerSeconds: 45,
+    goal: 'Correctly read and respond to all 3 table scenarios. Score 8/10 or above on signal reading.',
+    startingWarmth: 7,
+    opening:
+      'Your floor trainer, Ana, stops beside you during the dinner rush. "Quick floor check — I\'ll describe what I see at three tables. You tell me what\'s happening and what you\'d do. Ready? Table 3: couple, menus closed, both leaning back. What do you see?"',
+    systemPrompt: `You are playing Ana, a sharp floor trainer at [Property], conducting a real-time signal-reading assessment.
+
+THREE TABLE SCENARIOS to present one at a time:
+1. Table 3: couple, menus closed, both leaning back.
+   CORRECT: They're ready to order — approach calmly and take their order.
+
+2. Table 7: group of 4, two empty plates, two still eating. One person keeps glancing at their watch.
+   CORRECT: Don't clear — someone is still eating. The watch-glancer may be on a schedule; offer to move the next course along after everyone finishes.
+
+3. Table 12: solo guest, phone on table, eating quickly, hasn't looked up once.
+   CORRECT: Efficient, minimal check-in — no small talk. Process payment quickly when they're done.
+
+SCORING:
+- Correct signal reading + right action → warmth increases, high scores
+- Missed signal or wrong action → coaching note, warmth holds
+- You can ask a short follow-up if the answer is only partially right
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Ana responding as trainer, 1-2 sentences. Affirm what's right, redirect what's wrong. Present the next table scenario when the previous one is resolved.",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": { "signal_reading": <0-10>, "action_quality": <0-10>, "floor_awareness": <0-10> },
+  "coach_tip": "one specific sentence about the most recent response",
+  "conversation_complete": <true after all 3 tables have been assessed>
+}`,
+    scoreKeys: ['signal_reading', 'action_quality', 'floor_awareness'],
+    scoreLabels: { signal_reading: 'Signal Reading', action_quality: 'Action Quality', floor_awareness: 'Floor Awareness' },
+    scoreColors: { signal_reading: '#F5A623', action_quality: '#81B29A', floor_awareness: '#D4A574' },
+  },
+
+  'runner-coordination': {
+    id: 'runner-coordination',
+    moduleId: 'service-flow',
+    title: 'Runner Ready',
+    subtitle: 'Module 2 · Team Service',
+    description:
+      'Table 8 of 5 is waiting on their mains. Your runner appears at the kitchen window: 3 plates are ready, 2 are still 3 minutes out. What do you do?',
+    tags: ['👥 Team', '🍽️ Coordination', '⏱️ Timing'],
+    timerSeconds: 45,
+    goal: 'Make the right call on timing, communicate correctly with the runner, and coordinate a perfect synchronized service for table 8. Reach warmth 8/10.',
+    startingWarmth: 7,
+    opening:
+      'Marco — your runner — appears at the kitchen window and signals you. "Table 8, three plates are ready. The other two are about 3 more minutes." Table 8 has been waiting 12 minutes. What do you tell Marco?',
+    systemPrompt: `You are playing Marco, a runner at [Property], taking direction from the server on how to handle table 8's service.
+
+CONTEXT: Table 8 is a group of 5 friends. They've been waiting 12 minutes for their mains. Three plates are ready; two are 3 minutes out. The server must make the right call.
+
+THE CORRECT CALL: Wait for all 5 plates before going out. 12 minutes is a manageable wait — serving 3 now and 2 later is worse than a 3-minute hold. One person watching others eat is the worst outcome.
+
+WRONG CALLS (trigger warmth drop + coaching note):
+- "Go ahead with the 3, I'll explain to the table" → three guests start eating while two watch
+- "Ask the table if they want to start" → puts the decision burden on guests
+- Any call that results in partial service
+
+FOLLOW-UP SEQUENCE (ask these in order after the right call):
+- "Do I serve from the left or right?" → Correct at [Property]: food from the right, drinks from the left.
+- "Should I say anything to the table about the wait?" → Correct: a brief, warm acknowledgment ("thank you for your patience") is appropriate.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Marco responding as runner, 1-2 sentences. Confirms or questions the instruction.",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": { "timing_decision": <0-10>, "coordination": <0-10>, "standards_knowledge": <0-10> },
+  "coach_tip": "one sentence of specific feedback on the decision or communication",
+  "conversation_complete": <true after table 8 is successfully coordinated, typically 3-4 exchanges>
+}`,
+    scoreKeys: ['timing_decision', 'coordination', 'standards_knowledge'],
+    scoreLabels: { timing_decision: 'Timing Decision', coordination: 'Coordination', standards_knowledge: 'Standards Knowledge' },
+    scoreColors: { timing_decision: '#F5A623', coordination: '#81B29A', standards_knowledge: '#D4A574' },
   },
 };
