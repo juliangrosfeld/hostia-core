@@ -31,7 +31,7 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
             <span className="brand-tag">BY GLAD AI</span>
           </Link>
 
-          {/* Center: Brgr Haus pill — absolutely centered in nav bar */}
+          {/* Center: property pill — absolutely centered in nav bar */}
           <div
             className="property-pill"
             style={{
@@ -45,11 +45,6 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
               pointerEvents: 'none',
             }}
           >
-            <img
-              src="/Brgrlogo.png"
-              alt="Brgr Haus"
-              style={{ height: 18, width: 18, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }}
-            />
             {PROPERTY.name}
           </div>
 

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Hostia — Brgr Haus Training Platform',
-  description: 'AI-powered staff training by GLAD AI · Brgr Haus, Curaçao',
+  title: 'Hostia — Hospitality Training Platform',
+  description: 'AI-powered staff training by GLAD AI',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

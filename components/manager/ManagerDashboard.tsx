@@ -443,7 +443,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
                     <Trash2 size={22} color="var(--coral-deep)" />
                   </div>
                   <h2 className="display" style={{ fontSize: 22, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
-                    Remove {editTarget?.name.split(' ')[0]} from Brgr Haus?
+                    Remove {editTarget?.name.split(' ')[0]} from [Property]?
                   </h2>
                   <p style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.55, margin: 0 }}>
                     This cannot be undone.

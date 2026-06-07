@@ -603,7 +603,7 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
             <div style={{ position: 'relative' }}>
               <textarea
                 className="input-field"
-                placeholder="Respond as the server at Brgr Haus…"
+                placeholder="Respond as the server at [Property]…"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {

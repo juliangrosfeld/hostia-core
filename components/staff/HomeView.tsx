@@ -77,9 +77,9 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
         <div className="hero-banner">
           <div className="hero-content">
             <img
-              src="/Brgrlogo.png"
-              alt="Brgr Haus"
-              style={{ height: 32, width: 32, borderRadius: 6, objectFit: 'cover', marginBottom: 16 }}
+              src="/hostia-logo.png"
+              alt="Hostia"
+              style={{ height: 32, width: 'auto', objectFit: 'contain', marginBottom: 16 }}
             />
             <div className="hero-eyebrow">Welcome back, {firstName}</div>
             <h1 className="display hero-title">

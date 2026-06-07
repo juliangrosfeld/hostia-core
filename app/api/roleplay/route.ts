@@ -1,59 +1,116 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 
-export async function POST(request: NextRequest) {
-  // ── Debug: confirm the key is present before touching the SDK ──────────────
-  console.log('API Key exists:', !!process.env.ANTHROPIC_API_KEY);
-  console.log('API Key prefix:', process.env.ANTHROPIC_API_KEY?.substring(0, 10));
+// ── Rate limiter ─────────────────────────────────────────────────────────────
+const RATE_LIMIT = 30;
+const WINDOW_MS = 60_000;
 
-  // ── Key guard ───────────────────────────────────────────────────────────────
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>();
+
+function getIp(request: NextRequest): string {
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+  );
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitStore.get(ip);
+
+  if (!entry || now - entry.windowStart > WINDOW_MS) {
+    rateLimitStore.set(ip, { count: 1, windowStart: now });
+    return false;
+  }
+
+  if (entry.count >= RATE_LIMIT) return true;
+
+  entry.count++;
+  return false;
+}
+
+// ── Input sanitization ───────────────────────────────────────────────────────
+function stripHtml(str: string): string {
+  return str.replace(/<[^>]*>/g, '');
+}
+
+// ── Route handler ────────────────────────────────────────────────────────────
+export async function POST(request: NextRequest) {
+  // Rate limit check
+  const ip = getIp(request);
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait before trying again.' },
+      { status: 429, headers: { 'Retry-After': '60' } }
+    );
+  }
+
+  // Key guard
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || apiKey === 'your_key_here') {
     console.error('[roleplay] ANTHROPIC_API_KEY is not set in .env.local');
     return NextResponse.json(
-      { error: 'ANTHROPIC_API_KEY is missing or is still the placeholder. Set it in .env.local and restart the dev server.' },
+      { error: 'Server misconfiguration: API key is missing.' },
       { status: 500 }
     );
   }
 
-  // Instantiate with the key passed explicitly — no ambiguity about which env
-  // var the SDK picks up in different runtime environments.
   const client = new Anthropic({ apiKey });
 
-  // ── Parse body ──────────────────────────────────────────────────────────────
-  let body: { systemPrompt?: string; conversationHistory?: unknown; staffMessage?: string };
+  // Parse body
+  let body: { systemPrompt?: unknown; conversationHistory?: unknown; staffMessage?: unknown };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
   }
 
+  // Validate required fields exist and are strings
   const { systemPrompt, conversationHistory, staffMessage } = body;
 
-  if (!systemPrompt || !staffMessage) {
+  if (typeof systemPrompt !== 'string' || !systemPrompt.trim()) {
+    return NextResponse.json({ error: 'Missing or invalid field: systemPrompt' }, { status: 400 });
+  }
+  if (typeof staffMessage !== 'string' || !staffMessage.trim()) {
+    return NextResponse.json({ error: 'Missing or invalid field: staffMessage' }, { status: 400 });
+  }
+
+  // Length checks
+  if (staffMessage.length > 500) {
     return NextResponse.json(
-      { error: 'Missing required fields: systemPrompt and staffMessage' },
+      { error: 'staffMessage exceeds maximum length of 500 characters' },
+      { status: 400 }
+    );
+  }
+  if (systemPrompt.length > 5000) {
+    return NextResponse.json(
+      { error: 'systemPrompt exceeds maximum length of 5000 characters' },
       { status: 400 }
     );
   }
 
+  // Sanitize inputs
+  const cleanSystemPrompt = stripHtml(systemPrompt);
+  const cleanStaffMessage = stripHtml(staffMessage);
+
   const conversationText =
     Array.isArray(conversationHistory) && conversationHistory.length > 0
       ? (conversationHistory as { role: string; text: string }[])
-          .map((m) => `${m.role === 'guest' ? 'GUEST' : 'STAFF'}: ${m.text}`)
+          .map((m) => `${m.role === 'guest' ? 'GUEST' : 'STAFF'}: ${stripHtml(String(m.text ?? ''))}`)
           .join('\n\n')
       : '(conversation just starting)';
 
-  // ── Call the API ────────────────────────────────────────────────────────────
+  // Call the API
   try {
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1000,
-      system: systemPrompt,
+      system: cleanSystemPrompt,
       messages: [
         {
           role: 'user',
-          content: `CONVERSATION SO FAR:\n\n${conversationText}\n\nSTAFF JUST SAID: ${staffMessage}\n\nReturn ONLY the JSON object — no markdown, no explanation.`,
+          content: `CONVERSATION SO FAR:\n\n${conversationText}\n\nSTAFF JUST SAID: ${cleanStaffMessage}\n\nReturn ONLY the JSON object — no markdown, no explanation.`,
         },
       ],
     });
@@ -63,8 +120,6 @@ export async function POST(request: NextRequest) {
       .join('')
       .trim();
 
-    console.log('[roleplay] Raw model response:', rawText.substring(0, 200));
-
     // Strip markdown fences if the model wraps the JSON anyway
     const stripped = rawText
       .replace(/^```(?:json)?\s*/i, '')
@@ -73,9 +128,9 @@ export async function POST(request: NextRequest) {
     const match = stripped.match(/\{[\s\S]*\}/);
 
     if (!match) {
-      console.error('[roleplay] No JSON found in response:', rawText);
+      console.error('[roleplay] No JSON found in response:', rawText.substring(0, 200));
       return NextResponse.json(
-        { error: 'Model returned no parseable JSON', raw: rawText },
+        { error: 'Model returned no parseable JSON' },
         { status: 500 }
       );
     }
@@ -84,10 +139,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(parsed);
 
   } catch (error: unknown) {
-    // Log the full error object so every field is visible in the terminal
     console.error('Anthropic SDK error:', error);
 
-    // Surface Anthropic API errors (auth failures, rate limits, invalid model, etc.)
     if (
       error !== null &&
       typeof error === 'object' &&
@@ -95,13 +148,12 @@ export async function POST(request: NextRequest) {
       'message' in error
     ) {
       const ae = error as { status: number; message: string; error?: unknown };
-      console.error(`[roleplay] Anthropic error ${ae.status}:`, ae.message, ae.error ?? '');
       return NextResponse.json(
-        { error: `Anthropic API error (${ae.status}): ${ae.message}`, detail: ae.error },
+        { error: `Anthropic API error (${ae.status}): ${ae.message}` },
         { status: ae.status ?? 500 }
       );
     }
 
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
