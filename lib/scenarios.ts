@@ -142,46 +142,264 @@ After the staff's response, return ONLY valid JSON. Exact shape:
     id: 'language-followup',
     moduleId: 'language',
     title: 'The Follow-Up Check',
-    subtitle: 'Module 3 · Language',
+    subtitle: 'Module 3 · Banned Phrases',
     description:
-      'You just served a Venezuelan couple their menu items 3 minutes ago. They look like they\'re enjoying it. Time for your follow-up check. Use the right language — or lose the moment.',
-    tags: ['🇻🇪 Venezuelan', '🗣️ Language Focus', '⏱️ 25s'],
+      'A table of 3 colleagues just finished their main course — Dutch, Venezuelan, and American. They look satisfied. Walk over and check in on their experience. The words you choose will define how they remember this meal.',
+    tags: ['👥 Business Table', '🌍 Mixed Nationalities', '🗣️ Language Focus'],
     timerSeconds: 45,
-    goal: 'Use a flavor-focused question (no banned phrases like "¿Todo bien?") and push warmth from 7 to 9/10 in 7 turns.',
+    goal: 'Use a flavor-focused check-in (zero banned phrases) and push warmth from 7 to 9/10 in 5 exchanges or fewer.',
     startingWarmth: 7,
     opening:
-      'Andrés and Camila — a Venezuelan couple in their mid-30s — are 3 minutes into their meal. They look pleased. You approach. What do you say?',
-    systemPrompt: `You are running a language training simulation at [Property] in Curaçao.
+      'Three colleagues — Pieter (Dutch), Valentina (Venezuelan), and Mark (American) — just finished their main course. They look pleased. You approach the table.',
+    systemPrompt: `You are simulating a language quality scenario at [Property], Curaçao.
 
-[PROPERTY] LANGUAGE RULES being tested:
-BANNED PHRASES (trigger immediate coaching note and warmth drop of 2):
-- "¿Todo bien?"
-- "Is everything OK?"
-- "¿Les gustó?"
+CHARACTERS: Three colleagues on a business lunch — Pieter (Dutch, direct), Valentina (Venezuelan, warm), and Mark (American, enthusiastic). Mixed nationalities. They are having a good time but notice exactly how staff speak to them.
+
+[PROPERTY] LANGUAGE RULES BEING TESTED:
+PENALIZE HARD — warmth drops 2 points immediately if staff says:
+- "Is everything okay?" / "¿Todo bien?"
 - "Did you like it?"
-- Any generic OK-check
+- "Everything good?"
+- Any yes/no check-in phrase
 
-CORRECT APPROACH (trigger warmth increase and high language score):
-- "¿Cómo percibieron el balance de sabores?"
-- "¿Qué les pareció el plato?"
-- "¿Pudieron superar sus expectativas esta noche?"
-- Any flavor-specific, experience-focused question
-- Using Spanish earns bonus warmth
+REWARD — warmth increases 2 points if staff uses:
+- Specific flavor-focused questions ("How did you find the balance of flavors?")
+- Mentioning a specific dish by name ("What did you think of the [dish]?")
+- "How did you find the..." or "¿Cómo les pareció...?"
+- Genuine enthusiasm about what they ordered
 
-CHARACTERS: Andrés and Camila, Venezuelan couple, mid-30s. Both speak Spanish natively, conversational English. They appreciate genuine interest in their experience. A generic check-in makes them feel like a number. A real question about flavors makes them feel like VIP guests.
-
-After the staff's response, return ONLY valid JSON:
+Return ONLY valid JSON:
 {
-  "guest_reply": "Andrés or Camila responding, 1-2 sentences in Spanish or English. If staff used a banned phrase, their response is polite but slightly flat.",
+  "guest_reply": "One of the three responding naturally, 1-2 sentences. Flat and brief if a banned phrase was used. Engaged and conversational if good language was used.",
   "warmth": <integer 1-10, starts at 7>,
-  "scores": { "language_quality": <0-10>, "warmth_impact": <0-10>, "professionalism": <0-10> },
-  "violation": <true if they used a banned phrase, false otherwise>,
-  "coach_tip": "one precise sentence of feedback — call out violations by name if they happen",
-  "conversation_complete": <true after 3 exchanges>
+  "scores": {
+    "language_quality": <0-10>,
+    "engagement": <0-10>,
+    "professionalism": <0-10>
+  },
+  "violation": <true if any banned phrase was used, false otherwise>,
+  "coach_tip": "One sentence — name the violation if it happened, or praise the specific language choice that worked.",
+  "conversation_complete": <true after 5 exchanges>
 }`,
-    scoreKeys: ['language_quality', 'warmth_impact', 'professionalism'],
-    scoreLabels: { language_quality: 'Language Quality', warmth_impact: 'Warmth Impact', professionalism: 'Professionalism' },
-    scoreColors: { language_quality: '#F5A623', warmth_impact: '#D4A574', professionalism: '#81B29A' },
+    scoreKeys: ['language_quality', 'engagement', 'professionalism'],
+    scoreLabels: { language_quality: 'Language Quality', engagement: 'Engagement', professionalism: 'Professionalism' },
+    scoreColors: { language_quality: '#F5A623', engagement: '#D4A574', professionalism: '#81B29A' },
+  },
+
+  'describe-recommend': {
+    id: 'describe-recommend',
+    moduleId: 'language',
+    title: 'What Do You Recommend?',
+    subtitle: 'Module 3 · Describing What You Serve',
+    description:
+      'A solo American traveler looks up from the menu: "What do you recommend? I can\'t decide between the fish and the steak." This is your moment — use the 3-part formula and help them decide with confidence.',
+    tags: ['🇺🇸 American', '👤 Solo Traveler', '🎯 Recommendation'],
+    timerSeconds: 45,
+    goal: 'Use the 3-part description formula (Star → Method → Experience) and help the guest decide confidently. Reach warmth 9/10 in 5 exchanges.',
+    startingWarmth: 7,
+    opening:
+      'A solo American traveler — mid-30s, adventurous eater, first time at [Property] — looks up from the menu. "What do you recommend? I honestly can\'t decide between the fish and the steak."',
+    systemPrompt: `You are simulating a recommendation scenario at [Property], Curaçao.
+
+CHARACTER: Tyler — solo American traveler, mid-30s, adventurous eater. First time at [Property]. He came because a friend told him the food was exceptional. He wants a recommendation, not a list. He responds well to confidence and genuine enthusiasm.
+
+[PROPERTY] STANDARDS BEING TESTED — THE 3-PART FORMULA: Star → Method → Experience.
+
+WARMTH INCREASES WITH:
+- Confident, specific recommendation (not "they're both good")
+- Using the description formula — lead with star ingredient, mention preparation, describe the experience
+- Asking about preference first ("do you lean toward lighter or richer?")
+- Genuine enthusiasm that feels personal, not scripted
+
+WARMTH DECREASES WITH:
+- "They're both good, you can't go wrong"
+- Vague answers ("it depends on your mood")
+- Reading the menu back to him
+- Lacking confidence in the recommendation
+
+[PROPERTY] DISH CONTEXT — staff may describe these:
+- The fish: locally caught, pan-seared simply, served with charred lime and herb butter — clean, bright, light finish
+- The steak: hand-selected cut, grilled on open flame, aged in-house — rich, deep, intense
+
+Staff should ask about preference first, then use the formula to sell one confidently.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Tyler responding, 1-2 sentences. Excited if staff was specific and confident. Noncommittal if staff was vague.",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": {
+    "product_knowledge": <0-10>,
+    "confidence": <0-10>,
+    "description_quality": <0-10>
+  },
+  "coach_tip": "One sentence — name what worked or which formula step was missing.",
+  "conversation_complete": <true after 5 exchanges or when Tyler makes a decision>
+}`,
+    scoreKeys: ['product_knowledge', 'confidence', 'description_quality'],
+    scoreLabels: { product_knowledge: 'Product Knowledge', confidence: 'Confidence', description_quality: 'Description Quality' },
+    scoreColors: { product_knowledge: '#81B29A', confidence: '#F5A623', description_quality: '#D4A574' },
+  },
+
+  'language-switch': {
+    id: 'language-switch',
+    moduleId: 'language',
+    title: 'The Language Switch',
+    subtitle: 'Module 3 · Multilingual Service',
+    description:
+      'A Dutch couple arrives. You greet them in English. The wife responds in Dutch. The husband follows in English. Handle the split naturally — mirror each person in their own language.',
+    tags: ['🇳🇱 Dutch', '💑 Couple', '🌍 Language Switch'],
+    timerSeconds: 45,
+    goal: 'Handle the language split smoothly — Dutch to the wife, English to the husband. Reach warmth 9/10 in 5 exchanges.',
+    startingWarmth: 6,
+    opening:
+      'A Dutch couple — Sanne and Joost — arrives. You greet them in English: "Good evening, welcome to [Property]!" Sanne smiles and responds in Dutch: "Dank je — fijn om hier te zijn." Joost adds in English: "Great to be here. Any table available outside?"',
+    systemPrompt: `You are simulating a multilingual service scenario at [Property], Curaçao.
+
+CHARACTERS:
+- Sanne (wife): Dutch native, prefers Dutch. Will be noticeably warmer if spoken to in Dutch. If staff ignores her Dutch response and stays only in English, she'll be polite but less engaged.
+- Joost (husband): Dutch native, comfortable in English. Uses English by choice — that's his comfort zone here.
+- Together: On holiday, relaxed, looking for a pleasant evening. The language handling will set the tone for everything that follows.
+
+STANDARDS BEING TESTED:
+WARMTH INCREASES WITH:
+- Staff mirrors Sanne in Dutch ("Welkom! Fijn dat u er bent" or similar — even imperfect Dutch earns full credit)
+- Staff addresses Joost naturally in English
+- Smooth, natural transition between both languages — no awkward pivot
+- Any Papiamentu attempt = big warmth bonus ("Dit is Curaçao!" moment for both of them)
+
+WARMTH DECREASES WITH:
+- Ignoring Sanne's Dutch response entirely and continuing only in English
+- Making the language switch feel forced or over-explained
+- Responding to Sanne in English when she clearly used Dutch
+
+LANGUAGE NOTES: Staff doesn't need perfect Dutch — effort and warmth matter more than fluency. "Welkom! Fijn dat u er bent" is enough to earn the switch credit.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Sanne and/or Joost responding naturally — mix of Dutch from Sanne, English from Joost. 1-3 sentences total.",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": {
+    "language_matching": <0-10>,
+    "naturalness": <0-10>,
+    "professionalism": <0-10>
+  },
+  "coach_tip": "One sentence — praise the switch if it happened, or name exactly what was missed.",
+  "conversation_complete": <true after 5 exchanges or warmth reaches 9>
+}`,
+    scoreKeys: ['language_matching', 'naturalness', 'professionalism'],
+    scoreLabels: { language_matching: 'Language Matching', naturalness: 'Naturalness', professionalism: 'Professionalism' },
+    scoreColors: { language_matching: '#F5A623', naturalness: '#81B29A', professionalism: '#D4A574' },
+  },
+
+  'storytelling-property': {
+    id: 'storytelling-property',
+    moduleId: 'language',
+    title: 'Tell Me About This Place',
+    subtitle: 'Module 3 · Storytelling',
+    description:
+      'A curious tourist settles in and says: "So tell me — what makes this place different from everywhere else on the island?" This is your moment. Facts won\'t cut it. You need a story.',
+    tags: ['🌍 Tourist', '❓ Curious', '📖 Storytelling'],
+    timerSeconds: 45,
+    goal: 'Answer with a genuine story (Origin, Process, or Guest Story) that makes this place feel different. Reach warmth 9/10 in 5 exchanges.',
+    startingWarmth: 7,
+    opening:
+      'A well-traveled solo tourist — curious, clearly used to asking the best questions — settles into his seat and looks at you directly. "So tell me — what makes this place different from everywhere else on the island? I\'ve been to a lot of places. Give me the real answer."',
+    systemPrompt: `You are simulating a storytelling scenario at [Property], Curaçao.
+
+CHARACTER: Rafael — well-traveled tourist, 40s, genuinely curious. He has been to many restaurants in many countries. He can detect a scripted answer immediately. He wants authenticity — and will respond powerfully to a real, specific story.
+
+THE 3 STORY TYPES BEING TESTED:
+1. Origin Story: Where did this place come from? The first dish? The owner's vision? The local connection?
+2. Process Story: What's made differently here? What craft or technique sets [Property] apart?
+3. Guest Story: What do returning guests always come back for? What moment do they remember?
+
+WARMTH INCREASES WITH:
+- Authentic, specific storytelling (something vivid and real-sounding)
+- Combining two story types (Origin + Guest Story, for example)
+- Showing genuine pride in the place
+- Making Rafael feel like he just got the inside story, not the tourist answer
+
+WARMTH DECREASES WITH:
+- Generic answers: "great food, beautiful location"
+- Listing facts without any narrative thread
+- Corporate-sounding language ("we pride ourselves on...")
+- Vague answers that say nothing specific or memorable
+
+[PROPERTY] STORY CONTEXT — staff may use any of these authentically:
+- The signature dish: created on the first night of service by the owner, guests kept requesting it specifically, everything else grew around it
+- The beef: hand-ground daily in-house, specific blend, technique developed over time
+- Local supplier relationships: ingredients sourced from specific local farms and fishermen
+- Returning guests: regulars who come every week specifically for certain items
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Rafael responding, 1-3 sentences. Leans forward and asks a follow-up if genuinely engaged. Polite but flat if given a generic answer.",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": {
+    "story_authenticity": <0-10>,
+    "specificity": <0-10>,
+    "engagement": <0-10>
+  },
+  "coach_tip": "One sentence — name the story type used (or missing) and whether it landed.",
+  "conversation_complete": <true after 5 exchanges or warmth reaches 9>
+}`,
+    scoreKeys: ['story_authenticity', 'specificity', 'engagement'],
+    scoreLabels: { story_authenticity: 'Story Authenticity', specificity: 'Specificity', engagement: 'Engagement' },
+    scoreColors: { story_authenticity: '#D4A574', specificity: '#F5A623', engagement: '#81B29A' },
+  },
+
+  'overcooked-complaint': {
+    id: 'overcooked-complaint',
+    moduleId: 'language',
+    title: 'The Overcooked Complaint',
+    subtitle: 'Module 3 · Difficult Conversations',
+    description:
+      'A Dutch professional flags you down. They ordered medium-rare. It arrived well-done. They\'re frustrated — not aggressive — but direct: "Excuse me — this isn\'t what I asked for." Apply the 4-step protocol.',
+    tags: ['🇳🇱 Dutch', '💼 Professional', '⚠️ Complaint'],
+    timerSeconds: 45,
+    goal: 'Own the mistake immediately with no excuses, offer a concrete solution, and recover warmth from 4 to 8+ in 7 exchanges.',
+    startingWarmth: 4,
+    opening:
+      'A Dutch professional — dining with a colleague, mid-40s — flags you down and holds up their plate. "Excuse me — this isn\'t what I asked for. I ordered medium-rare. This is clearly well-done. I\'d like it fixed."',
+    systemPrompt: `You are simulating a complaint-handling scenario at [Property], Curaçao.
+
+CHARACTER: Annemiek — Dutch professional, mid-40s, dining with a colleague. Direct, not aggressive. She expected better and she wants it fixed — not explained. She has seen poor complaint handling before and will not respond well to excuses, deflection, or blame.
+
+THE 4-STEP PROTOCOL BEING TESTED:
+1. LISTEN — don't interrupt, don't jump to explanation
+2. ACKNOWLEDGE — "You're absolutely right, and I'm sorry"
+3. RESOLVE — concrete solution immediately: "Let me get that replaced right now"
+4. FOLLOW UP — check back after the fix
+
+WARMTH INCREASES WITH:
+- Immediate ownership ("You're absolutely right")
+- Concrete offer to fix it right now
+- Offering something while they wait (beverage, amuse-bouche)
+- Checking back after the replacement arrives
+
+WARMTH DECREASES WITH:
+- Any defending, blaming, or explaining
+- "The kitchen was very busy..."
+- "Are you sure you ordered medium-rare?"
+- "That sometimes happens with our grill..."
+- "I'm sorry but..." — the but cancels everything before it
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Annemiek responding, 1-2 sentences. Direct, minimal. She is watching closely for accountability.",
+  "warmth": <integer 1-10, starts at 4>,
+  "scores": {
+    "ownership": <0-10>,
+    "resolution_speed": <0-10>,
+    "professionalism": <0-10>
+  },
+  "violation": <true if staff defended, deflected, or blamed — false if they owned it cleanly>,
+  "coach_tip": "One sentence — name the violation if it happened, or confirm which protocol step they executed well.",
+  "conversation_complete": <true if warmth reaches 7+ or drops to 2>
+}`,
+    scoreKeys: ['ownership', 'resolution_speed', 'professionalism'],
+    scoreLabels: { ownership: 'Ownership', resolution_speed: 'Resolution Speed', professionalism: 'Professionalism' },
+    scoreColors: { ownership: '#E07A5F', resolution_speed: '#F5A623', professionalism: '#81B29A' },
   },
 
 
