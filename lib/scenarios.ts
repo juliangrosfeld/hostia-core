@@ -240,57 +240,6 @@ Return ONLY valid JSON:
     scoreColors: { product_knowledge: '#81B29A', confidence: '#F5A623', description_quality: '#D4A574' },
   },
 
-  'language-switch': {
-    id: 'language-switch',
-    moduleId: 'language',
-    title: 'The Language Switch',
-    subtitle: 'Module 3 · Multilingual Service',
-    description:
-      'A Dutch couple arrives. You greet them in English. The wife responds in Dutch. The husband follows in English. Handle the split naturally — mirror each person in their own language.',
-    tags: ['🇳🇱 Dutch', '💑 Couple', '🌍 Language Switch'],
-    timerSeconds: 45,
-    goal: 'Handle the language split smoothly — Dutch to the wife, English to the husband. Reach warmth 9/10 in 5 exchanges.',
-    startingWarmth: 6,
-    opening:
-      'A Dutch couple — Sanne and Joost — arrives. You greet them in English: "Good evening, welcome to [Property]!" Sanne smiles and responds in Dutch: "Dank je — fijn om hier te zijn." Joost adds in English: "Great to be here. Any table available outside?"',
-    systemPrompt: `You are simulating a multilingual service scenario at [Property], Curaçao.
-
-CHARACTERS:
-- Sanne (wife): Dutch native, prefers Dutch. Will be noticeably warmer if spoken to in Dutch. If staff ignores her Dutch response and stays only in English, she'll be polite but less engaged.
-- Joost (husband): Dutch native, comfortable in English. Uses English by choice — that's his comfort zone here.
-- Together: On holiday, relaxed, looking for a pleasant evening. The language handling will set the tone for everything that follows.
-
-STANDARDS BEING TESTED:
-WARMTH INCREASES WITH:
-- Staff mirrors Sanne in Dutch ("Welkom! Fijn dat u er bent" or similar — even imperfect Dutch earns full credit)
-- Staff addresses Joost naturally in English
-- Smooth, natural transition between both languages — no awkward pivot
-- Any Papiamentu attempt = big warmth bonus ("Dit is Curaçao!" moment for both of them)
-
-WARMTH DECREASES WITH:
-- Ignoring Sanne's Dutch response entirely and continuing only in English
-- Making the language switch feel forced or over-explained
-- Responding to Sanne in English when she clearly used Dutch
-
-LANGUAGE NOTES: Staff doesn't need perfect Dutch — effort and warmth matter more than fluency. "Welkom! Fijn dat u er bent" is enough to earn the switch credit.
-
-Return ONLY valid JSON:
-{
-  "guest_reply": "Sanne and/or Joost responding naturally — mix of Dutch from Sanne, English from Joost. 1-3 sentences total.",
-  "warmth": <integer 1-10, starts at 6>,
-  "scores": {
-    "language_matching": <0-10>,
-    "naturalness": <0-10>,
-    "professionalism": <0-10>
-  },
-  "coach_tip": "One sentence — praise the switch if it happened, or name exactly what was missed.",
-  "conversation_complete": <true after 5 exchanges or warmth reaches 9>
-}`,
-    scoreKeys: ['language_matching', 'naturalness', 'professionalism'],
-    scoreLabels: { language_matching: 'Language Matching', naturalness: 'Naturalness', professionalism: 'Professionalism' },
-    scoreColors: { language_matching: '#F5A623', naturalness: '#81B29A', professionalism: '#D4A574' },
-  },
-
   'storytelling-property': {
     id: 'storytelling-property',
     moduleId: 'language',

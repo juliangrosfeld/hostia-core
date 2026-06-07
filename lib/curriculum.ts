@@ -552,50 +552,6 @@ const languageLessons: Lesson[] = [
   },
 
   {
-    id: 'multilingual-service',
-    title: 'Multilingual Service',
-    desc: 'English, Dutch, Spanish & Papiamentu — and when to switch',
-    duration: '9 min',
-    xp: 65,
-    status: 'available',
-    scenarioId: 'language-switch',
-    learn: [
-      { type: 'intro', text: 'A greeting in someone\'s language is not just a courtesy — it\'s a signal: "We know who you are, and you\'re home here." On any given shift at [Property], you might welcome a Dutch couple, a Venezuelan family, American tourists, and local Curaçaoans — all within one hour. Three seconds of their language earns more warmth than five minutes of perfect English.' },
-      { type: 'lang-grid', items: [
-        { lang: 'English', flag: '🇺🇸', formal: 'Welcome to [Property], wonderful to have you here. How may I assist you?', casual: 'Hi! Welcome in — great to see you. How many are joining you today?', tip: 'Americans respond to genuine warmth and enthusiasm. Smile before you speak. Acknowledge occasions when you know them — a birthday, an anniversary.' },
-        { lang: 'Dutch', flag: '🇳🇱', formal: 'Welkom bij [Property]. Fijn dat u er bent. Waarmee kan ik u helpen?', casual: 'Hoi! Welkom — fijn dat jullie er zijn!', tip: 'Dutch guests value efficiency and directness. Warm but not over the top. Get to the point — they appreciate it.' },
-        { lang: 'Spanish', flag: '🇪🇸', formal: 'Bienvenido a [Property]. Qué bueno tenerle aquí. ¿En qué puedo ayudarle?', casual: '¡Hola! Bienvenidos — qué gusto verlos.', tip: 'Latin American guests appreciate warmth and time. Don\'t rush. Ask how they are — small talk is a sign of respect, not wasted time.' },
-        { lang: 'Papiamentu', flag: '🇨🇼', formal: 'Bon biní na [Property]. Kon mi por yuda bo?', casual: 'Bon dia! Bon biní — kon ta bai?', tip: 'Even one phrase in Papiamentu earns immediate warmth from local guests. They know you\'re trying — and they love you for it. They will teach you more.' },
-      ]},
-      { type: 'phrase-table', rows: [
-        { en: 'Welcome', nl: 'Welkom', es: 'Bienvenido(a)', pap: 'Bon biní' },
-        { en: 'Good morning', nl: 'Goedemorgen', es: 'Buenos días', pap: 'Bon dia' },
-        { en: 'Good afternoon', nl: 'Goedemiddag', es: 'Buenas tardes', pap: 'Bon tardi' },
-        { en: 'Good evening', nl: 'Goedenavond', es: 'Buenas noches', pap: 'Bon nochi' },
-        { en: 'Thank you', nl: 'Dank u wel', es: 'Gracias', pap: 'Danki' },
-        { en: "You're welcome", nl: 'Graag gedaan', es: 'De nada', pap: 'Na bo òrden' },
-        { en: 'How are you?', nl: 'Hoe gaat het?', es: '¿Cómo está?', pap: 'Kon ta bai?' },
-        { en: 'Enjoy your meal', nl: 'Eet smakelijk', es: 'Buen provecho', pap: 'Bon apetit' },
-      ]},
-      { type: 'callout', tone: 'rule', label: 'When to switch', text: 'Guest greets you in their language → match it immediately. Guest hesitates in English → offer their language. Never assume — follow their lead. If a table splits languages, mirror the individual: speak Dutch to the Dutch-speaker, English to the English-speaker.' },
-      { type: 'tip-list', title: 'Language switching in practice', items: [
-        'Guest greets in Dutch → respond in Dutch immediately.',
-        'Guest hesitates in English → "¿Prefiere continuar en español?" removes all friction.',
-        'Papiamentu guest → even "Bon biní" from a non-local changes the entire dynamic.',
-        'Mixed-language table → follow each person individually, not the table as a whole.',
-        'Don\'t over-switch — if a guest is comfortable in English, stay there.',
-      ]},
-    ],
-    quiz: [
-      { q: 'A Dutch couple walks in. The wife greets you in Dutch. The husband follows in English. How do you handle it?', options: ['"Reply in English to keep it simple for everyone."', '"Reply entirely in Dutch."', 'Mirror each person — Dutch to the wife, English to the husband. Follow their lead.', '"Ask which language they prefer."'], correct: 2, explain: 'When a table splits languages, mirror the individual. The wife led in Dutch — meet her there. The husband used English — that\'s his comfort zone. Follow their lead, not a rule.' },
-      { q: 'How do you say "Enjoy your meal" in Papiamentu?', options: ['Danki', 'Bon dia', 'Bon apetit', 'Bon biní'], correct: 2, explain: 'Bon apetit = enjoy your meal. Danki = thank you. Bon dia = good morning. Bon biní = welcome.' },
-      { q: 'A Venezuelan guest hesitates while ordering — they\'re struggling in English. You:', options: ['Speak more slowly in English.', 'Ask a colleague who speaks Spanish to help.', 'Offer to continue in Spanish: "¿Prefiere continuar en español?"', 'Point to the menu for them to indicate.'], correct: 2, explain: 'Hesitation in English from a Spanish-speaking guest is your cue to offer Spanish. One phrase removes all friction — and creates an immediate connection.' },
-      { q: 'A local Curaçaoan guest is seated. You\'ve never met them. Best opening:', options: ['"Welcome to [Property], how many are joining you?"', '"Bon biní! Kon ta bai?" — even if your Papiamentu is basic', '"Hola! Bienvenido"', 'Wait to hear what language they use first.'], correct: 1, explain: 'Even one phrase in Papiamentu earns immediate warmth from local guests. They know you\'re trying — and they love it. "Bon biní" from a non-local is better than perfect English from a stranger.' },
-      { q: 'What does "Bon tardi" mean?', options: ['Good morning', 'Good evening', 'Good afternoon', 'Welcome'], correct: 2, explain: 'Bon tardi = good afternoon. Bon dia = good morning. Bon nochi = good evening. Bon biní = welcome.' },
-    ],
-  },
-
-  {
     id: 'storytelling',
     title: 'Storytelling — Selling Through Stories',
     desc: 'Guests remember stories, not facts. Here\'s how to use them.',
@@ -862,10 +818,10 @@ export const CURRICULUM: Module[] = [
     iconName: 'MessageSquare',
     color: '#D4A574',
     progress: 0,
-    totalLessons: 5,
+    totalLessons: 4,
     completedLessons: 0,
     available: true,
-    xpTotal: 310,
+    xpTotal: 245,
     lessons: languageLessons,
   },
   {
