@@ -183,18 +183,14 @@ function SectionVideoGroup({ videos }: { videos: { title: string; url: string; d
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {videos.map((v, i) => (
           <div key={i}>
-            <div style={{ position: 'relative', width: '100%', maxWidth: 560, aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
-              <iframe
-                src={v.url}
-                title={v.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-              />
-            </div>
-            {v.description && (
-              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink-soft)' }}>{v.description}</div>
-            )}
+            <iframe
+              width="100%"
+              src={v.url}
+              title={v.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{ aspectRatio: '16/9', maxWidth: '560px', borderRadius: '12px', border: 'none', display: 'block' }}
+            />
           </div>
         ))}
       </div>
