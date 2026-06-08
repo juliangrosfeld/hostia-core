@@ -327,8 +327,7 @@ const physicalCraftLessons: Lesson[] = [
       ]},
       { type: 'callout', tone: 'warn', label: 'Common Mistakes', text: 'Fingers only (no palm support) → unstable. Carrying too high above head → dangerous. Twisting wrist to turn → spills guaranteed. Overloading → make two trips, never risk it. Looking down at the tray → look forward, trust your hands. Hair tied back, face forward when carrying.' },
       { type: 'video-group', videos: [
-        { title: 'Tray Carrying Masterclass', url: 'https://www.youtube.com/embed/CF4-AGWb6BU', description: 'Complete tray carrying technique for restaurant servers' },
-        { title: 'How to Carry a Large Food Tray', url: 'https://www.youtube.com/embed/i2zaxg_cKOc', description: 'Professional technique for carrying large food trays' },
+        { title: 'Tray Carrying Technique', url: 'https://www.youtube.com/embed/4c2sIvi196c', description: '' },
       ]},
     ],
     quiz: [
@@ -356,8 +355,7 @@ const physicalCraftLessons: Lesson[] = [
       ]},
       { type: 'callout', tone: 'rule', label: 'The Rules', text: 'Never tilt a plate — it looks rushed and can spill. Never cover the food with your thumb. Serve from the correct side (property standard). Never stack plates you are actively serving. If unsure about 3 plates — do 2 trips. A clean 2-plate carry beats a shaky 3-plate every time.' },
       { type: 'video-group', videos: [
-        { title: 'Carrying Plates — Real Server Training', url: 'https://www.youtube.com/embed/qQKEnRA68i4', description: 'Professional plate carrying technique from beginner to advanced' },
-        { title: 'The 3-Plate Carry — Fine Dining', url: 'https://www.youtube.com/embed/iIIR2d_vIz0', description: 'Correct 3-plate carry technique for fine dining service' },
+        { title: 'Plate Carrying Technique', url: 'https://www.youtube.com/embed/ZfIyfODimvo', description: '' },
       ]},
     ],
     quiz: [
@@ -796,52 +794,7 @@ const complaintsLessons: Lesson[] = [
   },
 ];
 
-// ─── MODULE 6: FLOOR CHOREOGRAPHY ───────────────────────────
-
-const floorLessons: Lesson[] = [
-  {
-    id: 'route-coordination',
-    title: 'Routes & Coordination',
-    desc: 'Never cross paths — move with intention',
-    duration: '7 min',
-    xp: 50,
-    status: 'available',
-    learn: [],
-    quiz: [],
-  },
-  {
-    id: 'synchronized-service',
-    title: 'Synchronized Plating',
-    desc: 'All plates go out together — always',
-    duration: '8 min',
-    xp: 55,
-    status: 'available',
-    learn: [],
-    quiz: [],
-  },
-  {
-    id: 'visual-signals',
-    title: 'Visual Communication',
-    desc: 'Eye contact, nods, and silent coordination',
-    duration: '6 min',
-    xp: 45,
-    status: 'available',
-    learn: [],
-    quiz: [],
-  },
-  {
-    id: 'clearing',
-    title: 'Clearing Protocol',
-    desc: 'Never clear while someone is still eating',
-    duration: '5 min',
-    xp: 35,
-    status: 'available',
-    learn: [],
-    quiz: [],
-  },
-];
-
-// ─── MODULE 7: GUEST PSYCHOLOGY ─────────────────────────────
+// ─── MODULE 6: GUEST PSYCHOLOGY ─────────────────────────────
 
 const guestPsychologyLessons: Lesson[] = [
   {
@@ -948,7 +901,7 @@ export const CURRICULUM: Module[] = [
   // Module 5
   {
     id: 'complaints',
-    title: 'Handling Complaints & Errors',
+    title: 'Handling Difficult Situations',
     subtitle: 'Turn a broken moment into a defining one',
     iconName: 'Shield',
     color: '#E07A5F',
@@ -960,20 +913,6 @@ export const CURRICULUM: Module[] = [
     lessons: complaintsLessons,
   },
   // Module 6
-  {
-    id: 'floor',
-    title: 'Floor Choreography',
-    subtitle: 'Fluid, synchronized, invisible teamwork',
-    iconName: 'Users',
-    color: '#81B29A',
-    progress: 0,
-    totalLessons: 4,
-    completedLessons: 0,
-    available: true,
-    xpTotal: 185,
-    lessons: floorLessons,
-  },
-  // Module 7
   {
     id: 'guest-psychology',
     title: 'Guest Psychology',

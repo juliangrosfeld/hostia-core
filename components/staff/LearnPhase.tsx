@@ -182,20 +182,19 @@ function SectionVideoGroup({ videos }: { videos: { title: string; url: string; d
       <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', marginBottom: 16 }}>Watch the technique</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         {videos.map((v, i) => (
-          <div key={i} style={{ background: 'white', border: '1px solid var(--sand-deeper)', borderRadius: 14, overflow: 'hidden' }}>
-            <div style={{ position: 'relative', width: '100%', maxWidth: 560, aspectRatio: '16/9', margin: '0 auto' }}>
+          <div key={i}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: 560, aspectRatio: '16/9', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
               <iframe
                 src={v.url}
                 title={v.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', borderRadius: '12px 12px 0 0' }}
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
               />
             </div>
-            <div style={{ padding: '12px 16px' }}>
-              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--brand-deep)', marginBottom: 4 }}>{v.title}</div>
-              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{v.description}</div>
-            </div>
+            {v.description && (
+              <div style={{ marginTop: 8, fontSize: 12, color: 'var(--ink-soft)' }}>{v.description}</div>
+            )}
           </div>
         ))}
       </div>
