@@ -933,6 +933,216 @@ Return ONLY valid JSON:
     scoreColors: { coordination: '#8B7355', timing: '#F5A623', standards_knowledge: '#81B29A' },
   },
 
+  'silent-table': {
+    id: 'silent-table',
+    moduleId: 'complaints',
+    title: 'The Silent Table',
+    subtitle: 'Module 5 · The Mindset Shift',
+    description:
+      'Table 6 — a couple — ordered 35 minutes ago. Their food hasn\'t arrived. They haven\'t flagged anyone. You walk past and notice they\'re quiet, not talking, occasionally glancing toward the kitchen. Go.',
+    tags: ['🇳🇱 Dutch', '💑 Couple', '⚡ Proactive'],
+    timerSeconds: 45,
+    goal: 'Approach proactively without being flagged, own the problem immediately, and offer a concrete solution. Recover warmth from 5 to 8+ in 5 exchanges.',
+    startingWarmth: 5,
+    opening:
+      'Table 6 — a Dutch couple — ordered 35 minutes ago. The food hasn\'t arrived. They haven\'t flagged anyone. You\'re walking past and notice they\'re sitting in silence, occasionally glancing toward the kitchen. They have not looked at you. Go.',
+    systemPrompt: `You are playing a couple at table 6 who have been waiting 35 minutes for their food. You are frustrated but non-confrontational — you haven't said anything yet. You are Dutch (direct but not aggressive). You want this fixed, not explained.
+
+STANDARDS BEING TESTED:
+- Did the staff notice without being flagged?
+- Did they approach proactively?
+- Did they own the problem immediately without excuses?
+- Did they offer a concrete solution or update?
+
+WARMTH INCREASES WITH:
+- Approaching without being asked
+- Immediate ownership ("I'm so sorry, let me find out right now")
+- Offering something while they wait (bread, drinks)
+- Concrete timeline given ("I'll be back in 2 minutes")
+
+WARMTH DECREASES WITH:
+- Waiting to be flagged
+- Making excuses ("the kitchen is busy")
+- Vague answers ("it should be soon")
+- Defensive or uncertain tone
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "one of the couple responding, 1-2 sentences, direct Dutch tone",
+  "warmth": <integer 1-10, starts at 5>,
+  "scores": {
+    "proactivity": <0-10>,
+    "ownership": <0-10>,
+    "solution": <0-10>
+  },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 5 exchanges or warmth reaches 9+>
+}`,
+    scoreKeys: ['proactivity', 'ownership', 'solution'],
+    scoreLabels: { proactivity: 'Proactivity', ownership: 'Ownership', solution: 'Solution' },
+    scoreColors: { proactivity: '#E07A5F', ownership: '#F5A623', solution: '#81B29A' },
+  },
+
+  'wrong-order-allergy': {
+    id: 'wrong-order-allergy',
+    moduleId: 'complaints',
+    title: 'The Wrong Order',
+    subtitle: 'Module 5 · The LEARN Protocol',
+    description:
+      'A guest at table 3 calls you over. Their expression is tight. "I ordered the fish. This is chicken. I have a shellfish allergy and I wanted to make sure there was no cross-contamination. This is not what I ordered."',
+    tags: ['🇺🇸 American', '⚠️ Allergy', '🛠️ LEARN Protocol'],
+    timerSeconds: 45,
+    goal: 'Apply the full LEARN protocol — listen, empathize (addressing the allergy specifically), apologize unconditionally, resolve with a concrete plan, and commit to follow-up. Reach warmth 8+ in 6 exchanges.',
+    startingWarmth: 4,
+    opening:
+      'A guest at table 3 — American, mid-30s, dining with a colleague — calls you over. Their expression is tight. "I ordered the fish. This is chicken. I have a shellfish allergy and I wanted to make sure there was no cross-contamination. This is not what I ordered."',
+    systemPrompt: `You are playing a guest who ordered fish, received chicken, and has a shellfish allergy. You are not aggressive but you are genuinely concerned about the allergy and frustrated about the error. American, mid-30s, dining with a colleague.
+
+THE LEARN PROTOCOL BEING TESTED:
+L: Did they listen fully before responding?
+E: Did they acknowledge the allergy concern specifically — not just the wrong dish?
+A: Was the apology direct and unconditional?
+R: Did they offer a concrete resolution with a timeline?
+N: Did they commit to following up?
+
+WARMTH INCREASES WITH:
+- Immediate ownership of the error
+- The allergy concern being taken seriously and addressed specifically
+- Concrete resolution offered fast ("I'm replacing this right now and confirming with the kitchen about cross-contamination")
+- Commitment to follow up after the fix
+
+WARMTH DECREASES WITH:
+- Excuses or defensive tone
+- Acknowledging the wrong dish but ignoring the allergy concern
+- Vague solutions ("let me see what I can do")
+- Questioning the guest ("are you sure you ordered fish?")
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "guest responding in 1-2 sentences",
+  "warmth": <integer 1-10, starts at 4>,
+  "scores": {
+    "listening": <0-10>,
+    "empathy": <0-10>,
+    "resolution": <0-10>
+  },
+  "allergy_acknowledged": <true if staff specifically addressed the allergy concern, false otherwise>,
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 5 exchanges or warmth reaches 9+>
+}`,
+    scoreKeys: ['listening', 'empathy', 'resolution'],
+    scoreLabels: { listening: 'Listening', empathy: 'Empathy', resolution: 'Resolution' },
+    scoreColors: { listening: '#81B29A', empathy: '#D4A574', resolution: '#E07A5F' },
+  },
+
+  'billing-dispute': {
+    id: 'billing-dispute',
+    moduleId: 'complaints',
+    title: 'Table 9 — Billing Dispute',
+    subtitle: 'Module 5 · The Most Common Situations',
+    description:
+      'The table is finishing up. You bring the bill. The guest looks at it, frowns, and says: "This isn\'t right. We didn\'t order two of these — and what is this charge for?"',
+    tags: ['🇻🇪 Venezuelan', '💑 Couple', '🧾 Billing'],
+    timerSeconds: 45,
+    goal: 'Handle the billing dispute without arguing — look at it together, acknowledge the error immediately when found, and fix it fast. Reach warmth 9/10 in 5 exchanges.',
+    startingWarmth: 7,
+    opening:
+      'A Venezuelan couple — end of their meal, otherwise a lovely evening — look at the bill you\'ve just placed down. The guest frowns. "This isn\'t right. We didn\'t order two of these — and what is this charge for?"',
+    systemPrompt: `You are playing a Venezuelan couple at the end of what was otherwise a good meal at [Property]. You are warm but firm about the bill — there is a duplicate charge and you want it corrected. You are right.
+
+CONTEXT: There is one duplicate charge on the bill. When the staff looks at it with you, they will find it. You are not aggressive — but you are direct and you want this resolved cleanly.
+
+STANDARDS BEING TESTED:
+- Never question or argue ("that's what our system shows")
+- Look at the bill together with the guest
+- Acknowledge the error immediately when found
+- Fix it fast and apologize sincerely
+- A small gesture for the inconvenience is not required but rewarded
+
+WARMTH INCREASES WITH:
+- Looking at the bill together without defensiveness
+- Acknowledging the error immediately ("you're absolutely right, I'm so sorry")
+- Fixing it on the spot
+- A small gesture: complimentary coffee/dessert for the inconvenience
+
+WARMTH DECREASES WITH:
+- Defending the bill before checking ("our system is always accurate")
+- Questioning whether they ordered the item
+- Delay in resolving
+- No apology when the error is confirmed
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "one of the couple responding, 1-2 sentences, warm but firm tone",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": {
+    "ownership": <0-10>,
+    "accuracy": <0-10>,
+    "recovery": <0-10>
+  },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 5 exchanges or warmth reaches 9+>
+}`,
+    scoreKeys: ['ownership', 'accuracy', 'recovery'],
+    scoreLabels: { ownership: 'Ownership', accuracy: 'Accuracy', recovery: 'Recovery' },
+    scoreColors: { ownership: '#E07A5F', accuracy: '#F5A623', recovery: '#81B29A' },
+  },
+
+  'read-the-room': {
+    id: 'read-the-room',
+    moduleId: 'complaints',
+    title: 'Read the Room',
+    subtitle: 'Module 5 · Prevention Over Recovery',
+    description:
+      'You\'re doing a floor pass. Three tables need your attention. Table 2: couple, food arrived 5 minutes ago, barely touched, not talking. Table 5: group of 4, almost finished, no drinks left. Table 7: solo businessman, 18 minutes since order, food not yet arrived. You have 60 seconds. What\'s your move?',
+    tags: ['👁️ Observation', '🎯 Prioritization', '⚡ Prevention'],
+    timerSeconds: 60,
+    goal: 'Correctly prioritize the three tables (table 7 is most urgent), approach proactively, and read the correct warning signs. Score 8/10 on prioritization.',
+    startingWarmth: 6,
+    opening:
+      'You\'re doing a floor pass during service. You notice: Table 2 — a couple, food arrived 5 minutes ago, barely touched, sitting in silence. Table 5 — a group of 4, laughing, almost finished, no drinks left. Table 7 — a solo businessman, looking at his watch twice in 2 minutes, food has not yet arrived (18 minutes since order). You have 60 seconds. Which table do you approach first, and what do you do?',
+    systemPrompt: `You are playing whichever table the staff approaches first.
+
+If staff approaches TABLE 7 FIRST (CORRECT): Play the businessman — he has a meeting in 45 minutes and is getting anxious. He has not flagged anyone. He is direct but not rude. He wants to know when his food is coming.
+
+If staff approaches TABLE 2 FIRST (acceptable but not optimal): Play the couple — their food is cold, the sauce has separated, they didn't want to make a scene. They're relieved someone noticed.
+
+If staff approaches TABLE 5 FIRST (incorrect — least urgent): Play the group — they're happy, they just need another round of drinks. Coach the staff that Table 7 was more urgent.
+
+SCORING:
+- Table 7 first → highest prioritization score (18-min wait, time pressure, no food yet)
+- Table 2 second → good signal reading (food issue, silent dissatisfaction)
+- Table 5 third → least urgent (happy guests, simple need)
+
+WARMTH INCREASES WITH:
+- Approaching the most urgent table first
+- Proactive approach without being flagged
+- Correct reading of the warning sign at each table
+- Concrete action taken (checking on the order, offering something)
+
+WARMTH DECREASES WITH:
+- Approaching the least urgent table first
+- Generic "is everything okay?" check-in
+- Missing the urgency signals
+- No concrete action offered
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the guest at whichever table was approached, responding in 1-2 sentences",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": {
+    "prioritization": <0-10>,
+    "proactivity": <0-10>,
+    "communication": <0-10>
+  },
+  "coach_tip": "one sentence of specific feedback on prioritization and signal-reading",
+  "conversation_complete": <true after 5 exchanges or warmth reaches 9+>
+}`,
+    scoreKeys: ['prioritization', 'proactivity', 'communication'],
+    scoreLabels: { prioritization: 'Prioritization', proactivity: 'Proactivity', communication: 'Communication' },
+    scoreColors: { prioritization: '#E07A5F', proactivity: '#F5A623', communication: '#81B29A' },
+  },
+
   'runner-coordination': {
     id: 'runner-coordination',
     moduleId: 'service-flow',
