@@ -17,7 +17,8 @@ export type LearnSection =
   | { type: 'phrase-table'; rows: PhraseRow[] }
   | { type: 'do-dont'; title: string; items: { do: string; dont: string }[] }
   | { type: 'culture-cards'; items: { group: string; cues: string }[] }
-  | { type: 'tip-list'; title: string; items: string[] };
+  | { type: 'tip-list'; title: string; items: string[] }
+  | { type: 'video-group'; videos: { title: string; url: string; description: string }[] };
 
 export interface LangCard {
   lang: string;
@@ -302,9 +303,181 @@ const greetingsLessons: Lesson[] = [
   },
 ];
 
-// ─── MODULE 2: THE SERVICE FLOW ─────────────────────────────
+// ─── MODULE 2: THE PHYSICAL CRAFT ───────────────────────────
+
+const physicalCraftLessons: Lesson[] = [
+  {
+    id: 'tray-carrying',
+    title: 'Tray Carrying — The Foundation',
+    desc: 'The skill that defines your confidence on the floor',
+    duration: '8 min',
+    xp: 60,
+    status: 'available',
+    scenarioId: 'first-tray-full-room',
+    learn: [
+      { type: 'intro', text: 'Before you serve a single guest — master the tray.\n\nA dropped tray is not just lost food. It breaks the entire atmosphere of the room. Guests notice. Confidence with a tray communicates competence before you say a word.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Left hand only', body: 'Palm open, fingers spread. The tray rests on your palm and fingertips — not just your fingers.' },
+        { num: 2, title: 'Shoulder height', body: 'Carry at shoulder height or just above. Never in front of the body, never down by your side.' },
+        { num: 3, title: 'Weight distribution', body: 'Heavy items at the CENTER of the tray, lighter items on the outside. Balance is everything.' },
+        { num: 4, title: 'Turning correctly', body: 'When turning: rotate your ENTIRE BODY — never twist just your wrist. The wrist alone cannot handle the torque.' },
+        { num: 5, title: 'Putting down', body: 'Bend at the knees, back straight. Use both hands to lower the tray — never let it drop.' },
+        { num: 6, title: 'Route planning', body: 'Never use narrow paths or busy areas. Plan your route before you load the tray.' },
+        { num: 7, title: 'If unstable', body: 'If a tray feels unstable: stop, steady, then continue — never rush through instability.' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'Common Mistakes', text: 'Fingers only (no palm support) → unstable. Carrying too high above head → dangerous. Twisting wrist to turn → spills guaranteed. Overloading → make two trips, never risk it. Looking down at the tray → look forward, trust your hands. Hair tied back, face forward when carrying.' },
+      { type: 'video-group', videos: [
+        { title: 'Tray Carrying Masterclass', url: 'https://www.youtube.com/embed/CF4-AGWb6BU', description: 'Complete tray carrying technique for restaurant servers' },
+        { title: 'How to Carry a Large Food Tray', url: 'https://www.youtube.com/embed/i2zaxg_cKOc', description: 'Professional technique for carrying large food trays' },
+      ]},
+    ],
+    quiz: [
+      { q: 'Which hand should always carry the tray?', options: ['Right hand', 'Left hand', 'Either hand', 'Both hands together'], correct: 1, explain: 'Left hand always — this keeps your right hand free to open doors, guide guests, or steady items.' },
+      { q: 'Where do heavy items go on the tray?', options: ['Outer edges for easy access', 'Center of the tray', 'Left side to balance your arm', "It doesn't matter"], correct: 1, explain: 'Heavy items center — this keeps the weight balanced over your palm. Heavy items on the edge tip the tray.' },
+      { q: 'Your tray feels unstable while walking. What do you do?', options: ['Speed up to get to the table faster', 'Stop completely, steady the tray, then continue', 'Grab the tray with both hands and carry it in front of you', 'Ask a colleague to take it'], correct: 1, explain: "Stop and steady. Never rush through instability. A moment's pause is better than a full tray on the floor." },
+      { q: 'When you need to turn direction, you:', options: ['Pivot your wrist to redirect the tray', 'Rotate your entire body as one unit', 'Lean in the direction you want to go', 'Switch the tray to your other hand'], correct: 1, explain: 'Full body rotation. Your wrist alone cannot handle the torque — rotating your whole body keeps the tray level and safe.' },
+      { q: 'The path to table 7 goes through a narrow corridor. You should:', options: ['Go through carefully, holding the tray high', 'Find an alternate route, never use narrow paths with a tray', 'Ask a colleague to clear the way', 'Put the tray down and carry plates by hand'], correct: 1, explain: "Never use narrow or busy paths. Plan your route before you load the tray. If you can't walk through comfortably, find another way." },
+    ],
+  },
+  {
+    id: 'plate-carrying',
+    title: 'Plate Carrying',
+    desc: 'One plate, two plates, three plates — the technique that saves time and looks professional',
+    duration: '7 min',
+    xp: 55,
+    status: 'available',
+    scenarioId: 'table-6-main-course',
+    learn: [
+      { type: 'intro', text: 'Plates are the most visible skill you have on the floor. How you carry them tells guests everything about your confidence and training before you say a word.' },
+      { type: 'steps', title: 'The progression', items: [
+        { num: 1, title: 'One plate', body: 'Right hand, three middle fingers together under the plate. Thumb and little finger raised as guides. Keep the plate level — tilting shows the sauce.', badge: 'Master this first' },
+        { num: 2, title: 'Two plates (same hand)', body: 'First plate: standard one-plate grip. Second plate: rest the center on the thumb muscle (base of thumb). Adjust position until balanced — every hand is different, practice matters.', badge: 'Then this' },
+        { num: 3, title: 'Three plates', body: 'First two plates in right hand as above. Third plate: rest on your forearm/wrist, balanced on the rim of the second plate. Left hand holds the third plate steady from below. Move slowly — this takes practice.', badge: 'Advanced' },
+      ]},
+      { type: 'callout', tone: 'rule', label: 'The Rules', text: 'Never tilt a plate — it looks rushed and can spill. Never cover the food with your thumb. Serve from the correct side (property standard). Never stack plates you are actively serving. If unsure about 3 plates — do 2 trips. A clean 2-plate carry beats a shaky 3-plate every time.' },
+      { type: 'video-group', videos: [
+        { title: 'Carrying Plates — Real Server Training', url: 'https://www.youtube.com/embed/qQKEnRA68i4', description: 'Professional plate carrying technique from beginner to advanced' },
+        { title: 'The 3-Plate Carry — Fine Dining', url: 'https://www.youtube.com/embed/iIIR2d_vIz0', description: 'Correct 3-plate carry technique for fine dining service' },
+      ]},
+    ],
+    quiz: [
+      { q: 'When carrying one plate, which fingers go under the plate?', options: ['Thumb and index finger only', 'Three middle fingers together', 'All five fingers spread', 'Pinky and ring finger'], correct: 1, explain: 'Three middle fingers together give a stable flat surface. Thumb and pinky act as side guides.' },
+      { q: 'For a two-plate carry, where does the second plate rest?', options: ['On top of the first plate', 'On the thumb muscle at the base of your hand', 'Balanced on your forearm', 'In your other hand'], correct: 1, explain: 'The thumb muscle (base of thumb) gives a wide, stable surface for the second plate to rest on.' },
+      { q: "You need to carry 3 plates to a table of 5. You've only practiced 2-plate carries. What do you do?", options: ["Attempt the 3-plate carry — guests don't mind if you're slow", "Do two clean 2-plate trips — don't risk an unstable carry", 'Use a tray instead', 'Ask a colleague to carry the third'], correct: 1, explain: 'Two clean trips beats one shaky 3-plate carry every time. Confidence and safety first. Build up to 3 plates with practice.' },
+      { q: "What's wrong with tilting a plate while carrying it?", options: ["Nothing — it's faster", 'It looks unprofessional and can spill the food or sauce', 'It makes the plate easier to carry', 'Guests prefer seeing the food from an angle'], correct: 1, explain: 'A tilted plate tells the guest you are rushing. It also risks spilling sauce or liquid — always keep plates level.' },
+      { q: 'You are mid-service and one of your three plates starts slipping. What now?', options: ['Tighten your grip and keep walking', 'Stop immediately, find a stable surface, reset your grip', 'Speed up to get to the table faster', 'Call for help loudly'], correct: 1, explain: 'Stop immediately. A plate on the floor — or on a guest — is worse than a brief pause. Always choose safety over speed.' },
+    ],
+  },
+  {
+    id: 'floor-movement',
+    title: 'Floor Movement & Navigation',
+    desc: 'How you move says everything about who you are on the floor',
+    duration: '6 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'busy-saturday',
+    learn: [
+      { type: 'intro', text: 'How you move through a room communicates everything. A server who moves with purpose, head up, at the right pace — tells every guest that this floor is under control.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Posture', body: 'Back straight, shoulders relaxed, head up. Never looking down at the floor. Deliberate pace — not slow, not rushed.' },
+        { num: 2, title: 'Right side of corridors', body: 'Always walk on the right side of pathways. This prevents collisions and creates natural flow.' },
+        { num: 3, title: 'Guests always have right of way', body: 'Step aside for guests — always. Never expect them to move for you. Give way to colleagues carrying food.' },
+        { num: 4, title: 'No running, no shuffling', body: 'Never run — it signals panic and stresses the room. Never shuffle — it signals disengagement. Smooth, quiet, purposeful movement only.' },
+        { num: 5, title: 'Pre-bus passes', body: 'Every time you walk past a table, check what is needed. Never walk empty-handed past a table that needs attention.' },
+        { num: 6, title: 'Always moving with purpose', body: 'Never stand idle in the middle of the floor. Always be moving toward something purposeful. If unsure what to do — check the tables.' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'Danger Zones', text: 'Kitchen door exits: slow down, look before entering/exiting. Corners: slow down and step out before turning. Wet floors: never rush, always tell a manager immediately.' },
+      { type: 'callout', tone: 'tip', label: 'What movement communicates', text: 'Rushed movement = stressed kitchen, stressed guest. Slow wandering = nobody is in control. Purposeful smooth movement = everything is under control.' },
+    ],
+    quiz: [
+      { q: 'On which side of corridors and pathways should you always walk?', options: ['Left side', 'Right side', 'Either side', 'Down the middle'], correct: 1, explain: 'Always walk on the right side of corridors. This prevents collisions and creates a natural flow of traffic through the space.' },
+      { q: 'A guest is walking toward you in a narrow corridor. You should:', options: ['Continue walking — they will move', 'Step aside and let them pass', 'Speed up to get past them quickly', 'Ask them to move to the side'], correct: 1, explain: 'Guests always have right of way. Always step aside — never expect a guest to move for you. This is non-negotiable.' },
+      { q: 'You are approaching a kitchen door exit with a full tray. You should:', options: ['Walk through quickly to save time', 'Slow down and look before entering or exiting', 'Use your shoulder to push through', 'Announce loudly that you are coming through'], correct: 1, explain: 'Kitchen door exits are danger zones — always slow down and look before entering or exiting. A moment of caution prevents a collision.' },
+      { q: 'You notice a wet floor near table 5 during service. What is the correct action?', options: ['Walk carefully and continue with service', 'Tell a manager immediately and avoid the area', 'Clean it yourself while still carrying items', 'Let guests know to be careful'], correct: 1, explain: 'Never rush on a wet floor. Alert a manager immediately and avoid the area. Safety first — service waits.' },
+      { q: 'You are walking past table 3 on your way to the kitchen. What should you do?', options: ['Walk straight through without stopping', 'Glance at the table and check if anything is needed', 'Stop and ask if everything is okay', 'Only stop if a guest flags you'], correct: 1, explain: 'Every pass by a table is an opportunity — the pre-bus pass. Check what is needed as you walk by. It catches problems before they become requests.' },
+    ],
+  },
+  {
+    id: 'table-setting',
+    title: 'Table Setting to Standard',
+    desc: "The table is the guest's first impression before you say a word",
+    duration: '7 min',
+    xp: 60,
+    status: 'available',
+    scenarioId: 'pre-service-inspection',
+    learn: [
+      { type: 'intro', text: "A perfectly set table communicates standards before the guest speaks to a single staff member. A crooked fork, a smudged glass, a missing napkin — these tell the guest everything about how much you care." },
+      { type: 'steps', title: 'Standard cover setup', items: [
+        { num: 1, title: 'Fork', body: 'Left of the plate. Tines up, handle parallel to the knife.' },
+        { num: 2, title: 'Knife', body: 'Right of the plate. Blade facing INWARD — toward the plate. Always.' },
+        { num: 3, title: 'Spoon', body: 'Right of the knife. Handle aligned with the knife handle.' },
+        { num: 4, title: 'Water glass', body: 'Above the knife, positioned slightly to the right.' },
+        { num: 5, title: 'Wine glass', body: 'To the right of the water glass (if applicable). Polished and streak-free.' },
+        { num: 6, title: 'Napkin', body: 'On the plate or to the left of the fork. Folded cleanly and consistently across all tables.' },
+      ]},
+      { type: 'tip-list', title: 'Pre-service checklist — every table, every time', items: [
+        'All glasses polished and streak-free — hold to light to check.',
+        'Cutlery aligned and parallel — fork handles at the same level as knife handles.',
+        'Plates clean and chip-free — any damaged plate goes back, not to a table.',
+        'Napkins folded consistently across all tables in the section.',
+        'Table surface clean and completely dry.',
+        'Centerpiece or candle in position.',
+        'Menus clean and in position.',
+      ]},
+      { type: 'callout', tone: 'rule', label: 'The Golden Rule', text: "Never seat a guest at a table you would not be proud to sit at yourself. If you would notice it — they will too." },
+      { type: 'callout', tone: 'tip', label: 'Polishing glasses', text: 'Hold the glass by the stem only — never the bowl. Polish with a clean lint-free cloth. Hold up to light to check for streaks. A smudged glass goes back — never to a guest table.' },
+    ],
+    quiz: [
+      { q: 'Where does the knife blade face in a standard cover?', options: ['Away from the plate (outward)', 'Toward the plate (inward)', 'Upward', "It doesn't matter"], correct: 1, explain: 'The knife blade always faces inward — toward the plate. This is a universal dining standard and a sign of a correctly set table.' },
+      { q: 'Where should the water glass be placed in a standard cover?', options: ['Directly above the fork', 'Above the knife, slightly to the right', 'To the left of the fork', 'In the center of the cover'], correct: 1, explain: 'Water glass goes above the knife, positioned slightly to the right. This is the standard cover position.' },
+      { q: 'How should you hold a glass when polishing it?', options: ['By the bowl for a firm grip', 'By the stem only', 'By the rim', 'By the base'], correct: 1, explain: 'Always hold glasses by the stem when polishing — never the bowl. Fingerprints on the bowl require re-polishing and are visible to guests.' },
+      { q: 'A glass still has a streak after polishing. What do you do?', options: ['Turn it streak-side away from the guest', 'Polish it again until completely streak-free', "Place it anyway — guests won't notice in the lighting", 'Use a damp cloth to remove the streak'], correct: 1, explain: 'A smudged or streaked glass never goes to a guest table. Polish again until it passes the light test.' },
+      { q: 'You find a small chip on one plate while resetting a table. What do you do?', options: ['Place it at the bottom of the stack', "Use it — it's only a small chip", 'Remove it from service immediately', 'Place it with the chip facing down, away from the guest'], correct: 2, explain: 'Chipped or damaged plates are removed from service immediately — no exceptions. A chipped plate is a safety concern and signals poor standards.' },
+    ],
+  },
+  {
+    id: 'synchronized-service',
+    title: 'Synchronized Service',
+    desc: 'Great service is invisible — because the whole team moves as one',
+    duration: '8 min',
+    xp: 75,
+    status: 'available',
+    scenarioId: 'six-top-all-at-once',
+    learn: [
+      { type: 'intro', text: "Guests don't see the teamwork behind great service — and that's exactly the point. When service is synchronized, it looks effortless. When it breaks down, guests feel it immediately: one person eating while the others watch, servers crossing paths, plates arriving one at a time. Choreography is not accidental." },
+      { type: 'steps', title: 'The choreography rules', items: [
+        { num: 1, title: 'All plates go out together', body: 'Every plate for a table leaves the kitchen at the same time. No exceptions. If one plate is 2 minutes behind, the team waits.', badge: 'Non-negotiable' },
+        { num: 2, title: 'Never cross paths', body: 'Know who is carrying what and which route they are taking. A collision — physical or visual — breaks the illusion of fluid service.', badge: 'Always' },
+        { num: 3, title: 'Clear simultaneously', body: 'When the last guest at a table finishes, all servers move in together. One plate at a time is amateur — synchronized clearing is invisible.', badge: 'Together' },
+        { num: 4, title: 'Communicate without words', body: 'Eye contact, nods, and brief gestures coordinate the floor silently. Loud verbal coordination in front of guests breaks the experience.', badge: 'Silent' },
+        { num: 5, title: 'Move with intention', body: 'No rushing, no stopping mid-floor to chat. Every movement has a purpose and a destination.', badge: 'Intention' },
+      ]},
+      { type: 'callout', tone: 'rule', label: 'The 3-Second Rule', text: 'When you approach a table with your team, everyone arrives within 3 seconds of each other. Not 30. Not 10. Three. This is what makes synchronized service invisible.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Server', body: 'Owns the guest relationship. Knows the table\'s history, preferences, and flow. Calls the timing — communicates pace to the team.' },
+        { num: 2, title: 'Runner', body: 'Supports timing and logistics. Carries plates, watches the kitchen window, confirms readiness before service.' },
+        { num: 3, title: 'Captain', body: 'Coordinates the floor in real time. Corrects issues before guests notice. The eye above the floor.' },
+      ]},
+      { type: 'tip-list', title: 'The 5-minute after-service brief', items: [
+        'What went well tonight — name it specifically.',
+        'What could have been smoother — one concrete thing.',
+        'One fix to implement tomorrow — not a complaint, an action.',
+      ]},
+    ],
+    quiz: [
+      { q: 'A table of 5 is ready for their mains — but one plate is 2 minutes behind. You:', options: ["Serve the 4 ready plates — guests shouldn't wait", 'Wait for all 5 plates before leaving the kitchen', 'Warn the guests that one plate is coming separately', 'Ask the guest whose plate is late to wait'], correct: 1, explain: 'All plates go out together — non-negotiable. One person eating while four others watch is worse than a 2-minute hold.' },
+      { q: 'The 3-second rule of synchronized service means:', options: ['Each plate should be placed within 3 seconds', 'All team members arrive at the table within 3 seconds of each other', 'Food should reach the table within 3 seconds of leaving the kitchen', 'Clearing should take no more than 3 seconds'], correct: 1, explain: 'All servers arrive at the table within 3 seconds of each other — not 30, not 10. Three. This is what makes service look choreographed rather than chaotic.' },
+      { q: 'How do you coordinate with your team during synchronized service without disturbing guests?', options: ['Whisper quietly near the kitchen', 'Use a headset communication system', 'Eye contact and small nods — silent visual communication', 'Pre-plan all movements before service starts'], correct: 2, explain: 'Silent communication — eye contact and nods — keeps coordination invisible to guests. Verbal coordination in front of a table breaks the experience.' },
+      { q: 'Who owns the timing and calls the pace of service for a table?', options: ['The runner, who controls kitchen timing', 'The captain, who manages the whole floor', 'The server, who owns the guest relationship', 'The kitchen, which sets the pace'], correct: 2, explain: 'The server owns the guest relationship and calls the timing. Runners support logistics. The captain coordinates the floor. But timing comes from the person closest to the guest.' },
+      { q: 'When should the team move in to clear a table?', options: ['When each guest finishes their plate', 'When the majority of guests have finished', 'When the last guest finishes — then all plates together', 'After asking each guest individually'], correct: 2, explain: 'Clear when the last guest finishes — and clear all plates simultaneously. Never clear while someone is still eating. Never clear one plate at a time at the same table.' },
+    ],
+  },
+];
+
+// ─── MODULE 3: THE SERVICE FLOW ─────────────────────────────
 
 const serviceFlowLessons: Lesson[] = [
+  // 3 lessons: ten-steps, proactive-reactive, nonverbal-signals
   {
     id: 'ten-steps',
     title: 'The 10-Step Service Sequence',
@@ -334,39 +507,6 @@ const serviceFlowLessons: Lesson[] = [
       { q: 'A guest finishes their main course while two others are still eating. You should:', options: ['Clear their plate immediately — it\'s polite.', 'Ask if you can clear their plate.', 'Wait until everyone finishes, then clear simultaneously.', 'Clear when the second person finishes.'], correct: 2, explain: 'Never clear while someone is still eating. Wait for the last person to finish, then clear all plates together (Step 8 — synchronized clearing).' },
       { q: 'When should you offer dessert or digestifs?', options: ['When guests ask for them.', 'After presenting the bill.', 'Before guests ask — proactive, directed suggestion.', 'Only if the table has been there over 2 hours.'], correct: 2, explain: 'Step 9 is proactive — offer before they ask, with a specific suggestion based on what they ordered. Waiting to be asked is reactive and misses the moment.' },
       { q: 'What makes a close "personalized"?', options: ['Handing over a feedback form.', 'Using their name and inviting them back with a genuine reference to their visit.', 'A smile and a wave.', 'Offering a discount for their next visit.'], correct: 1, explain: 'The close (Step 10) uses the guest\'s name when you have it and includes a genuine invitation to return — not just "have a good night."' },
-    ],
-  },
-  {
-    id: 'language-of-service',
-    title: 'The Language of Service',
-    desc: 'What to say, what never to say, and how to describe what you serve',
-    duration: '7 min',
-    xp: 50,
-    status: 'available',
-    scenarioId: 'two-minute-check',
-    learn: [
-      { type: 'intro', text: '"Is everything okay?" is the most dangerous phrase in hospitality. It sounds like a check-in. It is a missed opportunity. It invites a one-word answer, reveals nothing, and signals average service. Every word you choose is either building the experience or flattening it.' },
-      { type: 'do-dont', title: 'Phrases to replace immediately', items: [
-        { dont: '"Is everything okay?"', do: '"How are you finding the flavors tonight?"' },
-        { dont: '"Did you like it?"', do: '"What did you think of the [dish]?"' },
-        { dont: '"No problem"', do: '"Of course — my pleasure."' },
-        { dont: '"I can\'t / we don\'t have"', do: '"What I can do is..."' },
-        { dont: '"I\'ll check on that"', do: '"Let me find out for you — I\'ll be right back."' },
-      ]},
-      { type: 'callout', tone: 'rule', label: 'The Language Rule', text: 'Never focus on what you can\'t do. Every response pivots to what you can do. "What I can do is..." changes the entire conversation.' },
-      { type: 'principles', items: [
-        { num: 1, title: 'Lead with the star ingredient', body: 'When describing a dish, open with the hero element: "This starts with hand-selected Wagyu..." — not "this is a burger with..."' },
-        { num: 2, title: 'Mention the technique', body: 'The method matters: "slow-smoked for 8 hours", "house-ground daily", "fermented in-house". It signals craft and pride.' },
-        { num: 3, title: 'End with the flavor experience', body: 'Close with what the guest will feel: "...giving you a deep, smoky finish that\'s completely unique to us." Paint the experience, not the ingredients.' },
-      ]},
-      { type: 'callout', tone: 'tip', label: 'Example', text: '"Our signature burger starts with hand-ground [Property] blend beef, seared on a cast-iron flat top, giving you a crust that holds all the juice — you taste the technique in every bite."' },
-    ],
-    quiz: [
-      { q: 'A guest thanks you for your help. Which response is correct?', options: ['"No problem."', '"No worries!"', '"Of course — my pleasure."', '"That\'s what I\'m here for."'], correct: 2, explain: '"No problem" implies there could have been a problem. "My pleasure" signals that serving them is genuinely enjoyable — a completely different message.' },
-      { q: 'A guest asks about a dish you\'re not certain about. You say:', options: ['"I think it should be fine."', '"Probably — it\'s quite popular."', '"Let me find out for you — I want to be sure."', '"Most guests like it."'], correct: 2, explain: '"Let me find out for you" signals ownership and honesty. "I think" and "probably" signal uncertainty and erode trust.' },
-      { q: 'You don\'t carry a wine the guest specifically requested. You say:', options: ['"We don\'t have that."', '"That\'s not on our list."', '"What I can do is suggest our [X], which has a similar profile — bold, fruit-forward."', '"I\'ll check with the bar."'], correct: 2, explain: '"What I can do is..." pivots immediately to a solution. It acknowledges the gap without making the guest feel like a problem.' },
-      { q: 'How should you open a description of a menu item?', options: ['With the price point.', 'With the star ingredient.', 'With what other guests say about it.', 'With the cooking time.'], correct: 1, explain: 'Lead with the star ingredient — the hero of the dish. That\'s what makes guests lean in. Price and reviews come after the desire is created.' },
-      { q: 'Which check-in is correct 2-3 minutes after food arrives?', options: ['"Is everything okay?"', '"Everything good?"', '"How are you finding the flavors tonight?"', '"Did you enjoy your meal so far?"'], correct: 2, explain: '"How are you finding the flavors?" invites a real answer and shows genuine interest. Any "okay/good/enjoy" variant is lazy and closes the conversation.' },
     ],
   },
   {
@@ -434,45 +574,9 @@ const serviceFlowLessons: Lesson[] = [
       { q: 'An Asian guest has a closed menu but hasn\'t waved or made eye contact. You should:', options: ['Wait until they make a clear signal.', 'Approach — the closed menu is a sufficient signal.', 'Ask a colleague to check on them.', 'Wait 5 more minutes.'], correct: 1, explain: 'Cultural differences mean some guests won\'t wave even when ready. The closed menu is your cue — approach calmly without waiting for a more obvious signal.' },
     ],
   },
-  {
-    id: 'team-service',
-    title: 'Synchronized Team Service',
-    desc: 'The choreography that makes great service look effortless',
-    duration: '8 min',
-    xp: 55,
-    status: 'available',
-    scenarioId: 'runner-coordination',
-    learn: [
-      { type: 'intro', text: 'Guests don\'t see the teamwork behind great service — and that\'s exactly the point. When service is synchronized, it looks effortless. When it breaks down, guests feel it immediately: one person eating while the others watch, servers crossing paths, plates arriving one at a time. Choreography is not accidental.' },
-      { type: 'steps', title: 'The choreography rules', items: [
-        { num: 1, title: 'All plates go out together', body: 'Every plate for a table leaves the kitchen at the same time. No exceptions. If one plate is 2 minutes behind, the team waits.', badge: 'Non-negotiable' },
-        { num: 2, title: 'Never cross paths', body: 'Know who is carrying what and which route they\'re taking. A collision — physical or visual — breaks the illusion of fluid service.', badge: 'Always' },
-        { num: 3, title: 'Clear simultaneously', body: 'When the last guest at a table finishes, all servers move in together. One plate at a time is amateur — synchronized clearing is invisible.', badge: 'Together' },
-        { num: 4, title: 'Communicate without words', body: 'Eye contact, nods, and brief gestures coordinate the floor silently. Loud verbal coordination in front of guests breaks the experience.', badge: 'Silent' },
-        { num: 5, title: 'Move with intention', body: 'No rushing, no stopping mid-floor to chat. Every movement has a purpose and a destination.', badge: 'Intention' },
-      ]},
-      { type: 'principles', items: [
-        { num: 1, title: 'Server', body: 'Owns the guest relationship. Knows the table\'s history, preferences, and flow. Communicates pace to the team.' },
-        { num: 2, title: 'Runner', body: 'Supports timing and logistics. Carries plates, watches the kitchen window, confirms readiness before service.' },
-        { num: 3, title: 'Captain', body: 'Coordinates the floor in real time. Corrects issues before guests notice. The eye above the floor.' },
-      ]},
-      { type: 'tip-list', title: 'The 5-minute after-service brief', items: [
-        'What went well tonight — name it specifically.',
-        'What could have been smoother — one concrete thing.',
-        'One fix to implement tomorrow — not a complaint, an action.',
-      ]},
-    ],
-    quiz: [
-      { q: 'A table of 5 is ready for their mains — but one plate is 2 minutes behind. You:', options: ['Serve the 4 ready plates — guests shouldn\'t wait.', 'Wait for all 5 plates before leaving the kitchen.', 'Warn the guests that one plate is coming separately.', 'Ask the guest whose plate is late to wait.'], correct: 1, explain: 'All plates go out together — non-negotiable. One person eating while four others watch is worse than a 2-minute hold. Wait for the full table.' },
-      { q: 'A runner\'s role in synchronized service is:', options: ['To manage guest relationships for their assigned section.', 'To coordinate the entire floor and correct issues in real time.', 'To support timing and logistics — plates, timing, kitchen coordination.', 'To handle complaints and escalations.'], correct: 2, explain: 'The runner is the logistics support. They watch the kitchen window, confirm timing, and carry plates — freeing the server to manage the guest relationship.' },
-      { q: 'How do experienced servers coordinate during synchronized clearing?', options: ['They call out to each other across the floor.', 'They use a walkie-talkie or headset system.', 'Eye contact and nods — silent visual communication.', 'They pre-plan all routes at the start of service.'], correct: 2, explain: 'Silent communication — eye contact, nods, brief gestures — keeps the coordination invisible to guests. Vocal coordination in front of a table breaks the experience.' },
-      { q: 'Table 8 of 4 has finished their mains — two have empty plates, one has a bite left, one is still eating. You should:', options: ['Clear the two finished plates immediately.', 'Ask if you can start clearing.', 'Wait until the last person finishes, then clear all plates together.', 'Clear each plate as each guest finishes.'], correct: 2, explain: 'Never clear while someone is still eating. Wait for the last person to finish — then clear all plates simultaneously.' },
-      { q: 'An after-service brief should include:', options: ['Individual staff performance scores.', 'Only the complaints and incidents from the shift.', 'What went well, what to improve, and one concrete fix for tomorrow.', 'Sales numbers and table turnover times.'], correct: 2, explain: 'The 5-minute brief is a team tool — not a performance review. One win, one improvement, one action. Short, specific, forward-looking.' },
-    ],
-  },
 ];
 
-// ─── MODULE 3: LANGUAGE & STORYTELLING ──────────────────────
+// ─── MODULE 4: LANGUAGE & STORYTELLING ──────────────────────
 
 const languageLessons: Lesson[] = [
   {
@@ -627,7 +731,7 @@ const languageLessons: Lesson[] = [
   },
 ];
 
-// ─── MODULE 4: HANDLING COMPLAINTS & ERRORS ─────────────────
+// ─── MODULE 5: HANDLING COMPLAINTS & ERRORS ─────────────────
 
 const complaintsLessons: Lesson[] = [
   {
@@ -692,7 +796,7 @@ const complaintsLessons: Lesson[] = [
   },
 ];
 
-// ─── MODULE 5: FLOOR CHOREOGRAPHY ───────────────────────────
+// ─── MODULE 6: FLOOR CHOREOGRAPHY ───────────────────────────
 
 const floorLessons: Lesson[] = [
   {
@@ -737,7 +841,7 @@ const floorLessons: Lesson[] = [
   },
 ];
 
-// ─── MODULE 6: GUEST PSYCHOLOGY ─────────────────────────────
+// ─── MODULE 7: GUEST PSYCHOLOGY ─────────────────────────────
 
 const guestPsychologyLessons: Lesson[] = [
   {
@@ -785,6 +889,7 @@ const guestPsychologyLessons: Lesson[] = [
 // ─── MODULE REGISTRY ─────────────────────────────────────────
 
 export const CURRICULUM: Module[] = [
+  // Module 1
   {
     id: 'greetings',
     title: 'Greetings & First Impressions',
@@ -798,19 +903,35 @@ export const CURRICULUM: Module[] = [
     xpTotal: 165,
     lessons: greetingsLessons,
   },
+  // Module 2
   {
-    id: 'service-flow',
-    title: 'The Service Flow',
-    subtitle: '[Property]\'s 10-step standard, start to finish',
-    iconName: 'BookOpen',
-    color: '#111111',
+    id: 'physical-craft',
+    title: 'The Physical Craft',
+    subtitle: 'Master the physical skills before anything else',
+    iconName: 'Hand',
+    color: '#8B7355',
     progress: 0,
     totalLessons: 5,
     completedLessons: 0,
     available: true,
     xpTotal: 300,
+    lessons: physicalCraftLessons,
+  },
+  // Module 3
+  {
+    id: 'service-flow',
+    title: 'The Service Flow',
+    subtitle: "[Property]'s 10-step standard, start to finish",
+    iconName: 'BookOpen',
+    color: '#111111',
+    progress: 0,
+    totalLessons: 3,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 195,
     lessons: serviceFlowLessons,
   },
+  // Module 4
   {
     id: 'language',
     title: 'Language & Storytelling',
@@ -824,6 +945,7 @@ export const CURRICULUM: Module[] = [
     xpTotal: 245,
     lessons: languageLessons,
   },
+  // Module 5
   {
     id: 'complaints',
     title: 'Handling Complaints & Errors',
@@ -837,6 +959,7 @@ export const CURRICULUM: Module[] = [
     xpTotal: 245,
     lessons: complaintsLessons,
   },
+  // Module 6
   {
     id: 'floor',
     title: 'Floor Choreography',
@@ -850,6 +973,7 @@ export const CURRICULUM: Module[] = [
     xpTotal: 185,
     lessons: floorLessons,
   },
+  // Module 7
   {
     id: 'guest-psychology',
     title: 'Guest Psychology',

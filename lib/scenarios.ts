@@ -718,6 +718,221 @@ Return ONLY valid JSON:
     scoreColors: { signal_reading: '#F5A623', action_quality: '#81B29A', floor_awareness: '#D4A574' },
   },
 
+  'first-tray-full-room': {
+    id: 'first-tray-full-room',
+    moduleId: 'physical-craft',
+    title: 'First Tray, Full Room',
+    subtitle: 'Module 2 · Tray Carrying',
+    description:
+      "It's your first week. The kitchen just loaded your tray: 3 mains, 2 side dishes, 2 water glasses. The tray is heavier than anything you've practiced with. Table 4 is across a busy floor. Go.",
+    tags: ['🍽️ Tray Service', '⚡ First Week', '🎯 Technique'],
+    timerSeconds: 45,
+    goal: 'Describe checking tray balance, planning your route, and carrying with correct grip and body position. Score 8/10 on technique.',
+    startingWarmth: 6,
+    opening:
+      "It's your first week on the floor. The kitchen just loaded your tray: 3 main courses, 2 side dishes, 2 water glasses. It's heavier than anything you've practiced with. The floor is busy. Table 4 is across the room. Your senior colleague is watching. How do you approach this?",
+    systemPrompt: `You are a senior colleague watching a new server carry their first real tray on a busy service night. You observe their technique and coach them.
+
+Evaluate based on:
+- Did they describe checking the tray balance before lifting?
+- Did they plan their route?
+- Correct grip described (left hand, palm open, fingers spread)?
+- Correct body position (shoulder height, head up, face forward)?
+- Confidence level in their approach?
+
+REWARD: describing good technique, checking balance first, planning route, asking for help if genuinely unsure, steady approach over rushed.
+PENALIZE: rushing, describing dangerous shortcuts, ignoring the weight, overconfidence without checking stability, describing wrist-carrying or carrying in front of the body.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Senior colleague responding with observation or coaching tip, 1-2 sentences",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": {
+    "technique": <0-10>,
+    "safety": <0-10>,
+    "confidence": <0-10>
+  },
+  "coach_tip": "one specific technique note",
+  "conversation_complete": <true after 5 exchanges>
+}`,
+    scoreKeys: ['technique', 'safety', 'confidence'],
+    scoreLabels: { technique: 'Technique', safety: 'Safety', confidence: 'Confidence' },
+    scoreColors: { technique: '#8B7355', safety: '#E07A5F', confidence: '#F5A623' },
+  },
+
+  'table-6-main-course': {
+    id: 'table-6-main-course',
+    moduleId: 'physical-craft',
+    title: 'Table 6 — Main Course',
+    subtitle: 'Module 2 · Plate Carrying',
+    description:
+      'Three mains are up: a fish, a steak, and a pasta. The table is 3 guests. Your colleagues are busy. How do you carry and serve them?',
+    tags: ['🍽️ Plate Carrying', '👥 3-Top', '⚡ Solo Service'],
+    timerSeconds: 45,
+    goal: 'Describe your plate carry technique correctly (1, 2, or 3 plates) and explain how you serve safely and professionally.',
+    startingWarmth: 7,
+    opening:
+      'Three mains are up at the kitchen window: a fish, a steak, and a pasta for table 6. The table has 3 guests. Your colleagues are busy with other tables. How do you carry these and serve them?',
+    systemPrompt: `You are a floor trainer evaluating a server's plate carrying and serving technique at [Property].
+
+THE CORRECT APPROACH:
+- Option A: 3-plate carry (right hand two plates, third on forearm) if confident and practiced
+- Option B: Two clean 2-plate trips — the SAFE choice if not fully practiced
+- Either is acceptable. A safe 2-trip carry beats a shaky 3-plate every time.
+
+EVALUATE:
+- Correct grip described (three middle fingers, thumb muscle for second plate)?
+- Plates kept level — no tilting?
+- Serving from the correct side?
+- Safe decision-making (if unsure about 3 plates, do 2 trips)?
+
+REWARD: correct technique, safety-first thinking, confidence balanced with caution, clean description of the carry.
+PENALIZE: tilting plates, covering food with thumb, rushing, describing unsafe carries, stacking plates being served.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Floor trainer responding with coaching, 1-2 sentences",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": {
+    "technique": <0-10>,
+    "presentation": <0-10>,
+    "safety": <0-10>
+  },
+  "coach_tip": "one specific technique note",
+  "conversation_complete": <true after 5 exchanges>
+}`,
+    scoreKeys: ['technique', 'presentation', 'safety'],
+    scoreLabels: { technique: 'Technique', presentation: 'Presentation', safety: 'Safety' },
+    scoreColors: { technique: '#8B7355', presentation: '#D4A574', safety: '#E07A5F' },
+  },
+
+  'busy-saturday': {
+    id: 'busy-saturday',
+    moduleId: 'physical-craft',
+    title: 'The Busy Saturday',
+    subtitle: 'Module 2 · Floor Movement',
+    description:
+      "It's peak service — every table seated, kitchen firing, two colleagues crossing your path. You have a tray of drinks for table 3 and you just noticed table 7 is looking around. What's your move?",
+    tags: ['🚶 Floor Movement', '⚡ Peak Service', '🎯 Prioritization'],
+    timerSeconds: 45,
+    goal: "Navigate the busy floor correctly, prioritize table 7's signal, and describe your movement and decision-making.",
+    startingWarmth: 6,
+    opening:
+      "Peak Saturday service — every table is seated, the kitchen is firing, and two colleagues are crossing your path. You are carrying a tray of drinks for table 3 and have just noticed that table 7 is looking around the room for attention. Walk me through your move.",
+    systemPrompt: `You are a floor captain evaluating a server's floor movement decisions during peak service at [Property].
+
+THE CORRECT APPROACH:
+- Continue to table 3 first (carry the tray safely to completion)
+- Acknowledge table 7 with eye contact and a brief nod — signal you've seen them
+- After delivering table 3's drinks, immediately attend to table 7
+- Maintain correct floor movement: right side of pathways, smooth pace, not rushing
+
+REWARD: prioritizing the current carry, acknowledging table 7 non-verbally, smooth purposeful movement, correct prioritization.
+PENALIZE: rushing and risking the tray, ignoring table 7 entirely, stopping mid-floor to deal with table 7 while carrying drinks, describing frantic or panicked movement.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Floor captain responding with observation or coaching, 1-2 sentences",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": {
+    "prioritization": <0-10>,
+    "floor_awareness": <0-10>,
+    "composure": <0-10>
+  },
+  "coach_tip": "one specific coaching note on movement or decision",
+  "conversation_complete": <true after 5 exchanges>
+}`,
+    scoreKeys: ['prioritization', 'floor_awareness', 'composure'],
+    scoreLabels: { prioritization: 'Prioritization', floor_awareness: 'Floor Awareness', composure: 'Composure' },
+    scoreColors: { prioritization: '#F5A623', floor_awareness: '#81B29A', composure: '#8B7355' },
+  },
+
+  'pre-service-inspection': {
+    id: 'pre-service-inspection',
+    moduleId: 'physical-craft',
+    title: 'Pre-Service Inspection',
+    subtitle: 'Module 2 · Table Setting',
+    description:
+      'The manager does a walk-through in 10 minutes. You have 6 tables to reset and check. Table 3 has a smudged glass, table 5 has misaligned cutlery, and table 6 is missing a napkin. Walk through your approach.',
+    tags: ['🍽️ Table Setting', '⏱️ Pre-Service', '✓ Standards'],
+    timerSeconds: 45,
+    goal: 'Demonstrate correct pre-service table setting standards and systematic approach to resetting multiple tables.',
+    startingWarmth: 7,
+    opening:
+      "The manager is doing a walk-through in 10 minutes. You have 6 tables to check and reset. You've already spotted three problems: table 3 has a smudged glass, table 5 has misaligned cutlery, and table 6 is missing a napkin. Walk me through exactly how you approach this.",
+    systemPrompt: `You are a head server evaluating a team member's pre-service table setting process at [Property].
+
+THE CORRECT APPROACH:
+- Start systematically — don't jump around randomly between tables
+- Table 3: remove the smudged glass, re-polish with a clean lint-free cloth, hold to light to check, return to position
+- Table 5: realign cutlery parallel, fork left of plate, knife right with blade inward, spoon to right of knife
+- Table 6: add a cleanly folded napkin to the correct position (on plate or left of fork)
+- Then check all remaining tables against the full pre-service checklist
+- The golden rule: never seat a guest at a table you would not be proud to sit at yourself
+
+REWARD: systematic approach, correct standards knowledge (blade inward, glass by stem only, consistent napkin folding), efficient prioritization.
+PENALIZE: placing smudged glass back without full re-polish, ignoring the light test, describing shortcuts, missing parts of the checklist.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Head server responding with observation or follow-up question, 1-2 sentences",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": {
+    "standards_knowledge": <0-10>,
+    "efficiency": <0-10>,
+    "attention_to_detail": <0-10>
+  },
+  "coach_tip": "one specific standards note",
+  "conversation_complete": <true after 5 exchanges>
+}`,
+    scoreKeys: ['standards_knowledge', 'efficiency', 'attention_to_detail'],
+    scoreLabels: { standards_knowledge: 'Standards Knowledge', efficiency: 'Efficiency', attention_to_detail: 'Attention to Detail' },
+    scoreColors: { standards_knowledge: '#8B7355', efficiency: '#F5A623', attention_to_detail: '#D4A574' },
+  },
+
+  'six-top-all-at-once': {
+    id: 'six-top-all-at-once',
+    moduleId: 'physical-craft',
+    title: 'The 6-Top — All At Once',
+    subtitle: 'Module 2 · Synchronized Service',
+    description:
+      'Table 8 is a group of 6. All 6 mains are ready. You have yourself and one runner. How do you get all 6 plates out simultaneously and correctly?',
+    tags: ['👥 6-Top', '🎯 Synchronized', '🤝 Team Service'],
+    timerSeconds: 45,
+    goal: 'Coordinate a perfect synchronized service for 6 guests with one runner. All plates go out together, within 3 seconds.',
+    startingWarmth: 7,
+    opening:
+      'Table 8 — a group of 6 — has all their mains ready at the kitchen window. You have yourself and one runner, Marco. You need all 6 plates on the table simultaneously. How do you coordinate and execute this?',
+    systemPrompt: `You are Marco, the runner at [Property], waiting for direction from the server on how to coordinate the 6-plate service for table 8.
+
+THE CORRECT APPROACH:
+- Server assigns which plates Marco carries (2-3 plates each, or use a tray)
+- Agree on who serves which guests — assign by position around the table
+- Both approach the table from opposite sides simultaneously
+- All plates placed within 3 seconds of each other — the 3-second rule
+- Silent communication confirmed with a nod before approaching
+- No verbal coordination at or near the table — guests should not see the coordination
+
+REWARD: clear assignment of plates before approaching, 3-second rule mentioned, silent nod confirmation, approaching from correct sides simultaneously, all plates placed together.
+PENALIZE: any approach that results in plates arriving at different times, verbal coordination at the table, forgetting to assign which server takes which guests, not planning route before approaching.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Marco responding as runner, 1-2 sentences confirming or clarifying the coordination plan",
+  "warmth": <integer 1-10, starts at 7>,
+  "scores": {
+    "coordination": <0-10>,
+    "timing": <0-10>,
+    "standards_knowledge": <0-10>
+  },
+  "coach_tip": "one specific note on the coordination plan",
+  "conversation_complete": <true after 5 exchanges or when table 8 is successfully coordinated>
+}`,
+    scoreKeys: ['coordination', 'timing', 'standards_knowledge'],
+    scoreLabels: { coordination: 'Coordination', timing: 'Timing', standards_knowledge: 'Standards Knowledge' },
+    scoreColors: { coordination: '#8B7355', timing: '#F5A623', standards_knowledge: '#81B29A' },
+  },
+
   'runner-coordination': {
     id: 'runner-coordination',
     moduleId: 'service-flow',

@@ -176,6 +176,33 @@ function SectionCultureCards({ items }: { items: { group: string; cues: string }
   );
 }
 
+function SectionVideoGroup({ videos }: { videos: { title: string; url: string; description: string }[] }) {
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', marginBottom: 16 }}>Watch the technique</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {videos.map((v, i) => (
+          <div key={i} style={{ background: 'white', border: '1px solid var(--sand-deeper)', borderRadius: 14, overflow: 'hidden' }}>
+            <div style={{ position: 'relative', width: '100%', maxWidth: 560, aspectRatio: '16/9', margin: '0 auto' }}>
+              <iframe
+                src={v.url}
+                title={v.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', borderRadius: '12px 12px 0 0' }}
+              />
+            </div>
+            <div style={{ padding: '12px 16px' }}>
+              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--brand-deep)', marginBottom: 4 }}>{v.title}</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{v.description}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SectionTipList({ title, items }: { title: string; items: string[] }) {
   return (
     <div style={{ marginBottom: 24 }}>
@@ -203,6 +230,7 @@ function renderSection(section: LearnSection, idx: number) {
     case 'do-dont': return <SectionDoDont key={idx} title={section.title} items={section.items} />;
     case 'culture-cards': return <SectionCultureCards key={idx} items={section.items} />;
     case 'tip-list': return <SectionTipList key={idx} title={section.title} items={section.items} />;
+    case 'video-group': return <SectionVideoGroup key={idx} videos={section.videos} />;
     default: return null;
   }
 }
