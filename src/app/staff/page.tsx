@@ -1,0 +1,66 @@
+'use client'
+
+import { useState, Suspense, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import TopNav from '@/components/TopNav'
+import HomeView from '@/components/staff/HomeView'
+import ModuleView from '@/components/staff/ModuleView'
+import LessonView from '@/components/staff/LessonView'
+import { CURRICULUM, type Module, type Lesson } from '@/lib/curriculum'
+import { STAFF } from '@/lib/staff-data'
+import { useUser } from '@/lib/useUser'
+import { createClient } from '@/lib/supabase/client'
+
+type StaffView = 'home' | 'module' | 'lesson'
+type Phase = 'learn' | 'practice' | 'apply'
+
+function StaffPageInner() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const { user, property, loading } = useUser()
+  const asId = searchParams.get('as')
+  const viewingAs = asId ? (STAFF.find((s) => s.id === asId) ?? null) : null
+  const [view, setView] = useState<StaffView>('home')
+  const [activeModule, setActiveModule] = useState<Module | null>(null)
+  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
+  const [activeLessonIndex, setActiveLessonIndex] = useState(0)
+  const [phase, setPhase] = useState<Phase>('learn')
+
+  useEffect(() => {
+    if (!user) return
+    const supabase = createClient()
+    supabase.from('users').update({ last_active: new Date().toISOString() }).eq('id', user.id).then(() => {})
+  }, [user?.id])
+
+  const goHome = () => { setView('home'); setActiveModule(null); setActiveLesson(null) }
+  const openModule = (m: Module) => { setActiveModule(m); setView('module') }
+  const openLesson = (m: Module, lesson: Lesson, index: number) => {
+    setActiveModule(m); setActiveLesson(lesson); setActiveLessonIndex(index); setPhase('learn'); setView('lesson')
+  }
+  const backToModule = () => { setView('module'); setActiveLesson(null) }
+  const clearViewAs = () => { router.push('/manager') }
+
+  if (loading) {
+    return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sand)' }}><div style={{ fontFamily: 'Fraunces, serif', fontSize: 22, color: 'var(--brand-deep)' }}>Loading…</div></div>
+  }
+
+  const navUser = user ? { name: user.full_name, initials: user.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase(), role: user.role } : null
+  const navProperty = property ? { name: property.name, primaryColor: property.primary_color } : null
+
+  return (
+    <>
+      <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
+      {view === 'home' && <HomeView curriculum={CURRICULUM} onOpenModule={openModule} viewingAs={viewingAs} />}
+      {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} />}
+      {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} />}
+    </>
+  )
+}
+
+export default function StaffPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sand)' }}><div style={{ fontFamily: 'Fraunces, serif', fontSize: 22, color: 'var(--brand-deep)' }}>Loading…</div></div>}>
+      <StaffPageInner />
+    </Suspense>
+  )
+}

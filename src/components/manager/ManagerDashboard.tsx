@@ -85,8 +85,8 @@ function ActivityItem({
 
 // ─── Form state type ─────────────────────────────────────────
 
-interface FormState { name: string; role: string; color: string; }
-const BLANK_FORM: FormState = { name: '', role: 'Mesero', color: '#F5A623' };
+interface FormState { name: string; role: string; color: string; email: string; password: string; }
+const BLANK_FORM: FormState = { name: '', role: 'Mesero', color: '#F5A623', email: '', password: '' };
 
 // ─── Main dashboard ──────────────────────────────────────────
 
@@ -104,6 +104,8 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const [form, setForm] = useState<FormState>(BLANK_FORM);
   const [nameError, setNameError] = useState(false);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // ── CRUD actions ─────────────────────────────────────────
   const openAdd = () => {
@@ -111,11 +113,12 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
     setEditTarget(null);
     setNameError(false);
     setShowRemoveConfirm(false);
+    setSubmitError(null);
     setModalMode('add');
   };
 
   const openEdit = (s: StaffMember) => {
-    setForm({ name: s.name, role: s.role, color: s.color });
+    setForm({ name: s.name, role: s.role, color: s.color, email: '', password: '' });
     setEditTarget(s);
     setNameError(false);
     setShowRemoveConfirm(false);
@@ -126,31 +129,68 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
     setModalMode(null);
     setEditTarget(null);
     setShowRemoveConfirm(false);
+    setSubmitError(null);
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!form.name.trim()) { setNameError(true); return; }
-    const member: StaffMember = {
-      id: makeId(),
-      name: form.name.trim(),
-      initials: makeInitials(form.name),
-      role: form.role,
-      dept: ROLE_DEPT[form.role] ?? 'Floor',
-      level: 1,
-      xp: 0,
-      streak: 0,
-      score: 0,
-      lessons: 0,
-      total: 28,
-      lastActive: 'Just added',
-      status: 'new',
-      joined: 'Today',
-      color: form.color,
-      badges: 0,
-      skills: { greetings: 0, serviceFlow: 0, language: 0, complaints: 0, floor: 0, guestPsychology: 0 },
-    };
-    setStaffList((prev) => [...prev, member]);
-    closeModal();
+    if (!form.email.trim() || !form.password.trim()) {
+      setSubmitError('Email and password are required');
+      return;
+    }
+    if (form.password.length < 8) {
+      setSubmitError('Password must be at least 8 characters');
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const res = await fetch('/api/staff/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          full_name: form.name.trim(),
+          email: form.email.trim(),
+          password: form.password,
+          role: 'staff',
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setSubmitError(data.error || 'Failed to create staff member');
+        setSubmitting(false);
+        return;
+      }
+
+      const member: StaffMember = {
+        id: makeId(),
+        name: form.name.trim(),
+        initials: makeInitials(form.name),
+        role: form.role,
+        dept: ROLE_DEPT[form.role] ?? 'Floor',
+        level: 1,
+        xp: 0,
+        streak: 0,
+        score: 0,
+        lessons: 0,
+        total: 28,
+        lastActive: 'Just added',
+        status: 'new',
+        joined: 'Today',
+        color: form.color,
+        badges: 0,
+        skills: { greetings: 0, serviceFlow: 0, language: 0, complaints: 0, floor: 0, guestPsychology: 0 },
+      };
+      setStaffList((prev) => [...prev, member]);
+      setSubmitting(false);
+      closeModal();
+    } catch (err) {
+      setSubmitError('Network error — please try again');
+      setSubmitting(false);
+    }
   };
 
   const handleEdit = () => {
@@ -510,6 +550,55 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
                   {nameError && <div style={{ fontSize: 12, color: 'var(--coral-deep)', marginTop: 4 }}>Name is required</div>}
                 </div>
 
+        {modalMode === 'add' && (
+          <>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 6, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                Email <span style={{ color: 'var(--coral)' }}>*</span>
+              </label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => { setForm((f) => ({ ...f, email: e.target.value })); setSubmitError(null); }}
+                placeholder="staff@example.com"
+                style={{
+                  width: '100%', padding: '10px 14px',
+                  border: '1.5px solid var(--sand-deeper)',
+                  borderRadius: 10, fontSize: 14, background: 'white',
+                  outline: 'none', fontFamily: 'inherit', color: 'var(--ink)',
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 6, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                Temporary password <span style={{ color: 'var(--coral)' }}>*</span>
+              </label>
+              <input
+                type="text"
+                value={form.password}
+                onChange={(e) => { setForm((f) => ({ ...f, password: e.target.value })); setSubmitError(null); }}
+                placeholder="Min. 8 characters"
+                style={{
+                  width: '100%', padding: '10px 14px',
+                  border: '1.5px solid var(--sand-deeper)',
+                  borderRadius: 10, fontSize: 14, background: 'white',
+                  outline: 'none', fontFamily: 'inherit', color: 'var(--ink)',
+                }}
+              />
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 4 }}>
+                Staff will use this to log in. Share it with them directly.
+              </div>
+            </div>
+
+            {submitError && (
+              <div style={{ fontSize: 13, color: 'var(--coral-deep)', background: 'var(--sand-deeper)', padding: '8px 12px', borderRadius: 8, marginBottom: 18 }}>
+                {submitError}
+              </div>
+            )}
+          </>
+        )}
+
                 {/* Role */}
                 <div style={{ marginBottom: 18 }}>
                   <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 6, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -576,8 +665,9 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
                     className="btn-brand"
                     style={{ flex: 1, justifyContent: 'center' }}
                     onClick={modalMode === 'add' ? handleAdd : handleEdit}
+            disabled={submitting}
                   >
-                    {modalMode === 'add' ? 'Add to team' : 'Save changes'}
+                    {submitting ? 'Creating…' : (modalMode === 'add' ? 'Add to team' : 'Save changes')}
                   </button>
                   <button
                     onClick={closeModal}

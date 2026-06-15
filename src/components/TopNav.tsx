@@ -9,12 +9,18 @@ import type { StaffMember } from '@/lib/staff-data';
 interface TopNavProps {
   viewingAs?: StaffMember | null;
   onClearViewAs?: () => void;
+  user?: { name: string; initials: string; role: string } | null;
+  property?: { name: string; primaryColor: string } | null;
 }
 
-export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
+export default function TopNav({ viewingAs, onClearViewAs, user, property }: TopNavProps) {
   const pathname = usePathname();
   const isManager = pathname.startsWith('/manager');
   const isStaff = pathname.startsWith('/staff');
+
+  const propertyName = property?.name ?? PROPERTY.name;
+  const initials = user?.initials ?? 'OE';
+  const userName = user?.name ?? 'Manager';
 
   return (
     <>
@@ -31,7 +37,7 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
             <span className="brand-tag">BY GLAD AI</span>
           </Link>
 
-          {/* Center: property pill — absolutely centered in nav bar */}
+          {/* Center: property pill */}
           <div
             className="property-pill"
             style={{
@@ -45,7 +51,7 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
               pointerEvents: 'none',
             }}
           >
-            {PROPERTY.name}
+            {propertyName}
           </div>
 
           {/* Right: role switcher + avatar */}
@@ -59,7 +65,7 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
                   onClick={onClearViewAs}
                   aria-label="Exit staff view"
                 >
-                  ×
+                  x
                 </button>
               </div>
             )}
@@ -83,8 +89,8 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
               </Link>
             </div>
 
-            <div className="nav-avatar" title="Omar Elias — Manager">
-              OE
+            <div className="nav-avatar" title={userName}>
+              {initials}
             </div>
           </div>
 
@@ -93,17 +99,11 @@ export default function TopNav({ viewingAs, onClearViewAs }: TopNavProps) {
 
       {/* Bottom tab bar — mobile only */}
       <nav className="bottom-tab-bar">
-        <Link
-          href="/staff"
-          className={`bottom-tab${isStaff ? ' is-active' : ''}`}
-        >
+        <Link href="/staff" className={`bottom-tab${isStaff ? ' is-active' : ''}`}>
           <GraduationCap size={22} />
           Staff
         </Link>
-        <Link
-          href="/manager"
-          className={`bottom-tab${isManager ? ' is-active' : ''}`}
-        >
+        <Link href="/manager" className={`bottom-tab${isManager ? ' is-active' : ''}`}>
           <BarChart3 size={22} />
           Manager
         </Link>
