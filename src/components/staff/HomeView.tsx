@@ -221,7 +221,7 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
         </div>
 
         {/* Gold standard quote */}
-        <div style={{ margin: '32px 0', padding: '20px 28px', background: 'var(--brand-deep)', borderRadius: 16 }}>
+        <div style={{ margin: '32px 0', padding: '20px 28px', background: 'var(--ocean-deep)', borderRadius: 16 }}>
           <div className="label-mono" style={{ color: 'var(--brand)', marginBottom: 8 }}>
             {PROPERTY.name} standard
           </div>
