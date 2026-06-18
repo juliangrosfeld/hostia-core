@@ -3,6 +3,9 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // GET: return the property_modules rows for the signed-in user's property.
 // The staff curriculum is rebuilt from these on the client via resolveCurriculum().
 // Read-only — never mutates property_modules.

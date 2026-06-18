@@ -3,6 +3,9 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // GET: fetch all modules + which ones are assigned to a property
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
