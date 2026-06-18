@@ -43,6 +43,11 @@ interface LessonViewProps {
 export default function LessonView({
   module, lesson, lessonIndex, phase, setPhase, onBack,
 }: LessonViewProps) {
+  // Apply ("Live roleplay") only exists for lessons backed by a scenario.
+  // Onboarding lessons have no scenarioId, so they show only Learn & Practice.
+  const hasApply = Boolean(lesson.scenarioId);
+  const effectivePhase: Phase = phase === 'apply' && !hasApply ? 'practice' : phase;
+
   return (
     <div className="page animate-fade-up">
       <div className="container">
@@ -72,18 +77,20 @@ export default function LessonView({
 
         {/* Phase nav */}
         <div className="phase-nav">
-          <PhaseTab id="learn" current={phase} setPhase={setPhase} icon={BookOpen} label="Learn" desc="Read & absorb" />
-          <PhaseTab id="practice" current={phase} setPhase={setPhase} icon={Target} label="Practice" desc="Drill & quiz" />
-          <PhaseTab id="apply" current={phase} setPhase={setPhase} icon={Play} label="Apply" desc="Live roleplay" />
+          <PhaseTab id="learn" current={effectivePhase} setPhase={setPhase} icon={BookOpen} label="Learn" desc="Read & absorb" />
+          <PhaseTab id="practice" current={effectivePhase} setPhase={setPhase} icon={Target} label="Practice" desc="Drill & quiz" />
+          {hasApply && (
+            <PhaseTab id="apply" current={effectivePhase} setPhase={setPhase} icon={Play} label="Apply" desc="Live roleplay" />
+          )}
         </div>
 
-        {phase === 'learn' && (
+        {effectivePhase === 'learn' && (
           <LearnPhase lesson={lesson} onAdvance={() => setPhase('practice')} />
         )}
-        {phase === 'practice' && (
-          <PracticePhase lesson={lesson} onAdvance={() => setPhase('apply')} />
+        {effectivePhase === 'practice' && (
+          <PracticePhase lesson={lesson} onAdvance={hasApply ? () => setPhase('apply') : onBack} />
         )}
-        {phase === 'apply' && (
+        {effectivePhase === 'apply' && hasApply && (
           <ApplyPhase lesson={lesson} onComplete={onBack} />
         )}
       </div>

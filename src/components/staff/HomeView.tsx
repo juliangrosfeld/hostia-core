@@ -2,7 +2,7 @@
 
 import { Play, Lock } from 'lucide-react';
 import {
-  Hand, BookOpen, MessageSquare, Shield, Users, Brain,
+  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House,
 } from 'lucide-react';
 import type { Module } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
@@ -133,6 +133,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Shield,
   Users,
   Brain,
+  House,
 };
 
 function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }) {

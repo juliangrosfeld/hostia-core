@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, Lightbulb } from 'lucide-react';
+import { ChevronRight, Lightbulb, FileText } from 'lucide-react';
 import type { Lesson, LearnSection, LangCard, PhraseRow } from '@/lib/curriculum';
+import { useUser } from '@/lib/useUser';
 
 // ─── Section renderers ────────────────────────────────────────
 
@@ -214,6 +215,55 @@ function SectionTipList({ title, items }: { title: string; items: string[] }) {
   );
 }
 
+function SectionMenuPdf({ title, caption }: { title: string; caption?: string }) {
+  const { property, loading } = useUser();
+  const url = property?.menu_pdf_url ?? null;
+
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <h3 className="display" style={{ fontSize: 22, color: 'var(--brand-deep)', marginBottom: caption ? 8 : 16 }}>
+        {title}
+      </h3>
+      {caption && (
+        <p style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.55, marginTop: 0, marginBottom: 16 }}>
+          {caption}
+        </p>
+      )}
+
+      {loading ? (
+        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14 }}>
+          Loading the menu…
+        </div>
+      ) : url ? (
+        <>
+          <iframe
+            src={url}
+            title="Restaurant menu"
+            style={{ width: '100%', height: '80vh', minHeight: 600, border: '1px solid var(--sand-deeper)', borderRadius: 12, display: 'block', background: 'white' }}
+          />
+          <div style={{ marginTop: 12 }}>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, fontWeight: 600, color: 'var(--brand-deep)', textDecoration: 'none' }}
+            >
+              <FileText size={14} /> Open the menu in a new tab
+            </a>
+          </div>
+        </>
+      ) : (
+        <div className="card" style={{ padding: 40, textAlign: 'center' }}>
+          <FileText size={28} style={{ color: 'var(--ink-soft)', marginBottom: 12 }} />
+          <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>
+            The menu hasn’t been uploaded for your property yet. Check back soon, or ask your manager.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function renderSection(section: LearnSection, idx: number) {
   switch (section.type) {
     case 'intro': return <SectionIntro key={idx} text={section.text} />;
@@ -225,6 +275,7 @@ function renderSection(section: LearnSection, idx: number) {
     case 'do-dont': return <SectionDoDont key={idx} title={section.title} items={section.items} />;
     case 'culture-cards': return <SectionCultureCards key={idx} items={section.items} />;
     case 'tip-list': return <SectionTipList key={idx} title={section.title} items={section.items} />;
+    case 'menu-pdf': return <SectionMenuPdf key={idx} title={section.title} caption={section.caption} />;
     case 'video-group': return <SectionVideoGroup key={idx} videos={section.videos} />;
     default: return null;
   }

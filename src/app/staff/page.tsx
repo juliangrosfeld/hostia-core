@@ -6,9 +6,10 @@ import TopNav from '@/components/TopNav'
 import HomeView from '@/components/staff/HomeView'
 import ModuleView from '@/components/staff/ModuleView'
 import LessonView from '@/components/staff/LessonView'
-import { CURRICULUM, type Module, type Lesson } from '@/lib/curriculum'
+import { type Module, type Lesson } from '@/lib/curriculum'
 import { STAFF } from '@/lib/staff-data'
 import { useUser } from '@/lib/useUser'
+import { useCurriculum } from '@/lib/useCurriculum'
 import { createClient } from '@/lib/supabase/client'
 
 type StaffView = 'home' | 'module' | 'lesson'
@@ -18,6 +19,7 @@ function StaffPageInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, property, loading } = useUser()
+  const { curriculum, loading: curriculumLoading } = useCurriculum()
   const asId = searchParams.get('as')
   const viewingAs = asId ? (STAFF.find((s) => s.id === asId) ?? null) : null
   const [view, setView] = useState<StaffView>('home')
@@ -40,7 +42,7 @@ function StaffPageInner() {
   const backToModule = () => { setView('module'); setActiveLesson(null) }
   const clearViewAs = () => { router.push('/manager') }
 
-  if (loading) {
+  if (loading || curriculumLoading) {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sand)' }}><div style={{ fontFamily: 'Fraunces, serif', fontSize: 22, color: 'var(--brand-deep)' }}>Loading…</div></div>
   }
 
@@ -50,7 +52,7 @@ function StaffPageInner() {
   return (
     <>
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
-      {view === 'home' && <HomeView curriculum={CURRICULUM} onOpenModule={openModule} viewingAs={viewingAs} />}
+      {view === 'home' && <HomeView curriculum={curriculum} onOpenModule={openModule} viewingAs={viewingAs} />}
       {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} />}
       {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} />}
     </>

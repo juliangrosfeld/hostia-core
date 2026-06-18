@@ -21,6 +21,7 @@ export interface PropertyProfile {
   slug: string
   logo_url: string | null
   primary_color: string
+  menu_pdf_url: string | null
 }
 
 export function useUser() {

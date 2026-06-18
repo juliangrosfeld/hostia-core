@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, GraduationCap, Eye } from 'lucide-react';
+import { BarChart3, GraduationCap, Eye, BookOpen } from 'lucide-react';
 import { PROPERTY } from '@/lib/config';
 import type { StaffMember } from '@/lib/staff-data';
 
@@ -17,6 +17,8 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
   const pathname = usePathname();
   const isManager = pathname.startsWith('/manager');
   const isStaff = pathname.startsWith('/staff');
+  const isLibrary = pathname.startsWith('/admin/library');
+  const isAdmin = user?.role === 'admin';
 
   const propertyName = property?.name ?? PROPERTY.name;
   const initials = user?.initials ?? 'OE';
@@ -87,6 +89,16 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
                 <GraduationCap size={13} />
                 Staff
               </Link>
+              {isAdmin && (
+                <Link
+                  href="/admin/library"
+                  className={isLibrary ? 'is-active' : ''}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <BookOpen size={13} />
+                  Library
+                </Link>
+              )}
             </div>
 
             <div className="nav-avatar" title={userName}>

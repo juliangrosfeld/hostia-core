@@ -18,6 +18,7 @@ export type LearnSection =
   | { type: 'do-dont'; title: string; items: { do: string; dont: string }[] }
   | { type: 'culture-cards'; items: { group: string; cues: string }[] }
   | { type: 'tip-list'; title: string; items: string[] }
+  | { type: 'menu-pdf'; title: string; caption?: string }
   | { type: 'video-group'; videos: { title: string; url: string; description: string }[] };
 
 export interface LangCard {
@@ -60,6 +61,179 @@ export interface Module {
   xpTotal: number;
   lessons: Lesson[];
 }
+
+// ─── MODULE 0: ONBOARDING — WELCOME TO [PROPERTY] ────────────
+
+const onboardingLessons: Lesson[] = [
+  {
+    id: 'our-story',
+    title: 'Our Story & DNA',
+    desc: 'Where [Property] came from and what we stand for',
+    duration: '5 min',
+    xp: 20,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Before you carry a single plate, you need to know the story you\'re a part of. [Property] didn\'t start as a business plan — it started as an idea about how people should be treated when they sit down to eat. Knowing where we came from isn\'t trivia. When a guest asks "how long have you been here?" or "what\'s the story behind this place?", your answer is part of the experience. You are not just staff — you are the storyteller of [Property].' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Hospitality over transactions', body: 'We are not here to turn tables — we are here to make people feel cared for. Every decision at [Property] starts with the guest\'s experience, not the bottom line. Revenue follows hospitality, never the other way around.' },
+        { num: 2, title: 'Craft and pride', body: 'Everything we serve and every table we set reflects real care. We do the small things right — a polished glass, a folded napkin, a remembered name — because the details are what guests actually feel.' },
+        { num: 3, title: 'We are a team, not a hierarchy', body: 'From the kitchen to the floor to the host stand, everyone owns the guest experience. No one says "that\'s not my job." If something needs doing, we do it together.' },
+      ]},
+      { type: 'callout', tone: 'rule', label: 'What makes us different', text: 'Anyone can serve food. [Property] exists to make every guest feel like they were expected, welcomed, and remembered. If a guest leaves having eaten well but feeling like a number — we failed, no matter how good the food was.' },
+    ],
+    quiz: [
+      { q: 'A guest asks you, "So what\'s the story behind this place?" Why does your answer matter?', options: ['It doesn\'t — just point them to the website.', 'You are the storyteller of [Property]; your answer is part of the guest experience.', 'Only managers should answer history questions.', 'It\'s just small talk and has no real impact.'], correct: 1, explain: 'Every staff member carries the story. How you answer shapes how connected the guest feels to the place.' },
+      { q: 'At [Property], when a decision is made, what comes first?', options: ['The bottom line and turning tables quickly.', 'The guest\'s experience — revenue follows hospitality.', 'Whatever is easiest for staff.', 'The fastest option, always.'], correct: 1, explain: 'We lead with hospitality. Profit is the result of caring for guests well — never the starting point.' },
+      { q: 'A table needs clearing but it\'s technically in another server\'s section. What does our DNA say?', options: ['Leave it — it\'s not your job.', 'Wait for the assigned server to handle it.', 'Handle it — at [Property] everyone owns the guest experience.', 'Report it to a manager and move on.'], correct: 2, explain: 'We are a team, not a hierarchy. "That\'s not my job" has no place here — if something needs doing, we do it.' },
+      { q: 'Why do we obsess over small details like a polished glass or a remembered name?', options: ['Because health inspectors check for them.', 'Because the details are what guests actually feel — they signal real care.', 'Because they\'re required by law.', 'They don\'t really matter; the food is all that counts.'], correct: 1, explain: 'Craft and pride live in the small things. Details are how a guest feels cared for, even if they can\'t name why.' },
+      { q: 'A guest eats a flawless meal but leaves feeling like just another number. By [Property]\'s standard, how did the night go?', options: ['It was a success — the food was perfect.', 'It was a failure — we exist to make guests feel welcomed and remembered.', 'It was fine — you can\'t please everyone.', 'It was a success as long as they paid.'], correct: 1, explain: 'Great food isn\'t enough. If a guest doesn\'t feel expected, welcomed, and remembered, we missed our actual purpose.' },
+    ],
+  },
+  {
+    id: 'our-menu',
+    title: 'The Menu & Signature Dishes',
+    desc: 'Know what we serve — and how to talk about it',
+    duration: '8 min',
+    xp: 25,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'The menu is your script and your sales tool. Guests will ask you what\'s good, what you recommend, what\'s in a dish, and whether something fits their diet. "I\'m not sure" is the answer that loses trust fastest. You don\'t need to be a chef — but you do need to know every dish well enough to describe it, recommend it, and flag allergens with confidence. A staff member who knows the menu sells more, earns more trust, and makes guests feel like they\'re in good hands.' },
+      { type: 'steps', title: 'How to describe a dish confidently', items: [
+        { num: 1, title: 'Lead with the hero ingredient', body: 'Start with what makes the dish special — the star of the plate. "The short rib is braised for eight hours until it falls apart." Not "it\'s a beef dish."' },
+        { num: 2, title: 'Add a sensory word', body: 'Give them something to taste in their imagination: rich, crispy, bright, smoky, silky. Sensory language turns a list of ingredients into a craving.' },
+        { num: 3, title: 'Mention preparation or origin if it\'s a selling point', body: '"House-made daily," "freshly ground," "locally caught" — these signal quality and justify the price.' },
+        { num: 4, title: 'End with a personal or popular endorsement', body: '"It\'s honestly my favorite," or "It\'s our most-ordered dish for a reason." A genuine recommendation closes the decision.' },
+      ]},
+      { type: 'tip-list', title: 'Top items every staff member MUST know cold', items: [
+        'The signature dish — the one thing [Property] is known for, and why it\'s special.',
+        'The top 2–3 best-sellers and what makes each one a go-to.',
+        'At least one strong vegetarian and one vegan option.',
+        'Which dishes contain the most common allergens (nuts, shellfish, gluten, dairy).',
+        'What\'s currently unavailable or 86\'d — never promise something the kitchen can\'t deliver.',
+        'One confident pairing: a drink or side that goes with the signature dish.',
+      ]},
+    ],
+    quiz: [
+      { q: 'A guest asks "What\'s good here?" What\'s the strongest response?', options: ['"Everything\'s good, honestly."', '"I\'m not sure, let me ask someone."', '"Our short rib is the move — braised eight hours until it falls apart. It\'s our most-ordered dish."', '"Whatever you\'re in the mood for."'], correct: 2, explain: 'A specific, confident recommendation with a sensory detail and an endorsement makes the guest feel guided and builds trust.' },
+      { q: 'When describing a dish, where should you start?', options: ['With the price so they know what to expect.', 'With the hero ingredient — the star of the plate.', 'With the allergens.', 'With how long it takes to prepare.'], correct: 1, explain: 'Lead with the hero ingredient. It frames the dish around what makes it special, not a generic category.' },
+      { q: 'A guest mentions a severe nut allergy and asks if a dish is safe. You\'re not 100% sure. What do you do?', options: ['Guess based on what you can see in the dish.', 'Say it\'s probably fine to avoid slowing them down.', 'Tell them you\'ll confirm with the kitchen before they order — never guess on allergens.', 'Recommend a different dish without explaining why.'], correct: 2, explain: 'Allergens are never a guessing game. Knowing the menu means knowing when to confirm with the kitchen — a wrong guess can be dangerous.' },
+      { q: 'Why does adding a sensory word ("crispy," "silky," "smoky") matter when describing a dish?', options: ['It makes you sound more formal.', 'It turns a list of ingredients into something the guest can crave.', 'It\'s required by the menu.', 'It helps you remember the ingredients.'], correct: 1, explain: 'Sensory language lets the guest taste the dish in their imagination — that\'s what turns a description into a decision to order.' },
+      { q: 'The kitchen has just 86\'d (run out of) the salmon. A guest asks about it. What\'s the right move?', options: ['Take the order anyway and let the kitchen sort it out.', 'Let them know it\'s unavailable tonight and confidently suggest a similar dish.', 'Tell them it\'s available and hope more comes in.', 'Avoid mentioning it and steer them elsewhere without explanation.'], correct: 1, explain: 'Never promise what the kitchen can\'t deliver. Knowing what\'s 86\'d and pivoting smoothly to a great alternative protects the guest\'s trust.' },
+    ],
+  },
+  {
+    id: 'our-standards',
+    title: 'House Standards & Expectations',
+    desc: 'What [Property] expects from every team member',
+    duration: '6 min',
+    xp: 20,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Standards are not about being strict — they\'re about being consistent. A guest should get the same excellent experience whether it\'s your first shift or your five-hundredth, whether the room is empty or slammed. [Property] holds every team member to the same expectations around appearance, punctuality, attitude, and care. When you walk through that door, you stop being an individual having a good or bad day — you become [Property]. These standards are how we protect that.' },
+      { type: 'do-dont', title: 'The standards in practice', items: [
+        { do: 'Arrive 10–15 minutes early, in clean uniform, groomed and ready to start on time.', dont: 'Stroll in at the start of your shift, still getting dressed or eating.' },
+        { do: 'Keep a positive, composed attitude on the floor — guests never see the stress behind service.', dont: 'Let a bad mood, a kitchen delay, or a rude guest show on your face in the dining room.' },
+        { do: 'Put phones away during service — your attention belongs to the floor.', dont: 'Check your phone, lean on furniture, or cluster with coworkers where guests can see.' },
+        { do: 'Speak about colleagues, guests, and the restaurant respectfully, on and off shift.', dont: 'Gossip, complain about guests within earshot, or badmouth the restaurant online.' },
+      ]},
+      { type: 'callout', tone: 'rule', label: 'You represent the brand', text: 'The moment you put on the uniform, you are [Property] — not just to guests, but online and in the community too. Every interaction, every post, every overheard comment reflects on all of us. Protect the name like it\'s your own, because while you wear it, it is.' },
+    ],
+    quiz: [
+      { q: 'Why does [Property] hold every team member to the same standards?', options: ['To make the rules feel strict.', 'So guests get the same excellent experience every time, regardless of who\'s working or how busy it is.', 'Because corporate requires it.', 'To make new staff feel pressured.'], correct: 1, explain: 'Standards exist for consistency — a guest should never be able to tell if it\'s your first shift or your five-hundredth.' },
+      { q: 'The kitchen is 20 minutes behind and you\'re stressed. A guest at your table looks up. What should they see?', options: ['Your honest frustration — guests appreciate authenticity.', 'A composed, positive attitude — the stress behind service stays invisible.', 'You venting about the kitchen so they understand the delay.', 'You avoiding eye contact until things calm down.'], correct: 1, explain: 'Guests never see the stress behind service. Composure on the floor is part of the standard, especially when things go wrong.' },
+      { q: 'When does representing [Property] begin and end?', options: ['Only while you\'re clocked in and on the floor.', 'Only when a manager is watching.', 'The moment you put on the uniform — and it extends to how you act online and in the community.', 'Only during interactions with guests.'], correct: 2, explain: 'You represent the brand on and off shift, including online. While you wear the name, it\'s yours to protect.' },
+      { q: 'What\'s the expectation around arriving for a shift?', options: ['Arrive exactly at start time and clock in.', 'Arrive 10–15 minutes early, in clean uniform, ready to start on time.', 'Arrive whenever, as long as you stay late.', 'Arrive a few minutes late if it\'s not busy.'], correct: 1, explain: 'Early, groomed, and ready means you start on time — not start getting ready when your shift begins.' },
+      { q: 'A guest was rude to you and just left. A coworker asks what happened, while you\'re still on the floor. What\'s the right move?', options: ['Vent loudly so other staff know what you dealt with.', 'Describe the guest in detail to anyone who\'ll listen.', 'Keep it brief and respectful where guests can hear — debrief properly off the floor later.', 'Post about it online once your shift ends.'], correct: 2, explain: 'Speaking respectfully about guests, on and off the floor, is a house standard. The floor is never the place to vent, and the brand follows you online too.' },
+    ],
+  },
+  {
+    id: 'our-guests',
+    title: 'Who Are Our Guests',
+    desc: 'Understand who walks through our door and what they need',
+    duration: '5 min',
+    xp: 15,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'You can\'t deliver a great experience if you don\'t understand who you\'re serving. [Property] welcomes a real mix of people — locals who treat us like a second home, travelers discovering us for the first time, and guests marking the biggest moments of their lives. Each one wants something a little different. The best staff don\'t serve everyone the same way — they read who\'s in front of them and adjust. Knowing our guest profiles helps you anticipate needs before they\'re spoken.' },
+      { type: 'culture-cards', items: [
+        { group: '🏠 Regulars & Locals', cues: 'They come back because we make them feel at home. Learn their names, remember their usual, greet them like you\'re glad they\'re back. They forgive a busy night — but never being treated like a stranger. Familiarity is the whole point for them.' },
+        { group: '🌍 Travelers & First-Timers', cues: 'They don\'t know the menu, the area, or what makes us special — so they rely on you completely. Offer recommendations, share what we\'re known for, and make them feel like insiders. A great experience here becomes the highlight of their trip and a five-star review.' },
+        { group: '🎉 Celebration Guests', cues: 'Birthdays, anniversaries, engagements, big news. The stakes are high and the memory is what matters. Acknowledge the occasion genuinely, add a small surprise if you can, and protect the moment. Get this right and they\'ll choose us for every milestone.' },
+      ]},
+      { type: 'tip-list', title: 'Adapting to different guest needs', items: [
+        'Read before you speak — energy, body language, and pace tell you who you\'re serving.',
+        'For regulars: use their name and reference what they usually love.',
+        'For first-timers: offer to guide them — "Want me to walk you through our favorites?"',
+        'For celebration guests: acknowledge the occasion early and quietly flag the team.',
+        'Never apply the same script to every table — match your approach to the guest in front of you.',
+        'When unsure what someone needs, ask warmly and listen — guests will tell you how they want to be treated.',
+      ]},
+    ],
+    quiz: [
+      { q: 'Why does knowing our guest profiles matter?', options: ['So you can serve everyone in exactly the same way.', 'So you can read who\'s in front of you and anticipate their needs before they\'re spoken.', 'So you can decide who deserves better service.', 'It doesn\'t really matter — good food serves everyone equally.'], correct: 1, explain: 'The best staff adjust to the guest in front of them. Knowing profiles helps you anticipate needs instead of reacting to them.' },
+      { q: 'A regular walks in for the third time this week. What do they value most?', options: ['The fastest possible service.', 'Being treated like family — name remembered, usual known, welcomed back warmly.', 'A formal, by-the-book greeting.', 'Being left completely alone.'], correct: 1, explain: 'Familiarity is the whole point for regulars. They forgive a busy night, but never being treated like a stranger.' },
+      { q: 'A first-time guest is staring at the menu, clearly unsure. Best move?', options: ['Give them more time alone to figure it out.', 'Tell them to order whatever looks good.', 'Offer to guide them — "Want me to walk you through our favorites?"', 'Bring the bill early to keep things moving.'], correct: 2, explain: 'First-timers rely on you completely. Guiding them makes them feel like insiders — and often turns into a five-star review.' },
+      { q: 'You learn a table is celebrating an engagement. What should you do?', options: ['Treat it like any other table to avoid pressure.', 'Acknowledge the occasion genuinely and quietly flag the team to protect the moment.', 'Announce it loudly to the whole dining room immediately.', 'Wait for them to mention it again before acting.'], correct: 1, explain: 'Celebration guests remember how the moment felt. Acknowledging it early and coordinating with the team is how we earn their future milestones.' },
+      { q: 'You can\'t tell what a new table needs — they\'re hard to read. What\'s the best approach?', options: ['Default to your fastest, most efficient script.', 'Treat them exactly like the last table you served.', 'Ask warmly and listen — guests will tell you how they want to be treated.', 'Give them space and avoid checking in.'], correct: 2, explain: 'Never apply one script to every table. When unsure, a warm question and genuine listening lets the guest show you what they need.' },
+    ],
+  },
+  {
+    id: 'your-first-shift',
+    title: 'Your First Shift',
+    desc: 'What to expect and how to start strong on day one',
+    duration: '5 min',
+    xp: 20,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Your first shift is not a test you can fail — it\'s the day you start learning the floor for real. Nobody expects you to be perfect. They expect you to show up ready, stay observant, and ask good questions. The staff who thrive on day one aren\'t the ones who pretend to know everything — they\'re the ones who watch closely, follow the routine, and aren\'t afraid to say "show me." Here\'s how to make a strong first impression on the team and the guests.' },
+      { type: 'steps', title: 'Your first shift routine', items: [
+        { num: 1, title: 'Arrive early and check in', body: 'Get there 15 minutes before your start time. Find your manager or trainer, introduce yourself, and ask where you should be and what you should do first.', badge: 'Before service' },
+        { num: 2, title: 'Shadow and observe', body: 'Stay close to your trainer. Watch how they greet, move, carry, and talk to guests. Notice the rhythm of the floor before you try to match it.', badge: 'Watch' },
+        { num: 3, title: 'Take on small tasks', body: 'Start with the basics — refilling water, clearing plates, resetting tables. Do the small things excellently. Trust is built one clean table at a time.', badge: 'Do' },
+        { num: 4, title: 'Debrief and reflect', body: 'After service, ask your trainer what you did well and what to work on. Write down anything you want to remember for next time.', badge: 'After service' },
+      ]},
+      { type: 'callout', tone: 'tip', label: 'Asking questions is a strength', text: 'Never guess when you can ask. A new team member who asks "which side do I serve from?" looks far more professional than one who guesses wrong in front of a guest. Questions show you care about getting it right — that\'s exactly what we want to see on day one.' },
+      { type: 'do-dont', title: 'Common first-shift mistakes', items: [
+        { do: 'Stay close to your trainer and ask before you act when unsure.', dont: 'Wander off alone and try to run a table you haven\'t been shown how to handle.' },
+        { do: 'Focus on doing small tasks well and observing the flow.', dont: 'Try to prove yourself by taking on more than you\'re ready for.' },
+        { do: 'Keep your energy up and stay engaged even during slow moments.', dont: 'Stand around on your phone or disappear when the floor is quiet.' },
+      ]},
+    ],
+    quiz: [
+      { q: 'What\'s the right mindset to bring to your first shift?', options: ['Prove you already know everything so the team trusts you.', 'Show up ready, stay observant, and ask good questions — nobody expects perfection.', 'Stay quiet and avoid asking anything so you don\'t look new.', 'Take on as many tables as possible to impress your manager.'], correct: 1, explain: 'Day one is for learning the floor, not passing a test. The staff who thrive observe closely and ask rather than pretending to know.' },
+      { q: 'You\'re unsure which side to serve a plate from, mid-service. What\'s the most professional move?', options: ['Guess and hope it\'s right.', 'Skip serving that guest entirely.', 'Quickly ask your trainer — asking looks more professional than guessing wrong in front of a guest.', 'Serve from whichever side is closest.'], correct: 2, explain: 'Asking when you can ask shows you care about getting it right. A wrong guess in front of a guest costs far more than a quick question.' },
+      { q: 'It\'s your first shift and the floor goes quiet for a stretch. What should you do?', options: ['Check your phone since there\'s nothing happening.', 'Disappear to the back until it picks up.', 'Stay engaged — reset tables, restock, observe, or ask your trainer what to learn next.', 'Stand in one spot and wait to be told what to do.'], correct: 2, explain: 'Slow moments are for learning and prepping. Staying engaged on day one signals exactly the attitude we want to see.' },
+      { q: 'When should you arrive for your first shift?', options: ['Right at your start time.', 'About 15 minutes early, so you can check in and find out where to start.', 'A few minutes late is fine on day one.', 'Whenever, since you\'re only shadowing.'], correct: 1, explain: 'Arriving early lets you introduce yourself, get oriented, and start on time — it sets the tone for how reliable you\'ll be.' },
+      { q: 'After your first shift ends, what\'s the smartest thing to do?', options: ['Leave quickly — the work is done.', 'Ask your trainer what you did well and what to work on, and note it for next time.', 'Wait for your next shift to think about how it went.', 'Only ask for feedback if something went wrong.'], correct: 1, explain: 'A short debrief turns one shift into real progress. Reflecting and writing down what to improve is how strong staff grow fast.' },
+    ],
+  },
+  {
+    id: 'our-menu-pdf',
+    title: 'Our Menu',
+    desc: 'Study the full menu — every dish, ingredient, and price',
+    duration: '10 min',
+    xp: 25,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Study the menu carefully. Knowing every dish — ingredients, preparation, and price — is what separates a good server from a great one.' },
+      { type: 'tip-list', title: 'What to pay attention to as you read', items: [
+        'Ingredients in every dish — so you can answer "what\'s in this?" instantly and flag allergens before you\'re asked.',
+        'How each dish is prepared — grilled, braised, fried, raw — and what makes the signature items special.',
+        'Prices and what each dish includes — sides, portion size, and anything that costs extra.',
+        'Dietary options — which dishes are vegetarian, vegan, or can be made gluten-free.',
+        'Natural pairings — which drinks, sides, or starters you\'d confidently recommend alongside each main.',
+      ]},
+      { type: 'menu-pdf', title: 'The full menu', caption: 'Take your time — this is the exact menu your guests will be reading. Come back to it whenever you need a refresher.' },
+    ],
+    quiz: [
+      { q: 'A guest asks "what\'s in this dish?" and you\'ve studied the menu. What does that let you do?', options: ['Guess based on the name of the dish.', 'Answer instantly and flag any allergens before they have to ask.', 'Send the question to the kitchen every time.', 'Change the subject to a dish you do know.'], correct: 1, explain: 'Knowing ingredients cold means you answer with confidence and catch allergen risks early — that\'s the mark of a great server.' },
+      { q: 'Why is it worth knowing the price and what each dish includes?', options: ['So you can upsell guests on everything.', 'So you can set expectations clearly — what comes with the dish and what costs extra.', 'Prices don\'t matter to servers.', 'So you can decide which guests can afford what.'], correct: 1, explain: 'Knowing exactly what a dish includes lets you set honest expectations and avoid surprises on the bill.' },
+      { q: 'A guest says they\'re vegan. Because you studied the menu, you can:', options: ['Tell them there\'s probably nothing for them.', 'Point them confidently to vegan dishes and ones that can be adapted.', 'Guess which dishes might work.', 'Ask them to check with the kitchen themselves.'], correct: 1, explain: 'Knowing the dietary options in advance means a vegan guest feels taken care of instead of like an afterthought.' },
+      { q: 'What separates a good server from a great one, according to this lesson?', options: ['Speed of service alone.', 'Knowing every dish — its ingredients, preparation, and price.', 'Memorizing only the most expensive items.', 'Being friendly without knowing the menu.'], correct: 1, explain: 'Deep menu knowledge — ingredients, preparation, and price — is exactly what elevates good service into great service.' },
+      { q: 'Why does it help to know natural pairings as you study the menu?', options: ['So you can force add-ons onto every table.', 'So you can confidently recommend a drink, side, or starter that complements a guest\'s choice.', 'Pairings are only the bartender\'s job.', 'It doesn\'t help — guests decide on their own.'], correct: 1, explain: 'A genuine, well-matched recommendation enhances the guest\'s meal and shows you truly know what you\'re serving.' },
+    ],
+  },
+];
 
 // ─── MODULE 1: GREETINGS & FIRST IMPRESSIONS ────────────────
 
@@ -1034,6 +1208,20 @@ const guestPsychologyLessons: Lesson[] = [
 // ─── MODULE REGISTRY ─────────────────────────────────────────
 
 export const CURRICULUM: Module[] = [
+  // Module 0
+  {
+    id: 'onboarding',
+    title: 'Welcome to [Property]',
+    subtitle: 'Know your home before your first shift',
+    iconName: 'House',
+    color: '#051956',
+    progress: 0,
+    totalLessons: 6,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 125,
+    lessons: onboardingLessons,
+  },
   // Module 1
   {
     id: 'greetings',
@@ -1119,3 +1307,36 @@ export const CURRICULUM: Module[] = [
     lessons: guestPsychologyLessons,
   },
 ];
+
+// ─── PROPERTY CURRICULUM RESOLUTION ──────────────────────────
+// The `property_modules` DB table is the source of truth for WHICH modules a
+// property shows, in WHAT ORDER, and whether they're active. The CURRICULUM
+// array above remains the source of the actual CONTENT (lessons, quizzes,
+// learn sections). `resolveCurriculum` merges the two: it takes the property's
+// module rows and rebuilds the curriculum from CURRICULUM content accordingly.
+
+export interface PropertyModuleRow {
+  module_id: string;
+  order_index: number;
+  is_active: boolean;
+}
+
+const CURRICULUM_BY_ID: Record<string, Module> = Object.fromEntries(
+  CURRICULUM.map((m) => [m.id, m]),
+);
+
+export function resolveCurriculum(
+  propertyModules: PropertyModuleRow[] | null | undefined,
+): Module[] {
+  // No rows for this property → fall back to the full hardcoded curriculum so
+  // nothing breaks for properties that haven't been configured in the Library.
+  if (!propertyModules || propertyModules.length === 0) return CURRICULUM;
+
+  return propertyModules
+    .filter((pm) => pm.is_active) // inactive modules never reach staff
+    .slice()
+    .sort((a, b) => a.order_index - b.order_index)
+    .map((pm) => CURRICULUM_BY_ID[pm.module_id])
+    // Drop any module_id that has no matching content (e.g. removed from code).
+    .filter((m): m is Module => Boolean(m));
+}
