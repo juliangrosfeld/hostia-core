@@ -69,7 +69,7 @@ const onboardingLessons: Lesson[] = [
     id: 'our-story',
     title: 'Our Story & DNA',
     desc: 'Where [Property] came from and what we stand for',
-    duration: '5 min',
+    duration: '7 min',
     xp: 20,
     status: 'available',
     learn: [
@@ -125,7 +125,7 @@ const onboardingLessons: Lesson[] = [
     id: 'our-standards',
     title: 'House Standards & Expectations',
     desc: 'What [Property] expects from every team member',
-    duration: '6 min',
+    duration: '7 min',
     xp: 20,
     status: 'available',
     learn: [
@@ -150,8 +150,8 @@ const onboardingLessons: Lesson[] = [
     id: 'our-guests',
     title: 'Who Are Our Guests',
     desc: 'Understand who walks through our door and what they need',
-    duration: '5 min',
-    xp: 15,
+    duration: '7 min',
+    xp: 20,
     status: 'available',
     learn: [
       { type: 'intro', text: 'You can\'t deliver a great experience if you don\'t understand who you\'re serving. [Property] welcomes a real mix of people — locals who treat us like a second home, travelers discovering us for the first time, and guests marking the biggest moments of their lives. Each one wants something a little different. The best staff don\'t serve everyone the same way — they read who\'s in front of them and adjust. Knowing our guest profiles helps you anticipate needs before they\'re spoken.' },
@@ -181,8 +181,8 @@ const onboardingLessons: Lesson[] = [
     id: 'your-first-shift',
     title: 'Your First Shift',
     desc: 'What to expect and how to start strong on day one',
-    duration: '5 min',
-    xp: 20,
+    duration: '8 min',
+    xp: 25,
     status: 'available',
     learn: [
       { type: 'intro', text: 'Your first shift is not a test you can fail — it\'s the day you start learning the floor for real. Nobody expects you to be perfect. They expect you to show up ready, stay observant, and ask good questions. The staff who thrive on day one aren\'t the ones who pretend to know everything — they\'re the ones who watch closely, follow the routine, and aren\'t afraid to say "show me." Here\'s how to make a strong first impression on the team and the guests.' },
@@ -211,8 +211,8 @@ const onboardingLessons: Lesson[] = [
     id: 'our-menu-pdf',
     title: 'Our Menu',
     desc: 'Study the full menu — every dish, ingredient, and price',
-    duration: '10 min',
-    xp: 25,
+    duration: '12 min',
+    xp: 40,
     status: 'available',
     learn: [
       { type: 'intro', text: 'Study the menu carefully. Knowing every dish — ingredients, preparation, and price — is what separates a good server from a great one.' },
@@ -242,8 +242,8 @@ const greetingsLessons: Lesson[] = [
     id: 'five-second',
     title: 'The 5-Second Rule',
     desc: 'Immediate greeting within 5 seconds of arrival',
-    duration: '5 min',
-    xp: 30,
+    duration: '7 min',
+    xp: 50,
     status: 'completed',
     scenarioId: 'five-second-rule',
     learn: [
@@ -273,8 +273,8 @@ const greetingsLessons: Lesson[] = [
     id: 'guide-dont-point',
     title: 'Guide, Don\'t Point',
     desc: 'Always escort guests to their table — never point',
-    duration: '6 min',
-    xp: 35,
+    duration: '7 min',
+    xp: 50,
     status: 'completed',
     scenarioId: 'guide-dont-point',
     learn: [
@@ -304,8 +304,8 @@ const greetingsLessons: Lesson[] = [
     id: 'multilingual',
     title: 'Multilingual Welcome',
     desc: 'Greet in English, Dutch, Spanish & Papiamentu',
-    duration: '8 min',
-    xp: 60,
+    duration: '10 min',
+    xp: 50,
     status: 'current',
     scenarioId: 'greeting-dutch-couple',
     learn: [
@@ -348,8 +348,8 @@ const greetingsLessons: Lesson[] = [
     id: 'reading-table',
     title: 'Reading the Table',
     desc: 'Adapt your energy to couples, groups, and demanding guests',
-    duration: '6 min',
-    xp: 40,
+    duration: '8 min',
+    xp: 50,
     status: 'current',
     scenarioId: 'reading-table-romantic',
     learn: [
@@ -484,8 +484,8 @@ const physicalCraftLessons: Lesson[] = [
     id: 'tray-carrying',
     title: 'Tray Carrying — The Foundation',
     desc: 'The skill that defines your confidence on the floor',
-    duration: '8 min',
-    xp: 60,
+    duration: '10 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'first-tray-full-room',
     learn: [
@@ -516,8 +516,8 @@ const physicalCraftLessons: Lesson[] = [
     id: 'plate-carrying',
     title: 'Plate Carrying',
     desc: 'One plate, two plates, three plates — the technique that saves time and looks professional',
-    duration: '7 min',
-    xp: 55,
+    duration: '9 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'table-6-main-course',
     learn: [
@@ -544,7 +544,7 @@ const physicalCraftLessons: Lesson[] = [
     id: 'floor-movement',
     title: 'Floor Movement & Navigation',
     desc: 'How you move says everything about who you are on the floor',
-    duration: '6 min',
+    duration: '7 min',
     xp: 50,
     status: 'available',
     scenarioId: 'busy-saturday',
@@ -573,8 +573,8 @@ const physicalCraftLessons: Lesson[] = [
     id: 'table-setting',
     title: 'Table Setting to Standard',
     desc: "The table is the guest's first impression before you say a word",
-    duration: '7 min',
-    xp: 60,
+    duration: '8 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'pre-service-inspection',
     learn: [
@@ -612,7 +612,7 @@ const physicalCraftLessons: Lesson[] = [
     title: 'Synchronized Service',
     desc: 'Great service is invisible — because the whole team moves as one',
     duration: '8 min',
-    xp: 75,
+    xp: 50,
     status: 'available',
     scenarioId: 'six-top-all-at-once',
     learn: [
@@ -654,8 +654,8 @@ const serviceFlowLessons: Lesson[] = [
     id: 'ten-steps',
     title: 'The 10-Step Service Sequence',
     desc: 'The complete service standard every hospitality professional must master',
-    duration: '10 min',
-    xp: 80,
+    duration: '7 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'full-service-run',
     learn: [
@@ -685,8 +685,8 @@ const serviceFlowLessons: Lesson[] = [
     id: 'proactive-reactive',
     title: 'Proactive vs Reactive Service',
     desc: 'The difference between 4-star and 5-star service',
-    duration: '9 min',
-    xp: 60,
+    duration: '7 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'proactive-floor-signal',
     learn: [
@@ -717,8 +717,8 @@ const serviceFlowLessons: Lesson[] = [
     id: 'nonverbal-signals',
     title: 'Reading Non-Verbal Signals',
     desc: 'What guests communicate before they say a word',
-    duration: '8 min',
-    xp: 55,
+    duration: '7 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'nonverbal-observation',
     learn: [
@@ -755,7 +755,7 @@ const languageLessons: Lesson[] = [
     id: 'banned-phrases',
     title: 'The Banned Phrases',
     desc: 'What never to say — and what to say instead',
-    duration: '7 min',
+    duration: '8 min',
     xp: 50,
     status: 'available',
     scenarioId: 'language-followup',
@@ -793,7 +793,7 @@ const languageLessons: Lesson[] = [
     title: 'Describing What You Serve',
     desc: 'The 3-part formula that sells any dish or drink in one sentence',
     duration: '8 min',
-    xp: 60,
+    xp: 50,
     status: 'available',
     scenarioId: 'describe-recommend',
     learn: [
@@ -832,7 +832,7 @@ const languageLessons: Lesson[] = [
     title: 'Storytelling — Selling Through Stories',
     desc: 'Guests remember stories, not facts. Here\'s how to use them.',
     duration: '9 min',
-    xp: 70,
+    xp: 50,
     status: 'available',
     scenarioId: 'storytelling-property',
     learn: [
@@ -868,8 +868,8 @@ const languageLessons: Lesson[] = [
     id: 'handling-complaints',
     title: 'Handling Difficult Conversations',
     desc: 'The 4-step protocol that turns a broken moment into a defining one',
-    duration: '9 min',
-    xp: 65,
+    duration: '8 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'overcooked-complaint',
     learn: [
@@ -911,7 +911,7 @@ const complaintsLessons: Lesson[] = [
     title: 'The Mindset Shift',
     desc: 'Why complaints are the best thing that can happen to you',
     duration: '7 min',
-    xp: 60,
+    xp: 50,
     status: 'available',
     scenarioId: 'silent-table',
     learn: [
@@ -943,7 +943,7 @@ const complaintsLessons: Lesson[] = [
     title: 'The LEARN Protocol',
     desc: 'The 5-step framework used by Marriott, Hilton and IHG worldwide',
     duration: '8 min',
-    xp: 65,
+    xp: 50,
     status: 'available',
     scenarioId: 'wrong-order-allergy',
     learn: [
@@ -974,8 +974,8 @@ const complaintsLessons: Lesson[] = [
     id: 'common-situations',
     title: 'The Most Common Situations',
     desc: 'Exact scripts for the situations that happen every service',
-    duration: '9 min',
-    xp: 70,
+    duration: '7 min',
+    xp: 50,
     status: 'available',
     scenarioId: 'billing-dispute',
     learn: [
@@ -1015,7 +1015,7 @@ const complaintsLessons: Lesson[] = [
     title: 'Prevention Over Recovery',
     desc: 'The best complaint is the one that never happens',
     duration: '7 min',
-    xp: 55,
+    xp: 50,
     status: 'available',
     scenarioId: 'read-the-room',
     learn: [
@@ -1054,7 +1054,7 @@ const guestPsychologyLessons: Lesson[] = [
     title: 'Types of Guests',
     desc: 'Every table is different. Read who you are serving before you open your mouth.',
     duration: '8 min',
-    xp: 65,
+    xp: 50,
     status: 'available',
     scenarioId: 'seven-tables',
     learn: [
@@ -1083,7 +1083,7 @@ const guestPsychologyLessons: Lesson[] = [
     title: 'Cultural Awareness',
     desc: 'Curaçao welcomes the world. Know how to welcome each culture back.',
     duration: '9 min',
-    xp: 70,
+    xp: 50,
     status: 'available',
     scenarioId: 'dutch-businessman',
     learn: [
@@ -1111,7 +1111,7 @@ const guestPsychologyLessons: Lesson[] = [
     title: 'VIP & Returning Guests',
     desc: 'The guest who comes back is worth ten new ones. Treat them like it.',
     duration: '7 min',
-    xp: 60,
+    xp: 50,
     status: 'available',
     scenarioId: 'welcome-back',
     learn: [
@@ -1144,7 +1144,7 @@ const guestPsychologyLessons: Lesson[] = [
     title: 'Reading Buying Signals',
     desc: 'Great upselling feels like a recommendation. Bad upselling feels like pressure. Know the difference.',
     duration: '8 min',
-    xp: 65,
+    xp: 50,
     status: 'available',
     scenarioId: 'undecided-guest',
     learn: [
@@ -1179,7 +1179,7 @@ const guestPsychologyLessons: Lesson[] = [
     title: 'The Emotional Journey of a Guest',
     desc: 'Guests remember how you made them feel, not what they ate.',
     duration: '8 min',
-    xp: 70,
+    xp: 50,
     status: 'available',
     scenarioId: 'full-journey',
     learn: [
@@ -1219,7 +1219,7 @@ export const CURRICULUM: Module[] = [
     totalLessons: 6,
     completedLessons: 0,
     available: true,
-    xpTotal: 125,
+    xpTotal: 150,
     lessons: onboardingLessons,
   },
   // Module 1
@@ -1233,7 +1233,7 @@ export const CURRICULUM: Module[] = [
     totalLessons: 4,
     completedLessons: 2,
     available: true,
-    xpTotal: 165,
+    xpTotal: 200,
     lessons: greetingsLessons,
   },
   // Module 2
@@ -1247,7 +1247,7 @@ export const CURRICULUM: Module[] = [
     totalLessons: 5,
     completedLessons: 0,
     available: true,
-    xpTotal: 300,
+    xpTotal: 250,
     lessons: physicalCraftLessons,
   },
   // Module 3
@@ -1261,7 +1261,7 @@ export const CURRICULUM: Module[] = [
     totalLessons: 3,
     completedLessons: 0,
     available: true,
-    xpTotal: 195,
+    xpTotal: 150,
     lessons: serviceFlowLessons,
   },
   // Module 4
@@ -1275,7 +1275,7 @@ export const CURRICULUM: Module[] = [
     totalLessons: 4,
     completedLessons: 0,
     available: true,
-    xpTotal: 245,
+    xpTotal: 200,
     lessons: languageLessons,
   },
   // Module 5
@@ -1289,7 +1289,7 @@ export const CURRICULUM: Module[] = [
     totalLessons: 4,
     completedLessons: 0,
     available: true,
-    xpTotal: 250,
+    xpTotal: 200,
     lessons: complaintsLessons,
   },
   // Module 6
@@ -1303,7 +1303,7 @@ export const CURRICULUM: Module[] = [
     totalLessons: 5,
     completedLessons: 0,
     available: true,
-    xpTotal: 330,
+    xpTotal: 250,
     lessons: guestPsychologyLessons,
   },
 ];

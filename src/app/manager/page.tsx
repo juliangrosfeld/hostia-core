@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import TopNav from '@/components/TopNav';
 import ManagerDashboard from '@/components/manager/ManagerDashboard';
-import StaffDetail from '@/components/manager/StaffDetail';
+import StaffProfile from '@/components/manager/StaffProfile';
 import type { StaffMember } from '@/lib/staff-data';
 
 export default function ManagerPage() {
@@ -31,7 +31,7 @@ export default function ManagerPage() {
       <TopNav />
       {view === 'dashboard' && <ManagerDashboard onOpenStaff={openStaff} />}
       {view === 'staff-detail' && selectedStaff && (
-        <StaffDetail staff={selectedStaff} onBack={goBack} onViewAs={viewAsStaff} />
+        <StaffProfile staff={selectedStaff} onBack={goBack} onViewAs={viewAsStaff} />
       )}
     </>
   );

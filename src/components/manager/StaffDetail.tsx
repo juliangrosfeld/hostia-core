@@ -143,7 +143,7 @@ export default function StaffDetail({ staff: s, onBack, onViewAs }: StaffDetailP
                         {m.name}
                       </span>
                       <span style={{ color: 'var(--ink-soft)', fontVariantNumeric: 'tabular-nums' }}>
-                        {m.done}/{m.total}{m.avg > 0 ? ` · ${m.avg}%` : ''}
+                        {m.done}/{m.total}
                       </span>
                     </div>
                     <div className="skill-bar-track" style={{ height: 4 }}>

@@ -4,10 +4,18 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, RotateCcw, Loader2, Lightbulb, Heart, Play, Zap, Brain, Trophy } from 'lucide-react';
 import { SCENARIOS } from '@/lib/scenarios';
 import type { Lesson } from '@/lib/curriculum';
+import { calculateRoleplayXP, getWarmthLabel } from '@/lib/xp';
 
 // ─── Constants ────────────────────────────────────────────────
 
 const MAX_TURNS = 7;
+// Pass/fail model. Warmth from the API is 1-10; the performance model works on
+// a 0-100 warmth score (warmth × 10). To pass, the guest's warmth score must
+// stay at PASS_WARMTH_SCORE+ for CONSECUTIVE_PASSES_REQUIRED turns in a row,
+// and the session must run at least MIN_TURNS turns.
+const MIN_TURNS = 3;
+const PASS_WARMTH_SCORE = 55;
+const CONSECUTIVE_PASSES_REQUIRED = 2;
 
 // ─── Sub-components ──────────────────────────────────────────
 
@@ -119,7 +127,8 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
   const [turnCount, setTurnCount] = useState(0);
   const [tip, setTip] = useState<string | null>(null);
   const [done, setDone] = useState(false);
-  const [earlyWin, setEarlyWin] = useState(false);
+  const [passed, setPassed] = useState(false);
+  const [consecutiveGood, setConsecutiveGood] = useState(0);
   const [speedChip, setSpeedChip] = useState<'fast' | 'late' | null>(null);
   const [apiError, setApiError] = useState(false);
 
@@ -160,7 +169,8 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
     setTotals(init);
     setTurnCount(0);
     setDone(false);
-    setEarlyWin(false);
+    setPassed(false);
+    setConsecutiveGood(0);
     setTip(null);
     setTimerRunning(false);
     setThinkUsed(false);
@@ -297,11 +307,25 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
 
     setMessages([...updated, { role: 'guest', text: data.guest_reply ?? '…' }]);
 
-    // ── End conditions (in priority order) ────────────────────
-    const isEarlyWin = newWarmth >= 9;
-    if (isEarlyWin) setEarlyWin(true);
+    // ── Pass / fail evaluation ────────────────────────────────
+    // A turn = one staff message + one guest reply. Warmth (1-10) maps to a
+    // 0-100 warmth score (×10).
+    const newWarmthScore = newWarmth * 10;
+    const newConsecutiveGood =
+      newWarmthScore >= PASS_WARMTH_SCORE ? consecutiveGood + 1 : 0;
+    setConsecutiveGood(newConsecutiveGood);
 
-    if (isEarlyWin || newTurn >= MAX_TURNS || data.conversation_complete) {
+    // PASS: warmth score ≥ 55 for 2 consecutive turns AND at least 3 turns.
+    const didPass =
+      newTurn >= MIN_TURNS && newConsecutiveGood >= CONSECUTIVE_PASSES_REQUIRED;
+    // FAIL: reached the final turn without passing.
+    const hitMaxTurns = newTurn >= MAX_TURNS;
+
+    if (didPass) {
+      setPassed(true);
+      setTimeout(() => setDone(true), 1200);
+    } else if (hitMaxTurns) {
+      setPassed(false);
       setTimeout(() => setDone(true), 1200);
     } else {
       setTimerRunning(true);
@@ -371,7 +395,7 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
         </div>
 
         <div className="how-it-works" style={{ padding: '14px 18px', background: 'var(--sand-warm)', borderRadius: 12, marginBottom: 28, fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.6 }}>
-          <b style={{ color: 'var(--brand-deep)' }}>How it works:</b> Type your response as the server. You have <b>{timerSeconds} seconds</b> per turn and <b>{MAX_TURNS} turns total</b>. Respond quickly for a ⚡ speed bonus. Use the <b>Think</b> button (once) to pause and collect your thoughts. Hit warmth 9/10 early to earn a bonus.
+          <b style={{ color: 'var(--brand-deep)' }}>How it works:</b> Type your response as the server. You have <b>{timerSeconds} seconds</b> per turn and <b>{MAX_TURNS} turns total</b>. Respond quickly for a ⚡ speed bonus. Use the <b>Think</b> button (once) to pause and collect your thoughts. To pass, keep guest warmth at <b>55+</b> for <b>2 turns in a row</b> (minimum 3 turns).
         </div>
 
         <button className="btn-brand scenario-start-btn" onClick={startScenario}>
@@ -387,10 +411,16 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
     const totalScore = scenario.scoreKeys.reduce((a, k) => a + (totals[k] ?? 0), 0);
     const maxTotal = maxPerKey * scenario.scoreKeys.length;
     const avgPct = Math.round((totalScore / maxTotal) * 100);
-    const goalAchieved = warmth >= 8;
+
+    // Performance signal is 0-100 (API warmth 1-10 × 10). XP is the progress
+    // signal — earned only on a pass, scaled by the final warmth score. No XP
+    // is awarded on a fail; staff must retry and pass to earn it.
+    const finalWarmthScore = warmth * 10;
+    const xpEarned = calculateRoleplayXP(finalWarmthScore, passed);
+    const warmthLabel = getWarmthLabel(finalWarmthScore);
 
     const warmthPct = ((warmth - 1) / 9) * 100;
-    const warmthColor = warmth <= 3 ? '#C25B43' : warmth <= 5 ? '#D4A574' : warmth <= 7 ? '#A8B89C' : '#81B29A';
+    const warmthColor = warmthLabel.color;
     const warmthDelta = warmth - startingWarmth;
 
     return (
@@ -399,63 +429,61 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{
             width: 72, height: 72, margin: '0 auto 16px', borderRadius: '50%',
-            background: earlyWin ? 'var(--brand)' : goalAchieved ? 'var(--sage)' : 'var(--sand-deeper)',
+            background: passed ? 'var(--brand)' : 'var(--sand-deeper)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            {earlyWin
+            {passed
               ? <Trophy size={32} color="var(--brand-deep)" />
-              : <Heart size={32} color={goalAchieved ? 'white' : 'var(--ink-soft)'} />
+              : <Heart size={32} color="var(--ink-soft)" />
             }
           </div>
           <div className="label-mono">Scenario complete</div>
           <h2 className="display" style={{ fontSize: 34, color: 'var(--brand-deep)', margin: '6px 0 4px' }}>
-            {earlyWin
-              ? 'Nailed it early!'
-              : warmth >= 8
-                ? 'Excellent work.'
-                : warmth >= 5
-                  ? 'A solid performance.'
-                  : 'Room to grow.'}
+            {passed ? 'You passed!' : 'Not yet — try again'}
           </h2>
-          {earlyWin && (
-            <div style={{ fontSize: 13, color: 'var(--brand)', fontWeight: 700 }}>
-              ⚡ Early win — warmth hit 9 before turn {MAX_TURNS}
-            </div>
-          )}
+          <div style={{ fontSize: 13, color: passed ? 'var(--brand)' : 'var(--ink-soft)', fontWeight: 700 }}>
+            {passed
+              ? `Warmth held at ${PASS_WARMTH_SCORE}+ for ${CONSECUTIVE_PASSES_REQUIRED} turns in a row`
+              : `Keep warmth at ${PASS_WARMTH_SCORE}+ for ${CONSECUTIVE_PASSES_REQUIRED} turns in a row to pass`}
+          </div>
         </div>
 
-        {/* Final warmth bar */}
+        {/* Final warmth score bar */}
         <div style={{ padding: '16px 20px', background: 'var(--sand-warm)', borderRadius: 14, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
-            <span style={{ color: 'var(--ink-soft)' }}>Final guest warmth</span>
-            <span style={{ fontWeight: 700, color: warmthColor }}>{warmth} / 10</span>
+            <span style={{ color: 'var(--ink-soft)' }}>Final warmth score</span>
+            <span style={{ fontWeight: 700, color: warmthColor }}>{finalWarmthScore} / 100 · {warmthLabel.label}</span>
           </div>
           <div style={{ height: 10, background: 'rgba(0,0,0,0.06)', borderRadius: 5, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${warmthPct}%`, background: warmthColor, transition: 'width 0.6s ease' }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-soft)', marginTop: 7 }}>
-            <span>Started at {startingWarmth}/10</span>
+            <span>Started at {startingWarmth * 10}/100</span>
             <span style={{ color: warmthDelta > 0 ? '#3d6b57' : warmthDelta < 0 ? '#8b4a3a' : 'var(--ink-soft)', fontWeight: warmthDelta !== 0 ? 600 : 400 }}>
-              {warmthDelta > 0 ? `+${warmthDelta} gained` : warmthDelta < 0 ? `${warmthDelta} lost` : 'no change'}
+              {warmthDelta > 0 ? `+${warmthDelta * 10} gained` : warmthDelta < 0 ? `${warmthDelta * 10} lost` : 'no change'}
             </span>
           </div>
         </div>
 
-        {/* Goal status */}
+        {/* Pass / fail status + feedback */}
         <div style={{
           padding: '12px 16px',
           borderRadius: 12,
           marginBottom: 24,
-          background: goalAchieved ? 'rgba(129,178,154,0.15)' : 'rgba(224,122,95,0.1)',
-          border: `1px solid ${goalAchieved ? 'rgba(129,178,154,0.4)' : 'rgba(224,122,95,0.3)'}`,
+          background: passed ? 'rgba(129,178,154,0.15)' : 'rgba(224,122,95,0.1)',
+          border: `1px solid ${passed ? 'rgba(129,178,154,0.4)' : 'rgba(224,122,95,0.3)'}`,
           display: 'flex', alignItems: 'flex-start', gap: 12,
         }}>
-          <span style={{ fontSize: 18, lineHeight: 1, marginTop: 1 }}>{goalAchieved ? '✅' : '⚠️'}</span>
+          <span style={{ fontSize: 18, lineHeight: 1, marginTop: 1 }}>{passed ? '✅' : '⚠️'}</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: goalAchieved ? '#3d6b57' : '#8b4a3a', marginBottom: 3 }}>
-              {goalAchieved ? 'Goal achieved' : 'Goal not reached this time'}
+            <div style={{ fontSize: 13, fontWeight: 700, color: passed ? '#3d6b57' : '#8b4a3a', marginBottom: 3 }}>
+              {passed ? 'Passed' : 'Not passed — give it another go'}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5 }}>{scenario.goal}</div>
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5 }}>
+              {passed
+                ? scenario.goal
+                : `Your warmth landed at ${warmthLabel.label.toLowerCase()} (${finalWarmthScore}/100). ${tip ?? 'Focus on genuine, specific warmth from the very first reply.'}`}
+            </div>
           </div>
         </div>
 
@@ -485,7 +513,7 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
         }}>
           <span>Average score <b style={{ color: 'var(--brand-deep)' }}>{avgPct}%</b></span>
           <span style={{ color: 'var(--sand-deeper)' }}>|</span>
-          <span>XP earned <b style={{ color: 'var(--brand)' }}>+{totalScore}</b></span>
+          <span>XP earned <b style={{ color: passed ? 'var(--brand)' : 'var(--ink-soft)' }}>+{xpEarned}</b></span>
           <span style={{ color: 'var(--sand-deeper)' }}>|</span>
           <span>Turns played <b style={{ color: 'var(--brand-deep)' }}>{turnCount} / {MAX_TURNS}</b></span>
         </div>
@@ -495,7 +523,7 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
           <button className="btn-brand" onClick={resetScenario}>
             <RotateCcw size={14} /> Try again
           </button>
-          <button className="btn-ghost" onClick={onComplete}>Finish lesson</button>
+          <button className="btn-ghost" onClick={onComplete}>{passed ? 'Finish lesson' : 'Exit'}</button>
         </div>
       </div>
     );
