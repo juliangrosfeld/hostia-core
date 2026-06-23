@@ -40,14 +40,15 @@ interface Assigned {
 // ─── Track presentation ──────────────────────────────────────
 
 const TRACK_META: Record<string, { label: string; color: string }> = {
-  onboarding:    { label: 'Onboarding',   color: '#8DA9C4' },
-  universal:     { label: 'Universal',    color: '#D4A574' },
-  'fast-casual': { label: 'Fast Casual',  color: '#81B29A' },
-  'fine-dining': { label: 'Fine Dining',  color: '#E07A5F' },
-  manager:       { label: 'Manager',      color: '#051956' },
+  onboarding:      { label: 'Onboarding',     color: '#8DA9C4' },
+  universal:       { label: 'Universal',      color: '#D4A574' },
+  'casual-dining': { label: 'Casual Dining',  color: '#2D6A4F' },
+  'fast-casual':   { label: 'Fast Casual',    color: '#81B29A' },
+  'fine-dining':   { label: 'Fine Dining',    color: '#E07A5F' },
+  manager:         { label: 'Manager',        color: '#051956' },
 };
 
-const TRACK_ORDER = ['onboarding', 'universal', 'fast-casual', 'fine-dining', 'manager'];
+const TRACK_ORDER = ['onboarding', 'universal', 'casual-dining', 'fast-casual', 'fine-dining', 'manager'];
 
 function trackMeta(track: string) {
   return TRACK_META[track] ?? { label: track, color: '#4A5568' };

@@ -1207,6 +1207,144 @@ const guestPsychologyLessons: Lesson[] = [
 
 // ─── MODULE REGISTRY ─────────────────────────────────────────
 
+// ─── MODULE 7: THE CASUAL DINING STANDARD ───────────────────
+// Casual-dining-specific track. Covers the foundational "who you are at work"
+// skills — appearance, attitude, teamwork, and food-safety awareness — that the
+// universal modules deliberately don't touch.
+
+const casualDiningStandardLessons: Lesson[] = [
+  {
+    id: 'showing-up-right',
+    title: 'Showing Up Right',
+    desc: 'Professional appearance and attitude before you hit the floor',
+    duration: '7 min',
+    xp: 20,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Your first impression starts before you say a single word — before the first guest even looks at you. The way you walk in, the state of your uniform, the energy you carry: all of it sets the tone for the entire shift. A guest reads a server\'s confidence and care in the first glance, long before they\'re greeted. In casual dining the pace is fast and the room is open, so there\'s nowhere to hide a wrinkled shirt or a checked-out attitude. Showing up right isn\'t vanity — it\'s the foundation everything else is built on.' },
+      { type: 'tip-list', title: 'The pre-shift checklist', items: [
+        'Clean uniform — pressed, stain-free, and properly fitted. If it smells like last night\'s shift, it\'s not ready.',
+        'Name badge on and visible — guests want to know who\'s taking care of them.',
+        'Hair tied back, neat, and out of your face — nothing that ends up near food or in your eyes during a rush.',
+        'Hands washed, nails short and clean — the part of you that touches every plate and glass.',
+        'Phone away and on silent — stored in your locker or back pocket, never in your hand on the floor.',
+        'Posture ready — stand tall, shoulders back, take one breath. You\'re about to step into service mode.',
+      ]},
+      { type: 'intro', text: 'The hardest part of showing up right isn\'t the uniform — it\'s the attitude shift. Whatever happened before your shift (traffic, an argument, a bad day) has to stay at the door. Guests didn\'t cause it and shouldn\'t feel it. The professionals build a small ritual to make the switch: a deep breath before walking in, a quick look in the mirror, a reminder of why the next few hours matter. When you cross onto the floor, you stop being whoever you were five minutes ago and become the person every guest deserves: present, warm, and ready.' },
+      { type: 'tip-list', title: 'Body language guests read without you knowing', items: [
+        'Slouching — it signals boredom and low energy, and it makes the whole section feel tired.',
+        'Crossed arms — reads as closed-off, defensive, or unapproachable, even when you\'re just resting.',
+        'Avoiding eye contact — makes guests feel like they have to chase you down to be helped.',
+        'Rushing past tables without a glance — tells waiting guests they\'re invisible, even if you\'re slammed.',
+      ]},
+    ],
+    quiz: [
+      { q: 'When does your first impression on a guest actually begin?', options: ['The moment you greet them at the table.', 'Before you say a word — through your appearance and the energy you carry.', 'Only once you take their order.', 'When you drop the bill at the end.'], correct: 1, explain: 'Guests read your confidence and care in the first glance. The impression is set long before any greeting — which is why showing up right matters.' },
+      { q: 'You had a stressful morning and your shift is about to start. What\'s the professional move?', options: ['Let the guests know you\'re having a rough day so they\'re understanding.', 'Carry the stress onto the floor — authenticity matters more than performance.', 'Take a breath at the door and switch into "service mode" — the stress stays behind.', 'Work quietly in the back until your mood improves.'], correct: 2, explain: 'Guests didn\'t cause your bad day and shouldn\'t feel it. A small ritual at the door lets you leave personal stress behind and show up present.' },
+      { q: 'Which of these is part of the pre-shift checklist?', options: ['Phone in your hand in case you need to check the time.', 'Clean, pressed uniform, name badge visible, hair tied back, hands washed.', 'A quick scroll through social media to relax.', 'Whatever uniform is closest, as long as you\'re on time.'], correct: 1, explain: 'A clean uniform, visible badge, neat hair, and clean hands are the baseline. They signal to guests that they\'re in capable, caring hands.' },
+      { q: 'You\'re slammed and walking quickly past a table that hasn\'t been helped yet. What does rushing past without a glance communicate?', options: ['That you\'re hardworking and they\'ll respect that.', 'Nothing — guests understand busy.', 'That they\'re invisible, even though you\'re busy.', 'That they should flag down another server.'], correct: 2, explain: 'Guests read body language you\'re not aware of. Rushing past without acknowledgment makes them feel unseen — a glance or "I\'ll be right with you" changes everything.' },
+      { q: 'Why does posture and body language matter so much on a casual dining floor?', options: ['It doesn\'t — only the food and speed matter.', 'Because the room is open and fast, so guests constantly read your slouch, crossed arms, or avoided eye contact.', 'Because managers grade you on how you stand.', 'Because it\'s required for the dress code only.'], correct: 1, explain: 'In an open, fast room there\'s nowhere to hide. Slouching, crossed arms, and avoided eye contact all send messages to guests — usually the wrong ones.' },
+    ],
+  },
+  {
+    id: 'working-as-a-team',
+    title: 'Working as a Team',
+    desc: 'Cover, communicate, and never leave a teammate stranded',
+    duration: '8 min',
+    xp: 25,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Casual dining runs on teamwork even more than fine dining does. The pace is higher, the tickets come faster, and the margin for error is smaller. There\'s no army of support staff to absorb a mistake — when one person drops the ball, it lands on everyone. A forgotten drink order, an unbussed table, a server who vanishes mid-rush: each one slows the whole floor, frustrates guests, and shrinks the tips the entire team shares. The best casual dining teams move like one organism. You don\'t just run your section — you watch the whole floor and step in before anyone has to ask.' },
+      { type: 'tip-list', title: 'The 5 unwritten rules of floor teamwork', items: [
+        'If you see it, own it. A spill, an empty glass, a guest looking around — if you notice it, it\'s yours, regardless of section.',
+        'Never say "that\'s not my table." Those four words are poison to a team. Help first, sort out sections later.',
+        'Communicate before you disappear. Going on break, heading to the walk-in, stepping outside? Tell someone, so your tables are covered.',
+        'Check on your colleagues, not just your section. Glance at how your teammates are doing — if someone\'s drowning, you already know.',
+        'End of shift = help close together. Nobody leaves while a teammate is still buried in side work. You came in as a team, you leave as one.',
+      ]},
+      { type: 'intro', text: 'The kitchen is your most important teammate, and how you talk to them under pressure decides whether service flows or breaks. Use clear timing language — "ordering," "fire table 12," "how long on the fish?" — instead of vague pressure. When there\'s a problem, flag it calmly and early, with the facts, not blame: "Table 6 has been waiting 20 minutes, can we prioritize?" beats "What\'s taking so long?!" Never bark orders, never argue on the line, and never make the kitchen the enemy during a rush. A server the kitchen trusts gets their tickets taken care of; a server who creates conflict gets nothing but slower.' },
+      { type: 'intro', text: 'Picture a Saturday lunch rush. Your colleague\'s section has filled all at once — six tables seated in five minutes, and they\'re visibly underwater. The wrong move is to either ignore it ("not my section") or to barge in and take over their tables, which embarrasses them and confuses the guests. The right move: catch their eye, ask quietly "what do you need?", and take one concrete thing off their plate — run their drinks, drop their bread, clear a finished table. You\'re not stealing their section or their tips. You\'re buying them ninety seconds to get their head above water. Then you check back once more. That\'s stepping in without stepping on toes.' },
+    ],
+    quiz: [
+      { q: 'Why does teamwork matter even more in casual dining than fine dining?', options: ['It doesn\'t — fine dining needs more coordination.', 'The pace is higher and the margin for error is smaller, so one person dropping the ball affects everyone.', 'Because casual dining has more managers watching.', 'Because casual dining guests tip individually, not by section.'], correct: 1, explain: 'Higher pace, faster tickets, and less support staff mean a single dropped ball lands on the whole floor — and on everyone\'s shared tips.' },
+      { q: 'You spot an empty water glass at a table that isn\'t in your section. What does the team standard say?', options: ['Leave it — it\'s the other server\'s responsibility.', 'Find that server and tell them about it.', 'If you see it, own it — refill it yourself.', 'Wait to see if the guest flags someone.'], correct: 2, explain: '"If you see it, own it" is the first rule of floor teamwork. Help the guest first; section boundaries come second.' },
+      { q: 'You need to step outside for a quick break during service. What should you do first?', options: ['Just go — you\'ll only be a minute.', 'Tell a colleague so your tables are covered while you\'re gone.', 'Wait until every one of your tables is completely settled, even if it takes 30 minutes.', 'Leave a note on the host stand.'], correct: 1, explain: '"Communicate before you disappear" keeps tables covered. A teammate can\'t cover for you if they don\'t know you\'re gone.' },
+      { q: 'Table 6 has waited 20 minutes for their food during a rush. What\'s the best way to raise it with the kitchen?', options: ['"What is taking so long with table 6?!"', 'Say nothing and hope it comes up soon.', 'Calmly: "Table 6 has been waiting 20 minutes — can we prioritize them?"', 'Tell the guest the kitchen is too slow today.'], correct: 2, explain: 'Flag issues calmly and early with facts, not blame. A server the kitchen trusts gets their tickets handled; conflict only slows things down.' },
+      { q: 'A colleague\'s section just got slammed with six new tables. What\'s the right way to step in?', options: ['Take over their tables entirely so they can catch up.', 'Ignore it — it\'s their section and their tips.', 'Catch their eye, ask "what do you need?", and take one concrete task off their plate.', 'Tell a manager their section is too busy.'], correct: 2, explain: 'Stepping in without stepping on toes means asking what they need and handling one thing — running drinks, dropping bread — not seizing their section.' },
+    ],
+  },
+  {
+    id: 'food-safety-floor',
+    title: 'Food Safety on the Floor',
+    desc: 'Allergens, cross-contamination, and when to flag a concern',
+    duration: '8 min',
+    xp: 25,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Food safety isn\'t just a kitchen job — it\'s a front-of-house responsibility too. As a server, you\'re the last line of defense between the kitchen and the guest. You\'re the one who hears "I\'m allergic to nuts," the one who carries the plate to the table, the one who notices a dish that doesn\'t look right. A missed allergen flag isn\'t a small mistake — it can end in a hospital visit, or worse. You don\'t need to be a food scientist, but you do need to take allergies seriously, know the common danger zones, and know exactly what to do when something feels off.' },
+      { type: 'tip-list', title: 'The 8 most common allergens', items: [
+        'Milk (dairy) — hidden in sauces, dressings, butter, and many desserts.',
+        'Eggs — in mayonnaise, batters, custards, and some pasta.',
+        'Fish — including fish sauce and Worcestershire, not just whole fillets.',
+        'Shellfish — shrimp, crab, lobster; often in stocks and broths too.',
+        'Tree nuts — almonds, walnuts, cashews; common in oils, pesto, and desserts.',
+        'Peanuts — distinct from tree nuts; in sauces, garnishes, and fryer oil.',
+        'Wheat (gluten) — bread, pasta, breading, soy sauce, many thickeners.',
+        'Soybeans (soy) — in soy sauce, tofu, edamame, and many processed items. Remember: guests don\'t always volunteer an allergy — you must ask.',
+      ]},
+      { type: 'intro', text: 'When a guest mentions an allergy, follow these exact steps every time. First, confirm the details with the guest — "How severe is it? Is even a trace a problem?" Second, take it straight to the kitchen and flag the ticket clearly — write it on the order and say it out loud. Third, never assume the kitchen already knows or that a dish is "probably fine" — assumptions are how people get hurt. Fourth, follow up when you deliver the dish: confirm out loud that this is the allergy-safe plate so there\'s no mix-up at the table. An allergy is never a place to guess, rush, or cut a corner.' },
+      { type: 'tip-list', title: 'Red flags to always report', items: [
+        'Food that looks undercooked — pink chicken, cold centers, raw-looking meat where it shouldn\'t be.',
+        'A strong off or sour smell coming from a dish or ingredient — trust your nose.',
+        'A plated dish that was left sitting out during a rush instead of going to the table — temperature matters.',
+        'A guest showing signs of an allergic reaction — flushing, swelling, hives, difficulty breathing. Act immediately.',
+        'A colleague skipping handwashing or handling food after touching something dirty — speak up or tell a manager.',
+      ]},
+    ],
+    quiz: [
+      { q: 'Why is food safety a front-of-house responsibility, not just the kitchen\'s?', options: ['It isn\'t — servers only deliver what the kitchen makes.', 'Because servers are the last line of defense between the kitchen and the guest.', 'Because servers cook part of the meal at the table.', 'Because health inspectors only talk to servers.'], correct: 1, explain: 'You hear the allergy, carry the plate, and notice when something looks off. That makes you the final safeguard before food reaches the guest.' },
+      { q: 'Which of these is one of the 8 most common allergens?', options: ['Tomatoes.', 'Black pepper.', 'Shellfish.', 'Garlic.'], correct: 2, explain: 'The 8 common allergens are milk, eggs, fish, shellfish, tree nuts, peanuts, wheat, and soybeans. Shellfish is one of the most severe.' },
+      { q: 'A guest says they have a peanut allergy. What\'s the correct sequence?', options: ['Assume the kitchen knows and put the order in normally.', 'Confirm severity with the guest, flag the ticket clearly to the kitchen, never assume, and reconfirm when delivering.', 'Just avoid the obvious peanut dishes and serve the rest.', 'Tell them to ask the kitchen themselves.'], correct: 1, explain: 'Confirm, flag clearly, never assume, and reconfirm at delivery. An allergy is never a place to guess or cut a corner.' },
+      { q: 'Do guests always tell you about their allergies up front?', options: ['Yes — they always mention it when ordering.', 'No — they may not volunteer it, so you should ask.', 'Only guests with severe allergies mention it.', 'It\'s not your job to ask; wait for them to say.'], correct: 1, explain: 'Guests don\'t always volunteer an allergy. Asking is part of protecting them — never assume silence means no allergy.' },
+      { q: 'You\'re about to run a chicken dish and notice the center looks pink and undercooked. What do you do?', options: ['Serve it — the guest can send it back if they\'re worried.', 'Report it and don\'t take it to the table.', 'Take it out and quietly warn the guest to check it.', 'Leave it on the pass for another server to handle.'], correct: 1, explain: 'Undercooked food is a red flag you always report. Catching it before it reaches the guest is exactly the server\'s job as the last line of defense.' },
+    ],
+  },
+  {
+    id: 'speed-without-rushing',
+    title: 'Speed Without Rushing',
+    desc: 'Stay efficient and organized without making guests feel hurried',
+    duration: '9 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'casual-dining-pace',
+    learn: [
+      { type: 'intro', text: 'There\'s a world of difference between being fast and making guests feel rushed. Done right, efficiency is completely invisible to the guest. They should feel relaxed, unhurried, and well looked after — even when you\'re actually moving at double speed behind the scenes. The goal is never to make a table feel like you\'re trying to turn them. It\'s to handle everything so smoothly that they never wait, never want for anything, and never sense the controlled chaos around them. A great casual dining server is a calm swan on the surface, paddling furiously underneath.' },
+      { type: 'tip-list', title: 'The priority ladder during a rush', items: [
+        'Food that\'s ready in the kitchen — hot plates wait for no one. Run them before they die under the heat lamp.',
+        'Drink refills at the table — empty glasses are the most visible sign of neglect. Catch them fast.',
+        'Check-ins for tables that have been waiting — a quick word resets a guest\'s patience.',
+        'Clearing finished plates — it keeps tables comfortable and signals you\'re on top of things.',
+        'Everything else — side work, restocking, resetting. Important, but it never comes before a guest.',
+      ]},
+      { type: 'intro', text: 'Attention to detail is a speed multiplier, not the opposite of speed. The servers who seem effortlessly fast aren\'t running harder — they\'re seeing more. They catch the nearly empty glass before it\'s empty, notice the guest scanning the room before they have to wave, spot the table that\'s ready for the bill before they ask. Each thing caught early means one fewer interruption, one fewer return trip, one fewer guest left waiting. Sloppy attention creates extra work: forgotten refills, missed signals, double-backs. Sharp attention removes work before it appears. That\'s how you move fast without ever looking rushed.' },
+      { type: 'tip-list', title: '5 habits of efficient servers', items: [
+        'Pre-bussing — clear empty plates and glasses as you pass, so tables never pile up and the final clear is quick.',
+        'Carrying more in one trip — never make two trips when one will do; bring the refill and clear the plate together.',
+        'Anticipating refills before they\'re asked — watch the glass line, not the raised hand.',
+        'Knowing which tables are next in the sequence — hold the whole floor in your head so nothing surprises you.',
+        'Never walking the floor empty-handed — every trip out carries something, every trip back brings something.',
+      ]},
+    ],
+    quiz: [
+      { q: 'What\'s the difference between being fast and making a guest feel rushed?', options: ['There is no difference — fast always feels rushed.', 'Efficiency done right is invisible; the guest feels relaxed even while you move at double speed.', 'Rushing is good when the restaurant is busy.', 'Feeling rushed means the server is working hard, which guests appreciate.'], correct: 1, explain: 'Great efficiency is invisible to the guest. They should feel unhurried and cared for, never like you\'re trying to turn their table.' },
+      { q: 'During a rush, what sits at the top of the priority ladder?', options: ['Restocking and side work.', 'Clearing finished plates from every table.', 'Hot food that\'s ready in the kitchen.', 'Resetting empty tables for the next guests.'], correct: 2, explain: 'Ready food is the top priority — hot plates die under the heat lamp. Run them first, then refills, check-ins, clearing, and everything else.' },
+      { q: 'How is attention to detail a "speed multiplier"?', options: ['It isn\'t — paying attention slows you down.', 'Catching things early means fewer interruptions, fewer return trips, and fewer waiting guests.', 'It only matters in fine dining, not casual.', 'It just makes managers happy during reviews.'], correct: 1, explain: 'Seeing the near-empty glass or the searching guest before they signal removes work before it appears — that\'s what makes sharp servers seem effortlessly fast.' },
+      { q: 'Which of these is a core habit of an efficient server?', options: ['Walking the floor empty-handed to move faster.', 'Making two trips so you never carry too much.', 'Pre-bussing and never walking the floor empty-handed.', 'Waiting for the raised hand before refilling drinks.'], correct: 2, explain: 'Pre-bussing and always carrying something each direction cut down trips and keep tables clean — hallmarks of efficiency.' },
+      { q: 'A guest at your table keeps glancing around the room. What does an attentive server read from this?', options: ['Nothing — they\'re just looking at the décor.', 'They need something and shouldn\'t have to wave you down — go check in.', 'They\'re bored and will leave soon.', 'They want the bill, so bring it without asking.'], correct: 1, explain: 'A guest scanning the room is a signal you catch before they have to flag you. Anticipating it is exactly how you stay ahead and avoid the wave.' },
+    ],
+  },
+];
+
 export const CURRICULUM: Module[] = [
   // Module 0
   {
@@ -1305,6 +1443,20 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 250,
     lessons: guestPsychologyLessons,
+  },
+  // Module 7
+  {
+    id: 'casual-dining-standard',
+    title: 'The Casual Dining Standard',
+    subtitle: 'Master the professional habits, team mindset, and safety awareness that define a great casual dining team member.',
+    iconName: 'Star',
+    color: '#2D6A4F',
+    progress: 0,
+    totalLessons: 4,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 120,
+    lessons: casualDiningStandardLessons,
   },
 ];
 

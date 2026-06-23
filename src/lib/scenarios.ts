@@ -1440,4 +1440,44 @@ Return ONLY valid JSON:
     scoreLabels: { stage_awareness: 'Stage Awareness', emotional_intelligence: 'Emotional Intelligence', memorability: 'Memorability' },
     scoreColors: { stage_awareness: '#8DA9C4', emotional_intelligence: '#D4A574', memorability: '#F5A623' },
   },
+
+  'casual-dining-pace': {
+    id: 'casual-dining-pace',
+    moduleId: 'casual-dining-standard',
+    title: 'The Impatient Table',
+    subtitle: 'Module 7 · Speed Without Rushing',
+    description:
+      'It\'s a Saturday lunch rush and the room is full. A guest at one of your tables is visibly impatient — service feels slow to them. The truth is you\'re managing the floor well and their food is on track, but they don\'t feel it. Stay calm, acknowledge how they feel, and show control — without becoming defensive or drowning them in apologies.',
+    tags: ['⚡ Rush', '😤 Impatient', '🎯 Control'],
+    timerSeconds: 60,
+    goal: 'Acknowledge the guest\'s experience genuinely, project calm control, and reset their patience with a concrete update — without over-apologizing or getting defensive. Hit warmth 9/10 in 4 exchanges or fewer.',
+    startingWarmth: 4,
+    opening:
+      'Saturday lunch rush, every table full. A guest at table 9 catches your eye, a little tense: "Hey — we\'ve been waiting a while here. Is our food actually coming?" They\'re not rude yet, but they\'re close. Respond.',
+    systemPrompt: `You are simulating an impatient guest during a busy Saturday lunch rush at [Property], a casual dining restaurant.
+
+CHARACTER: A guest who feels service has been slow. They are tense and a little frustrated but not yet hostile. In reality the server is managing well and the food is on track — the guest just doesn't feel cared for. They respond very well to genuine acknowledgment, calm confidence, and a concrete update. They respond badly to excuses, defensiveness, blaming the kitchen, or a flood of empty apologies.
+
+STANDARDS BEING TESTED:
+- Stay calm and in control — never match the guest's tension or get defensive
+- Acknowledge how the guest FEELS ("I can see you've been waiting and I don't blame you for checking in") before anything else
+- Give a concrete, confident update ("Your food is up next — I'll have it to you within a few minutes") instead of vague reassurance
+- Do NOT over-apologize or grovel — one genuine acknowledgment beats five "I'm so sorry"s
+- Do NOT blame the kitchen, the rush, or other tables
+
+WARMTH INCREASES WITH: genuine acknowledgment of their experience, calm confident control, a specific update, ownership without excuses.
+WARMTH DECREASES WITH: defensiveness, excuses, blaming the kitchen/rush, over-apologizing, vague non-answers, or matching their frustration.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the guest responding, 1-2 sentences, reflecting whether they feel reassured or more frustrated",
+  "warmth": <integer 1-10, starts at 4>,
+  "scores": { "composure": <0-10>, "acknowledgment": <0-10>, "control": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['composure', 'acknowledgment', 'control'],
+    scoreLabels: { composure: 'Composure', acknowledgment: 'Acknowledgment', control: 'Control' },
+    scoreColors: { composure: '#2D6A4F', acknowledgment: '#D4A574', control: '#81B29A' },
+  },
 };
