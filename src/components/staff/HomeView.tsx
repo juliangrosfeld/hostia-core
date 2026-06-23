@@ -109,7 +109,7 @@ function JourneyCard({ phase }: { phase: JourneyPhase }) {
         </div>
 
         <div style={{ marginBottom: 4 }}>
-          <span className="label-mono" style={{ color: 'var(--ink-soft)' }}>Month {phase.month}</span>
+          <span className="label-mono" style={{ color: 'var(--ink-soft)' }}>Phase {phase.month}</span>
         </div>
         <h3 className="display journey-title">{phase.title}</h3>
         <div className="journey-level">→ {phase.level}</div>
@@ -258,11 +258,11 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
           ))}
         </div>
 
-        {/* 6-Month Journey */}
+        {/* Journey */}
         <div style={{ marginTop: 64 }}>
           <div style={{ marginBottom: 32 }}>
             <h2 className="display" style={{ fontSize: 28, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
-              Your 6-Month Journey
+              Your Journey
             </h2>
             <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0, lineHeight: 1.55 }}>
               From new hire to Senior Hospitality Professional — your complete development path.
@@ -281,7 +281,7 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
               What comes after
             </div>
             <h3 className="display" style={{ fontSize: 22, color: 'white', margin: '0 0 10px', lineHeight: 1.2 }}>
-              After Month 6 — Continuous Development
+              After Phase 6 — Continuous Development
             </h3>
             <p style={{ fontSize: 14, color: 'rgba(250,247,242,0.65)', margin: '0 0 24px', lineHeight: 1.6, maxWidth: 560 }}>
               Monthly challenge packs, quarterly certifications, and AI-assigned training keep your skills sharp and your career growing.
