@@ -1220,6 +1220,7 @@ const casualDiningStandardLessons: Lesson[] = [
     duration: '7 min',
     xp: 20,
     status: 'available',
+    scenarioId: 'casual-dining-arrival',
     learn: [
       { type: 'intro', text: 'Your first impression starts before you say a single word — before the first guest even looks at you. The way you walk in, the state of your uniform, the energy you carry: all of it sets the tone for the entire shift. A guest reads a server\'s confidence and care in the first glance, long before they\'re greeted. In casual dining the pace is fast and the room is open, so there\'s nowhere to hide a wrinkled shirt or a checked-out attitude. Showing up right isn\'t vanity — it\'s the foundation everything else is built on.' },
       { type: 'tip-list', title: 'The pre-shift checklist', items: [
@@ -1253,6 +1254,7 @@ const casualDiningStandardLessons: Lesson[] = [
     duration: '8 min',
     xp: 25,
     status: 'available',
+    scenarioId: 'casual-dining-teamwork',
     learn: [
       { type: 'intro', text: 'Casual dining runs on teamwork even more than fine dining does. The pace is higher, the tickets come faster, and the margin for error is smaller. There\'s no army of support staff to absorb a mistake — when one person drops the ball, it lands on everyone. A forgotten drink order, an unbussed table, a server who vanishes mid-rush: each one slows the whole floor, frustrates guests, and shrinks the tips the entire team shares. The best casual dining teams move like one organism. You don\'t just run your section — you watch the whole floor and step in before anyone has to ask.' },
       { type: 'tip-list', title: 'The 5 unwritten rules of floor teamwork', items: [
@@ -1280,6 +1282,7 @@ const casualDiningStandardLessons: Lesson[] = [
     duration: '8 min',
     xp: 25,
     status: 'available',
+    scenarioId: 'casual-dining-allergy',
     learn: [
       { type: 'intro', text: 'Food safety isn\'t just a kitchen job — it\'s a front-of-house responsibility too. As a server, you\'re the last line of defense between the kitchen and the guest. You\'re the one who hears "I\'m allergic to nuts," the one who carries the plate to the table, the one who notices a dish that doesn\'t look right. A missed allergen flag isn\'t a small mistake — it can end in a hospital visit, or worse. You don\'t need to be a food scientist, but you do need to take allergies seriously, know the common danger zones, and know exactly what to do when something feels off.' },
       { type: 'tip-list', title: 'The 8 most common allergens', items: [

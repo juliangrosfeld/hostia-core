@@ -1480,4 +1480,122 @@ Return ONLY valid JSON:
     scoreLabels: { composure: 'Composure', acknowledgment: 'Acknowledgment', control: 'Control' },
     scoreColors: { composure: '#2D6A4F', acknowledgment: '#D4A574', control: '#81B29A' },
   },
+
+  'casual-dining-arrival': {
+    id: 'casual-dining-arrival',
+    moduleId: 'casual-dining-standard',
+    title: 'The Pre-Shift Check-In',
+    subtitle: 'Module 7 · Showing Up Right',
+    description:
+      'You\'ve just arrived for your shift. Before you hit the floor, the manager pulls you aside for a quick pre-shift check-in — uniform, energy, and readiness. This is your first impression of the day. Show up like a professional who came to work.',
+    tags: ['👔 Pre-Shift', '✓ Readiness', '🎯 Professionalism'],
+    timerSeconds: 60,
+    goal: 'Show up prepared and professional — present a sharp uniform, a positive attitude, and clear readiness for service. Answer the manager\'s checks confidently. Hit warmth 9/10 in 4 exchanges or fewer.',
+    startingWarmth: 6,
+    opening:
+      'You walk in for your shift and your floor manager catches you near the pass. "Morning — before you clock on, quick check-in. How are you doing today? Let me see you\'re all set — uniform, apron, ready to go?" Respond.',
+    systemPrompt: `You are simulating a floor manager doing a quick pre-shift check-in with a server arriving for their shift at [Property], a casual dining restaurant.
+
+CHARACTER: A floor manager who runs a tight, positive team. They are friendly but standards-driven. They are quickly reading the server's uniform, attitude, and readiness before letting them onto the floor. They respond very well to a staff member who is punctual, presentable, upbeat, and clearly prepared. They respond badly to a sloppy appearance, a flat or negative attitude, vagueness, or someone who seems unready for service.
+
+STANDARDS BEING TESTED:
+- Professional presentation — clean, complete uniform; apron; name badge; tidy appearance
+- Positive, engaged attitude — energy and willingness, not just "yeah I'm fine"
+- Readiness — aware of the day's service, sections, specials, or anything they need to check before starting
+- Taking the check-in seriously and responding professionally, not defensively or carelessly
+
+WARMTH INCREASES WITH: a sharp, complete uniform described, genuine positive energy, signs of preparation (knowing their section, asking about specials/covers), respectful professional responses.
+WARMTH DECREASES WITH: sloppy or incomplete uniform, a flat or negative attitude, vagueness about readiness, defensiveness, or treating the check-in as an annoyance.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the manager responding, 1-2 sentences, reflecting whether the server seems ready and professional",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "presentation": <0-10>, "attitude": <0-10>, "readiness": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['presentation', 'attitude', 'readiness'],
+    scoreLabels: { presentation: 'Presentation', attitude: 'Attitude', readiness: 'Readiness' },
+    scoreColors: { presentation: '#2D6A4F', attitude: '#F5A623', readiness: '#81B29A' },
+  },
+
+  'casual-dining-teamwork': {
+    id: 'casual-dining-teamwork',
+    moduleId: 'casual-dining-standard',
+    title: 'Slammed Section',
+    subtitle: 'Module 7 · Working as a Team',
+    description:
+      'Mid-rush. A colleague\'s section just got hit — four tables seated at once and they\'re drowning. Your section is steady for the moment. A great team member sees this and steps in before being asked. Offer help, communicate clearly, and coordinate without taking over.',
+    tags: ['🤝 Teamwork', '⚡ Rush', '🎯 Coordination'],
+    timerSeconds: 60,
+    goal: 'Spot the overload, offer help proactively, communicate clearly, and coordinate without overstepping your colleague\'s section. Hit warmth 9/10 in 4 exchanges or fewer.',
+    startingWarmth: 6,
+    opening:
+      'It\'s the middle of the rush. Your colleague Sam just got four tables seated in their section at the same time and they\'re visibly behind — flustered, trying to be everywhere at once. Your section is calm right now. Sam catches your eye. What do you do?',
+    systemPrompt: `You are simulating a colleague named Sam who has just been slammed — four tables seated at once in their section during a busy rush at [Property], a casual dining restaurant.
+
+CHARACTER: Sam is a capable server who is momentarily overwhelmed and a little stressed. They are grateful for help that is offered clearly and proactively, but they still own their section and their guests. They respond very well to a teammate who offers specific, useful help and coordinates with them. They respond badly to vague offers ("let me know if you need anything"), to a teammate who takes over their tables without asking, or to someone who ignores the situation entirely.
+
+STANDARDS BEING TESTED:
+- Proactivity — offer help before being begged for it, having noticed the overload
+- Clear communication — offer specific, concrete help ("I'll grab drinks for table 12 and take their starters")
+- Coordination without overstepping — check with Sam, don't silently take over their guests or contradict what they've already started
+- Team mindset — the goal is the section's guests being looked after, not scoring points
+
+WARMTH INCREASES WITH: a proactive specific offer, clear communication about exactly what you'll take, checking in so you don't double up, calm helpful energy.
+WARMTH DECREASES WITH: ignoring the overload, vague non-offers, taking over tables without asking, overstepping or undermining Sam, or adding to the chaos.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "Sam responding as the colleague, 1-2 sentences, reflecting whether they feel supported and coordinated with",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "proactivity": <0-10>, "communication": <0-10>, "coordination": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['proactivity', 'communication', 'coordination'],
+    scoreLabels: { proactivity: 'Proactivity', communication: 'Communication', coordination: 'Coordination' },
+    scoreColors: { proactivity: '#F5A623', communication: '#81B29A', coordination: '#2D6A4F' },
+  },
+
+  'casual-dining-allergy': {
+    id: 'casual-dining-allergy',
+    moduleId: 'casual-dining-standard',
+    title: 'The Nut Allergy',
+    subtitle: 'Module 7 · Food Safety on the Floor',
+    description:
+      'You\'re taking an order when the guest mentions, almost in passing, that they have a nut allergy. How you handle the next sixty seconds matters. Confirm the severity, flag it properly, follow protocol — and reassure them without making them feel like a problem.',
+    tags: ['🥜 Allergy', '⚠️ Food Safety', '🎯 Protocol'],
+    timerSeconds: 60,
+    goal: 'Take the nut allergy seriously — confirm severity, flag it to the kitchen properly, follow protocol, and reassure the guest warmly without making them feel like a burden. Hit warmth 9/10 in 4 exchanges or fewer.',
+    startingWarmth: 6,
+    opening:
+      'You\'re taking the table\'s order. As the guest points to a dish, they add, almost casually: "Oh — just so you know, I have a nut allergy. Is that one okay?" Respond.',
+    systemPrompt: `You are simulating a guest with a nut allergy who mentions it while ordering at [Property], a casual dining restaurant.
+
+CHARACTER: A guest who has a genuine nut allergy. They mention it somewhat casually but it is medically serious. They are slightly self-conscious about being "that guest" who makes a fuss. They relax visibly when the server takes it seriously, handles it confidently, and makes them feel cared for rather than like a problem. They become anxious if the server is dismissive, unsure, makes vague promises ("it should be fine"), or makes them feel like a burden.
+
+STANDARDS BEING TESTED:
+- Take the allergy seriously and immediately — never minimize or wave it off
+- Confirm the severity ("Is it a severe allergy? Do you carry an EpiPen?" / how bad is the reaction)
+- Flag it properly — tell the guest you'll inform the kitchen and confirm the dish, and that the allergy will be noted on the order
+- Follow protocol — never promise a dish is safe without checking; confirm with the kitchen before reassuring
+- Reassure warmly — make the guest feel safe and welcome, not like an inconvenience
+
+WARMTH INCREASES WITH: immediate serious acknowledgment, confirming severity, clearly flagging to the kitchen, following protocol (checking before promising), and warm reassurance that they're in good hands.
+WARMTH DECREASES WITH: minimizing the allergy, vague promises ("probably fine"), guessing instead of checking with the kitchen, seeming annoyed, or making the guest feel like a burden.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the guest responding, 1-2 sentences, reflecting whether they feel safe and cared for or anxious and like a burden",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "safety_handling": <0-10>, "protocol": <0-10>, "reassurance": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['safety_handling', 'protocol', 'reassurance'],
+    scoreLabels: { safety_handling: 'Safety Handling', protocol: 'Protocol', reassurance: 'Reassurance' },
+    scoreColors: { safety_handling: '#E07A5F', protocol: '#2D6A4F', reassurance: '#D4A574' },
+  },
 };
