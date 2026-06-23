@@ -179,6 +179,24 @@ function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }
   );
 }
 
+// Sum every lesson's `duration` ("7 min") across all modules and format as "~2h 27m".
+function formatCurriculumTime(curriculum: Module[]): string {
+  const totalMin = curriculum.reduce(
+    (sum, m) =>
+      sum +
+      m.lessons.reduce((s, l) => {
+        const n = parseInt(l.duration, 10);
+        return s + (Number.isFinite(n) ? n : 0);
+      }, 0),
+    0,
+  );
+  const hours = Math.floor(totalMin / 60);
+  const minutes = totalMin % 60;
+  if (hours === 0) return `~${minutes}m`;
+  if (minutes === 0) return `~${hours}h`;
+  return `~${hours}h ${minutes}m`;
+}
+
 interface HomeViewProps {
   curriculum: Module[];
   onOpenModule: (m: Module) => void;
@@ -195,6 +213,7 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
 
   const totalXp = curriculum.reduce((a, m) => a + m.xpTotal, 0);
   const totalLessons = curriculum.reduce((a, m) => a + m.totalLessons, 0);
+  const totalTime = formatCurriculumTime(curriculum);
 
   return (
     <div className="page animate-fade-up">
@@ -244,7 +263,7 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
         <div className="curriculum-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, marginTop: 48 }}>
           <h2 className="display" style={{ fontSize: 28, color: 'var(--brand-deep)' }}>Curriculum</h2>
           <span className="curriculum-sub" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-            {curriculum.length} modules · {totalLessons} lessons · ~4 hours total
+            {curriculum.length} modules · {totalLessons} lessons · {totalTime} total
           </span>
         </div>
 
