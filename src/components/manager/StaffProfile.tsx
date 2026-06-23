@@ -15,6 +15,9 @@
 
 import { useState } from 'react';
 import { ChevronLeft, Check, Lock, MessageSquare, Eye, X } from 'lucide-react';
+import {
+  ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
+} from 'recharts';
 import type { StaffMember } from '@/lib/staff-data';
 import { getModuleSkillScore, getWarmthLabel } from '@/lib/xp';
 
@@ -294,32 +297,23 @@ export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfil
             </div>
           </div>
 
-          {/* Section B — Skill profile (warmth % per module) */}
+          {/* Section B — Skill profile (warmth % per module, radar) */}
           <div className="card" style={{ padding: 28 }}>
-            <div className="label-mono">Section B · Skill profile</div>
-            <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', margin: '6px 0 6px' }}>
-              Warmth by module
+            <div className="label-mono">Skill profile</div>
+            <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', margin: '6px 0 0' }}>
+              Strengths &amp; gaps
             </h3>
-            <p style={{ fontSize: 12.5, color: 'var(--ink-soft)', margin: '0 0 18px' }}>
-              Average warmth score across passed roleplays. Below 70% needs work.
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {skillProfile.map((m) => {
-                const color = getWarmthLabel(m.score).color;
-                return (
-                  <div key={m.name}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
-                      <span>{m.name}</span>
-                      <span style={{ color, fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
-                        {m.score > 0 ? `${m.score}%` : '—'}
-                      </span>
-                    </div>
-                    <div className="skill-bar-track" style={{ height: 6 }}>
-                      <div className="skill-bar-fill" style={{ width: `${m.score}%`, background: color }} />
-                    </div>
-                  </div>
-                );
-              })}
+            <div style={{ height: 280, marginTop: 8 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart
+                  data={skillProfile.map((m) => ({ skill: m.name, value: m.score, fullMark: 100 }))}
+                  margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
+                >
+                  <PolarGrid stroke="#E5DCC9" />
+                  <PolarAngleAxis dataKey="skill" tick={{ fontSize: 11, fill: '#4A5568' }} />
+                  <Radar dataKey="value" stroke="#F5A623" fill="#F5A623" fillOpacity={0.25} strokeWidth={2} />
+                </RadarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
