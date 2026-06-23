@@ -2,7 +2,7 @@
 
 import { Play, Lock } from 'lucide-react';
 import {
-  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House,
+  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils,
 } from 'lucide-react';
 import type { Module } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
@@ -134,10 +134,12 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Users,
   Brain,
   House,
+  Utensils,
 };
 
 function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
+  const hasRoleplay = module.lessons.some((l) => Boolean(l.scenarioId));
   return (
     <div className="module-card" onClick={onClick}>
       <div className="module-band" style={{ background: module.color }} />
@@ -154,6 +156,13 @@ function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }
           <h3 className="display module-title">{module.title}</h3>
           <p className="module-sub">{module.subtitle}</p>
         </div>
+        {hasRoleplay && (
+          <div style={{ marginBottom: 6 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: module.color, background: `${module.color}18`, borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
+              ⚡ Live Roleplay
+            </span>
+          </div>
+        )}
         <div className="module-progress-row">
           <div className="module-progress-bar">
             <div

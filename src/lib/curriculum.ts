@@ -1448,8 +1448,8 @@ export const CURRICULUM: Module[] = [
   {
     id: 'casual-dining-standard',
     title: 'The Casual Dining Standard',
-    subtitle: 'Master the professional habits, team mindset, and safety awareness that define a great casual dining team member.',
-    iconName: 'Star',
+    subtitle: 'Habits, teamwork, and safety on a fast floor.',
+    iconName: 'Utensils',
     color: '#2D6A4F',
     progress: 0,
     totalLessons: 4,
