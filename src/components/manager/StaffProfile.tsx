@@ -2,23 +2,30 @@
 
 // ─────────────────────────────────────────────────────────────
 // StaffProfile — manager drill-down for one staff member.
+// Mirrors the hostia-brgrhaus staff profile layout:
 //
-// Three sections:
-//   A. Module Progress   — lessons completed / total, no %.
-//   B. Skill Profile     — warmth % per module (getModuleSkillScore).
-//   C. Recent Roleplay   — last 3 sessions + transcript modal.
+//   • Header card  — avatar, name, role line, badge chips, actions.
+//   • Stats row    — Overall score · Lessons · Level · XP · Last active.
+//   • Skill profile (left)   — radar of warmth % per module.
+//   • Module progress (right) — per-module lesson count + warmth + bar.
+//   • Recent roleplay scores  — last 3 sessions + transcript modal.
+//   • Manager notes — textarea + save.
 //
-// Sections B and C run on MOCK data shaped exactly like the
-// `roleplay_sessions` table (warmth_score, passed, transcript: [{ role,
-// content, warmth? }], …) so wiring up live data later is a straight swap.
+// All data is MOCK, shaped exactly like the `roleplay_sessions` table
+// (warmth_score, passed, transcript: [{ role, content, warmth? }], …)
+// so wiring up live data later is a straight swap.
 // ─────────────────────────────────────────────────────────────
 
 import { useState } from 'react';
-import { ChevronLeft, Check, Lock, MessageSquare, Eye, X } from 'lucide-react';
+import {
+  ChevronLeft, Check, Lock, MessageSquare, BookOpen, Eye, X,
+  Star, Flame, Award,
+} from 'lucide-react';
 import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 import type { StaffMember } from '@/lib/staff-data';
+import { SKILL_LABELS } from '@/lib/staff-data';
 import { getModuleSkillScore, getWarmthLabel } from '@/lib/xp';
 
 // ─── Schema-shaped types (match roleplay_sessions) ───────────
@@ -39,17 +46,26 @@ interface RoleplaySession {
   transcript: TranscriptEntry[];
 }
 
-// ─── Module definitions (roleplay modules only) ──────────────
+// ─── Module definitions (roleplay modules) ───────────────────
 // Keys map to StaffMember.skills so mock data varies per staff member.
+// Names come from SKILL_LABELS so radar + progress list stay in sync.
 
 const MODULES = [
-  { key: 'greetings', name: 'Greetings', total: 4 },
-  { key: 'floor', name: 'Physical Craft', total: 5 },
-  { key: 'serviceFlow', name: 'Service Flow', total: 3 },
-  { key: 'language', name: 'Language', total: 4 },
-  { key: 'complaints', name: 'Complaints', total: 4 },
-  { key: 'guestPsychology', name: 'Guest Psychology', total: 5 },
+  { key: 'greetings', total: 4 },
+  { key: 'serviceFlow', total: 3 },
+  { key: 'language', total: 4 },
+  { key: 'complaints', total: 4 },
+  { key: 'floor', total: 5 },
+  { key: 'guestPsychology', total: 5 },
 ] as const;
+
+const STATUS_LABEL: Record<StaffMember['status'], string> = {
+  star: 'Star performer',
+  active: 'Active',
+  developing: 'Developing',
+  'at-risk': 'At risk',
+  new: 'New hire',
+};
 
 // Build mock sessions whose warmth scores cluster around `score`, so
 // getModuleSkillScore() returns a realistic per-module average.
@@ -165,7 +181,7 @@ function TranscriptModal({ session, onClose }: { session: RoleplaySession; onClo
           </div>
         </div>
 
-        {/* Chat-style transcript: user on the right, guest/assistant on the left */}
+        {/* Chat-style transcript: server on the right, guest/assistant on the left */}
         <div style={{ padding: 24, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {session.transcript.map((entry, i) => {
             const isStaff = entry.role === 'user';
@@ -213,21 +229,29 @@ interface StaffProfileProps {
 
 export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfileProps) {
   const [openSession, setOpenSession] = useState<RoleplaySession | null>(null);
+  const [note, setNote] = useState('');
 
-  // Section A — distribute lessons across modules sequentially.
-  const moduleProgress = MODULES.map((m, i) => {
+  const firstName = s.name.split(' ')[0];
+
+  // Per-module warmth + lesson progress (mock, schema-shaped).
+  // Lessons are distributed across modules sequentially.
+  const modules = MODULES.map((m, i) => {
     const priorTotal = MODULES.slice(0, i).reduce((sum, mm) => sum + mm.total, 0);
     const done = Math.max(0, Math.min(m.total, s.lessons - priorTotal));
-    return { ...m, done };
+    const warmth = getModuleSkillScore(mockSessionsFor(s.skills[m.key]));
+    return {
+      key: m.key,
+      name: SKILL_LABELS[m.key],
+      total: m.total,
+      done,
+      warmth,
+    };
   });
 
-  // Section B — warmth % per module via getModuleSkillScore on mock sessions.
-  const skillProfile = MODULES.map((m) => ({
-    name: m.name,
-    score: getModuleSkillScore(mockSessionsFor(s.skills[m.key])),
-  }));
+  // Skill profile radar — warmth % per module.
+  const radarData = modules.map((m) => ({ skill: m.name, value: m.warmth, fullMark: 100 }));
 
-  // Section C — last 3 roleplay sessions (mock).
+  // Recent roleplay sessions (last 3, mock).
   const recentSessions = buildRecentSessions(s);
 
   return (
@@ -237,67 +261,81 @@ export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfil
           <ChevronLeft size={16} /> Team roster
         </button>
 
-        {/* ─ Hero ─ */}
+        {/* ─ Header card ─ */}
         <div className="staff-hero">
           <div className="staff-hero-inner" style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
             <div className="hero-avatar" style={{ background: s.color }}>{s.initials}</div>
-            <div style={{ flex: 1 }}>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
               <h1 className="display" style={{ fontSize: 36, color: 'var(--brand-deep)', margin: 0, lineHeight: 1.1 }}>
                 {s.name}
               </h1>
               <div style={{ fontSize: 15, color: 'var(--ink-soft)', marginTop: 6 }}>
                 {s.role} · {s.dept} · Joined {s.joined}
               </div>
+
+              {/* Badge chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
+                <span className="chip">
+                  <Star size={12} color="var(--gold-deep)" /> {STATUS_LABEL[s.status]}
+                </span>
+                <span className="chip">
+                  <Flame size={12} color="var(--coral)" /> {s.streak}-day streak
+                </span>
+                <span className="chip">
+                  <Award size={12} color="var(--sage-deep)" /> {s.badges} badges
+                </span>
+              </div>
             </div>
-            {onViewAs && (
-              <button className="btn-brand-sm" onClick={() => onViewAs(s)} style={{ flexShrink: 0 }}>
-                <Eye size={13} /> View as {s.name.split(' ')[0]}
+
+            {/* Actions */}
+            <div className="staff-hero-actions" style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+              {onViewAs && (
+                <button className="btn-brand-sm" onClick={() => onViewAs(s)}>
+                  <Eye size={13} /> View as {firstName}
+                </button>
+              )}
+              <button className="btn-ghost-sm" onClick={() => { /* TODO: messaging (live) */ }}>
+                <MessageSquare size={13} /> Send message
               </button>
-            )}
+              <button className="btn-ghost-sm" onClick={() => { /* TODO: module assignment (live) */ }}>
+                <BookOpen size={13} /> Assign module
+              </button>
+            </div>
+          </div>
+
+          {/* Stats row */}
+          <div className="staff-stats">
+            <div>
+              <div className="label-mono">Overall score</div>
+              <div className="stat-big">{s.score}%</div>
+            </div>
+            <div className="div-vert" />
+            <div>
+              <div className="label-mono">Lessons</div>
+              <div className="stat-big" style={{ fontVariantNumeric: 'tabular-nums' }}>{s.lessons}/{s.total}</div>
+            </div>
+            <div className="div-vert" />
+            <div>
+              <div className="label-mono">Level</div>
+              <div className="stat-big">L{s.level}</div>
+            </div>
+            <div className="div-vert" />
+            <div>
+              <div className="label-mono">XP earned</div>
+              <div className="stat-big" style={{ color: 'var(--brand)' }}>{s.xp}</div>
+            </div>
+            <div className="div-vert" />
+            <div>
+              <div className="label-mono">Last active</div>
+              <div className="stat-big">{s.lastActive}</div>
+            </div>
           </div>
         </div>
 
-        {/* ─ Section A + B grid ─ */}
+        {/* ─ Skill profile + Module progress ─ */}
         <div className="detail-grid">
-          {/* Section A — Module progress */}
-          <div className="card" style={{ padding: 28 }}>
-            <div className="label-mono">Section A · Module progress</div>
-            <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', margin: '6px 0 18px' }}>
-              Where they stand
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {moduleProgress.map((m) => {
-                const pct = (m.done / m.total) * 100;
-                const isDone = m.done === m.total;
-                const notStarted = m.done === 0;
-                return (
-                  <div key={m.key}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
-                      <span style={{ fontWeight: isDone ? 700 : 400, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        {notStarted && <Lock size={11} color="var(--ink-soft)" />}
-                        {m.name}
-                      </span>
-                      <span style={{ color: 'var(--ink-soft)', fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        {m.done}/{m.total}
-                        {isDone && <Check size={13} color="var(--sage)" />}
-                      </span>
-                    </div>
-                    <div className="skill-bar-track" style={{ height: 4 }}>
-                      <div
-                        className="skill-bar-fill"
-                        style={{
-                          width: `${pct}%`,
-                          background: isDone ? 'var(--sage)' : notStarted ? 'var(--sand-deeper)' : s.color,
-                        }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Section B — Skill profile (warmth % per module, radar) */}
+          {/* Left — Skill profile (radar) */}
           <div className="card" style={{ padding: 28 }}>
             <div className="label-mono">Skill profile</div>
             <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', margin: '6px 0 0' }}>
@@ -305,10 +343,7 @@ export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfil
             </h3>
             <div style={{ height: 280, marginTop: 8 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart
-                  data={skillProfile.map((m) => ({ skill: m.name, value: m.score, fullMark: 100 }))}
-                  margin={{ top: 20, right: 30, bottom: 20, left: 30 }}
-                >
+                <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                   <PolarGrid stroke="#E5DCC9" />
                   <PolarAngleAxis dataKey="skill" tick={{ fontSize: 11, fill: '#4A5568' }} />
                   <Radar dataKey="value" stroke="#F5A623" fill="#F5A623" fillOpacity={0.25} strokeWidth={2} />
@@ -316,11 +351,56 @@ export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfil
               </ResponsiveContainer>
             </div>
           </div>
+
+          {/* Right — Module progress */}
+          <div className="card" style={{ padding: 28 }}>
+            <div className="label-mono">Module progress</div>
+            <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', margin: '6px 0 18px' }}>
+              Where they stand
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {modules.map((m) => {
+                const isDone = m.done === m.total;
+                const locked = m.done === 0;
+                const pct = (m.done / m.total) * 100;
+                return (
+                  <div key={m.key}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13.5, marginBottom: 6 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, fontWeight: isDone ? 700 : 500 }}>
+                        {isDone ? (
+                          <Check size={15} color="var(--sage)" />
+                        ) : locked ? (
+                          <Lock size={13} color="var(--ink-soft)" />
+                        ) : (
+                          <span style={{ width: 15, height: 15, borderRadius: '50%', border: '2px solid var(--sand-deeper)', flexShrink: 0 }} />
+                        )}
+                        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name}</span>
+                      </span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+                        <span style={{ color: 'var(--ink-soft)', fontVariantNumeric: 'tabular-nums' }}>
+                          {m.done}/{m.total}
+                        </span>
+                        <span style={{ fontWeight: 700, color: locked ? 'var(--ink-soft)' : 'var(--sage-deep)', fontVariantNumeric: 'tabular-nums', minWidth: 34, textAlign: 'right' }}>
+                          {locked ? '—' : `${m.warmth}%`}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="skill-bar-track" style={{ height: 4 }}>
+                      <div
+                        className="skill-bar-fill"
+                        style={{ width: `${pct}%`, background: locked ? 'var(--sand-deeper)' : 'var(--sage)' }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* ─ Section C — Recent roleplay scores ─ */}
+        {/* ─ Recent roleplay scores ─ */}
         <div style={{ marginTop: 32 }}>
-          <div className="label-mono">Section C · Recent roleplay scores</div>
+          <div className="label-mono">Recent roleplay scores</div>
           <h2 className="display" style={{ fontSize: 22, margin: '6px 0 16px', color: 'var(--brand-deep)' }}>
             Last {recentSessions.length} sessions
           </h2>
@@ -377,6 +457,31 @@ export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfil
               </div>
             </>
           )}
+        </div>
+
+        {/* ─ Manager notes ─ */}
+        <div style={{ marginTop: 32 }}>
+          <div className="label-mono">Manager notes</div>
+          <h2 className="display" style={{ fontSize: 22, margin: '6px 0 16px', color: 'var(--brand-deep)' }}>
+            Private notes
+          </h2>
+          <div className="card" style={{ padding: 24 }}>
+            <textarea
+              className="notes-area"
+              rows={4}
+              placeholder={`Add a private note about ${firstName} — coaching focus, standout shifts, follow-ups…`}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
+              <button
+                className="btn-brand-sm"
+                onClick={() => { /* TODO: persist note (live data) */ }}
+              >
+                Save note
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
