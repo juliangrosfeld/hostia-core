@@ -182,7 +182,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
         joined: 'Today',
         color: form.color,
         badges: 0,
-        skills: { greetings: 0, serviceFlow: 0, language: 0, complaints: 0, floor: 0, guestPsychology: 0 },
+        skills: { greetings: 0, serviceFlow: 0, language: 0, complaints: 0, floor: 0, guestPsychology: 0, casualDiningFloor: 0 },
       };
       setStaffList((prev) => [...prev, member]);
       setSubmitting(false);

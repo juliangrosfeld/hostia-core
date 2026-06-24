@@ -1348,6 +1348,152 @@ const casualDiningStandardLessons: Lesson[] = [
   },
 ];
 
+const casualDiningFloorLessons: Lesson[] = [
+  {
+    id: 'taking-orders',
+    title: 'Taking Orders Correctly',
+    desc: 'Full attention, clean modifications, and a confident read-back',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'casual-dining-order',
+    learn: [
+      { type: 'intro', text: 'Taking an order looks simple, but it\'s where more guest frustration is born than almost anywhere else in service. A wrong dish, a forgotten modification, a missed allergy — every one of them starts at this moment, with how well you listened. Taking an order correctly is not about writing fast. It\'s about giving the table your complete attention for the sixty seconds it takes, getting every detail right, and confirming it before you walk away. Get this right and the rest of the meal flows. Get it wrong and you\'ll be apologizing for it ten minutes later.' },
+      { type: 'tip-list', title: 'Taking the order with full attention', items: [
+        'Phone away, body squared to the table — you are present and nowhere else for these sixty seconds.',
+        'Don\'t interrupt — let each guest finish before you respond or suggest.',
+        'Make eye contact and acknowledge each order as it comes ("great choice," a nod) so they know they\'ve been heard.',
+        'Know the menu well enough to answer questions instantly — and confirm with the kitchen rather than guessing if you\'re unsure.',
+        'Capture modifications and allergies the moment they\'re said — write them down clearly, never trust them to memory in a rush.',
+        'Move around the table in a logical order so nobody gets skipped or doubled up.',
+      ]},
+      { type: 'intro', text: 'Modifications and allergies are where attention matters most. When a guest changes a dish — dressing on the side, no onions, a swap of sides — repeat that change back as you note it: "Got it, the chicken bowl with the dressing on the side and greens instead of rice." When a guest mentions an allergy, treat it as non-negotiable: confirm the severity, write it on the ticket, and flag it out loud to the kitchen. Never wave a modification through with a vague "sure" and hope you remember — that\'s how the wrong plate reaches the table. A modification handled with confidence tells the guest they can trust you with the whole meal.' },
+      { type: 'tip-list', title: 'Common order-taking mistakes to avoid', items: [
+        'Trusting your memory instead of writing it down — the rush will erase it.',
+        'Nodding along to a modification you didn\'t fully catch instead of asking them to repeat it.',
+        'Forgetting to ask the follow-up questions — cook temperature, side choice, dressing, sauce.',
+        'Letting a quieter guest get talked over and skipped in a big group.',
+        'Walking away without reading the order back — the single fastest way to send the wrong food.',
+        'Treating an allergy like a preference instead of confirming severity and flagging it properly.',
+      ]},
+      { type: 'intro', text: 'Picture a table of four with mixed modifications: one orders a burger medium with no pickle, one wants the salad with grilled chicken added and dressing on the side, one has a gluten allergy and needs the bun swapped and the kitchen flagged, and one orders straight off the menu. The amateur tries to hold all of that in their head and gets at least one wrong. The professional writes each one down as it\'s said, asks the cook-temperature and side questions in the moment, notes the allergy clearly and says it back, and then — before leaving — reads the entire table\'s order out loud to confirm. Thirty seconds of read-back saves ten minutes of remade plates and a table that no longer trusts you.' },
+    ],
+    quiz: [
+      { q: 'What is taking an order correctly actually about?', options: ['Writing as fast as possible to save time.', 'Giving the table full attention, getting every detail right, and confirming before you leave.', 'Memorizing everything so you don\'t need to write it down.', 'Getting through it quickly so you can move to the next table.'], correct: 1, explain: 'Accuracy beats speed. Full attention for sixty seconds and a read-back before you walk away is what makes the rest of the meal flow.' },
+      { q: 'A guest changes their dish — dressing on the side, greens instead of rice. What\'s the right move?', options: ['Say "sure" and trust yourself to remember it.', 'Write it down and repeat the change back as you note it.', 'Tell them modifications slow the kitchen down.', 'Note only the part you think matters most.'], correct: 1, explain: 'Capture the modification the moment it\'s said and read it back. A vague "sure" you hope to remember is how the wrong plate reaches the table.' },
+      { q: 'A guest mentions an allergy while ordering. How should you treat it?', options: ['Like any other preference — note it and move on.', 'As non-negotiable — confirm severity, write it on the ticket, and flag it to the kitchen.', 'Assume the kitchen will catch it from the order.', 'Avoid the obvious dishes and serve the rest.'], correct: 1, explain: 'An allergy is never a preference. Confirm severity, note it clearly, and flag it out loud to the kitchen — guessing can put a guest in the hospital.' },
+      { q: 'Why read the full order back before leaving the table?', options: ['It fills time while the guests settle.', 'It\'s the fastest way to catch a mistake before it becomes a remade plate and a table that doesn\'t trust you.', 'It\'s only necessary for large groups.', 'It shows the guests how good your memory is.'], correct: 1, explain: 'Thirty seconds of read-back saves ten minutes of remade food. It catches errors while they\'re still free to fix.' },
+      { q: 'At a four-top with mixed modifications, what separates the professional from the amateur?', options: ['The professional holds it all in their head to look impressive.', 'The professional writes each order down as it\'s said, asks the follow-up questions, notes the allergy clearly, and reads the whole table back.', 'The professional takes the orders faster.', 'The professional lets the kitchen sort out the modifications.'], correct: 1, explain: 'Writing each item down in the moment, asking cook-temp and side questions, flagging the allergy, and confirming the full order is exactly how the pro avoids a wrong plate.' },
+    ],
+  },
+  {
+    id: 'managing-sections',
+    title: 'Managing Multiple Tables',
+    desc: 'Always know the status of every table at once',
+    duration: '9 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'casual-dining-multitable',
+    learn: [
+      { type: 'intro', text: 'The single skill that separates a server who survives a rush from one who owns it is section awareness — holding the live status of every table in your head at once. A great server always knows, without looking twice, which table just sat down, which has ordered, which is waiting on food, which is eating, and which is ready for the bill. They don\'t react to whichever guest waves loudest; they work a mental map and stay ahead of all of it. Lose that map and you\'re suddenly running in circles, double-backing, and letting tables slip — which is exactly when guests start to feel forgotten.' },
+      { type: 'tip-list', title: 'The five states every table is always in', items: [
+        'Just seated — needs greeting, water, and menus. The clock is running on their first impression.',
+        'Ordered — needs drinks out fast and the order fired correctly to the kitchen.',
+        'Waiting on food — the danger zone; this is where guests feel forgotten, so keep them seen.',
+        'Eating — needs a check-in, refills, and pre-bussing, then space to enjoy it.',
+        'Ready for the bill — needs the check promptly and a warm close before they have to ask.',
+      ]},
+      { type: 'intro', text: 'Knowing the states is one thing; prioritizing them under pressure is another. When three tables need you at once, you triage. Hot food that\'s ready always goes first — it dies under the lamp and the table\'s already waiting. A new table that hasn\'t been greeted comes next, because an unacknowledged guest\'s frustration grows fastest. A guest who simply needs a refill or the bill can be held for thirty seconds with a glance and a "right with you." The mistake is serving whoever is closest or loudest instead of whoever the floor actually needs you to serve next. Triage by impact, not by volume.' },
+      { type: 'tip-list', title: 'Prioritization under pressure', items: [
+        'Ready hot food first — always. It only gets worse the longer it waits.',
+        'Greet a new table before it starts to stew — an unacknowledged guest sours fastest.',
+        'Batch your trips — never cross the floor for one thing when you could carry three.',
+        'Acknowledge everyone you can\'t serve yet with eye contact and "I\'ll be right with you."',
+        'Reset your mental map every time you pass the floor — re-scan, re-rank, keep moving.',
+      ]},
+      { type: 'intro', text: 'When you\'re genuinely stretched, the goal is to manage the guest\'s experience without ever making them feel the strain you\'re under. Guests forgive a busy room; they don\'t forgive feeling forgotten. So acknowledge waits honestly and warmly, set a realistic expectation ("I\'m firing your order now — about ten minutes"), and never let your stress show on your face or in your pace. A small gesture — topping up water, a quick honest update, "you\'re next" — buys enormous patience. What kills it is excuses, blaming the kitchen, vanishing, or over-apologizing. Calm, honest, and seen: that\'s how a stretched server keeps every table feeling looked after.' },
+    ],
+    quiz: [
+      { q: 'What does "section awareness" actually mean?', options: ['Knowing how many tables are in your section.', 'Holding the live status of every table in your head at once — who just sat, who ordered, who\'s waiting, who\'s eating, who needs the bill.', 'Watching your manager\'s section as well as your own.', 'Remembering which tables tip the best.'], correct: 1, explain: 'Section awareness is the mental map of every table\'s state at once. It\'s what lets you stay ahead instead of reacting to whoever waves loudest.' },
+      { q: 'Three tables need you at the same time. How do you decide what comes first?', options: ['Serve whoever is closest to you.', 'Serve whoever is waving or calling loudest.', 'Triage by impact — ready hot food first, then a new ungreeted table, then quick needs like a refill or bill.', 'Handle them strictly in the order they sat down.'], correct: 2, explain: 'Triage by impact, not volume. Hot food dies under the lamp and an ungreeted guest sours fastest — those come before a quick refill that can wait thirty seconds.' },
+      { q: 'Which table state is the "danger zone" where guests most often feel forgotten?', options: ['Just seated.', 'Waiting on food.', 'Eating.', 'Ready for the bill.'], correct: 1, explain: 'Waiting on food is where guests feel forgotten. Keeping them seen during that stretch is what prevents frustration before it starts.' },
+      { q: 'You\'re slammed and stretched thin. What\'s the right way to handle a waiting guest?', options: ['Explain how busy you are so they understand.', 'Acknowledge the wait warmly, set a realistic expectation, and never let your stress show.', 'Apologize repeatedly every time you pass.', 'Avoid eye contact until you can actually help them.'], correct: 1, explain: 'Guests forgive busy; they don\'t forgive feeling forgotten. Honest acknowledgment, a realistic time, and calm composure keep them patient — excuses and over-apologizing don\'t.' },
+      { q: 'You\'re crossing the floor to grab one drink refill. What does an aware server do?', options: ['Make the single trip — focus on one task at a time.', 'Batch it — check the mental map and carry or clear whatever else is on the way.', 'Wait until several tables need things before moving.', 'Ask another server to cover the trip.'], correct: 1, explain: 'Never cross the floor for one thing. Batching trips off your mental map is what keeps a stretched section moving without double-backs.' },
+    ],
+  },
+  {
+    id: 'table-turns',
+    title: 'Table Turns & Pacing',
+    desc: 'Move tables through efficiently without ever rushing a guest',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'casual-dining-turn',
+    learn: [
+      { type: 'intro', text: 'Turning tables and rushing guests are not the same thing — and confusing them is one of the most expensive mistakes a server makes. Turning a table means moving it through the service sequence smoothly and at the right pace, so when the guests are naturally ready to go, everything\'s in place for them to leave happy and for the next party to sit. Rushing a guest means making them feel pushed out before they\'re ready. The first protects revenue and the guest experience at the same time. The second sacrifices the guest experience for a few extra minutes — and costs you the return visit and the tip. The whole craft is turning tables without anyone ever feeling turned.' },
+      { type: 'tip-list', title: 'Reading the natural pacing signals', items: [
+        'Plates pushed toward the edge or stacked — they\'re finished; clear promptly to open the next phase.',
+        'Conversation winding down, glances around the room — the meal is closing; this is your window to offer dessert or the bill.',
+        'Cutlery laid together on the plate — the universal "I\'m done" signal; don\'t leave it sitting.',
+        'Cards or wallet appearing on the table — they want the bill now; don\'t make them ask.',
+        'Settling back in, ordering another round, leaning into conversation — they\'re staying; give them space, don\'t force the close.',
+      ]},
+      { type: 'intro', text: 'Good pacing is the engine of a clean turn, and most of it is invisible. Clear plates promptly the moment a course is finished — a table buried under empty dishes feels neglected and stalls. Offer dessert and coffee at the natural lull rather than waiting to be asked, which keeps the meal moving forward. Present the bill at the right moment: after you\'ve read that they\'re winding down, framed with zero pressure — "no rush at all, just leaving this whenever you\'re ready." Each of these nudges the table gently toward its natural conclusion without a single word that sounds like "hurry up." The guest experiences a smooth, complete meal; you experience a table that turns itself.' },
+      { type: 'tip-list', title: 'Turning a table without rushing the guest', items: [
+        'Pre-bus throughout so the final clear is small and the table never feels stalled.',
+        'Offer dessert, coffee, or the bill at the natural lull — read the moment, don\'t force it.',
+        'Present the bill warmly and with no pressure: "whenever you\'re ready, no rush at all."',
+        'Never hover, sigh, or stack chairs nearby — body language rushes guests louder than words.',
+        'Close with genuine warmth and an invitation back — a great wrap-up makes the next visit, not just this turn.',
+        'When a table genuinely wants to linger and the floor allows it, let them — a forced turn that sours a regular costs more than the table.',
+      ]},
+    ],
+    quiz: [
+      { q: 'What\'s the difference between turning a table and rushing a guest?', options: ['They\'re the same thing — both just mean getting guests to leave faster.', 'Turning moves a table smoothly through the sequence so it\'s ready when guests naturally are; rushing makes them feel pushed out before they\'re ready.', 'Turning only happens at busy times; rushing happens when it\'s slow.', 'Turning is for big tables, rushing is for small ones.'], correct: 1, explain: 'Turning protects both revenue and experience by pacing well. Rushing sacrifices the experience for a few minutes — and costs the return visit and the tip.' },
+      { q: 'A guest lays their cutlery together on the plate. What does this signal?', options: ['They want more food.', 'They\'re finished with the course — clear it promptly.', 'They\'re unhappy with the dish.', 'They want to be left alone.'], correct: 1, explain: 'Cutlery laid together is the universal "I\'m done" signal. Clearing promptly opens the next phase and keeps the table from stalling.' },
+      { q: 'What\'s the right way to present the bill when a table is winding down?', options: ['Drop it silently and walk away fast.', 'Wait until they explicitly ask for it.', 'Present it warmly with no pressure — "whenever you\'re ready, no rush at all."', 'Tell them you need the table for the next party.'], correct: 2, explain: 'Present at the natural lull, framed with zero pressure. It nudges the table toward its close without a single word that sounds like "hurry up."' },
+      { q: 'Which of these rushes a guest the loudest — even without words?', options: ['Pre-bussing empty plates as you pass.', 'Offering dessert at a natural lull.', 'Hovering nearby, sighing, or stacking chairs close to the table.', 'Closing with a warm invitation back.'], correct: 2, explain: 'Body language rushes guests louder than words. Hovering, sighing, and stacking chairs nearby all scream "hurry up" even if you never say it.' },
+      { q: 'A table genuinely wants to linger and the floor isn\'t under pressure. What\'s the smart call?', options: ['Force the turn anyway — every table must turn on schedule.', 'Let them linger — a forced turn that sours a regular costs more than the table.', 'Present the bill repeatedly until they leave.', 'Start clearing everything to signal they should go.'], correct: 1, explain: 'When the floor allows it, let a table linger. A great wrap-up makes the next visit; a forced turn that sours a guest costs far more than a few minutes.' },
+    ],
+  },
+  {
+    id: 'floor-efficiency',
+    title: 'Efficiency & Attention to Detail',
+    desc: 'Catch the small things before guests ever have to ask',
+    duration: '9 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'casual-dining-efficiency',
+    learn: [
+      { type: 'intro', text: 'The best servers don\'t look like they\'re working harder than everyone else — they look like they\'re working less, because everything is handled before it becomes a problem. That\'s the difference between proactive and reactive service. Reactive service waits for the raised hand, the empty glass, the request; it\'s always one step behind, always apologizing for a thing that was already too late. Proactive service sees the need forming and meets it before the guest even registers it. The refill arrives before they reach for the glass. The plate is cleared before they push it away. Nothing is ever asked for, because nothing is ever missed. That\'s what "seamless" actually means — and it\'s built entirely on attention to detail.' },
+      { type: 'tip-list', title: 'Proactive vs reactive — the shift', items: [
+        'Reactive waits for the empty glass; proactive watches the glass line and refills before it\'s empty.',
+        'Reactive waits to be flagged; proactive catches the guest scanning the room and is already on the way.',
+        'Reactive clears when asked; proactive clears the finished plate the moment cutlery goes down.',
+        'Reactive brings the bill when requested; proactive reads the close and has it ready at the right moment.',
+        'Reactive apologizes for the miss; proactive never creates the miss in the first place.',
+      ]},
+      { type: 'intro', text: 'Two habits turn attention into efficiency. The first is the scan: every single time you pass through your section, your eyes do a quick sweep — glass levels, plate states, faces, body language. One pass, the whole picture updated, every time. The servers who seem to have eyes everywhere aren\'t gifted; they\'ve just made scanning automatic. The second is the one-trip rule, sometimes called never walking empty-handed: every trip out of the kitchen carries something to the floor, and every trip back brings something with it. A dropped plate cleared on the way past, a refill delivered en route, a condiment grabbed because you noticed it was needed two tables ago. Small details compound: catch ten tiny things early and you\'ve erased ten interruptions, ten return trips, ten moments a guest might have felt overlooked. That compounding is what an exceptional experience is actually made of.' },
+      { type: 'tip-list', title: '6 efficiency habits every floor server should build', items: [
+        'Scan your section every single time you pass — one sweep, glasses and plates and faces, picture updated.',
+        'Live by the one-trip rule — never walk the floor empty-handed in either direction.',
+        'Pre-bus constantly — clear finished plates and glasses as you go so the table never piles up.',
+        'Anticipate the next need — read what each table will want next and have it moving before they ask.',
+        'Batch tasks by trip — group what you carry and where you stop so one lap does the work of three.',
+        'Reset and restock proactively in the lulls — stock your station so a rush never catches you running for napkins.',
+      ]},
+      { type: 'intro', text: 'The observant regular is the ultimate test of all of this. They\'ve been in enough times to know exactly how good service feels, and they read your section the way you should be reading it — they see the glass you didn\'t refill, the plate you left sitting, the moment you waited to be told. You can\'t charm your way past that guest; you can only out-attention them. Catch the near-empty glass before they touch it, clear the finished plate without being asked, anticipate the next thing they\'ll want and have it ready — and do all of it smoothly, in one pass, without making a performance of it. Get there and the regular stops noticing the service at all, which is the highest compliment there is: it just feels effortless, because you did all the work where they couldn\'t see it.' },
+    ],
+    quiz: [
+      { q: 'What\'s the core difference between proactive and reactive service?', options: ['Proactive is faster; reactive is slower.', 'Proactive sees the need forming and meets it before the guest registers it; reactive waits for the raised hand and is always a step behind.', 'Proactive is for regulars; reactive is for new guests.', 'There is no real difference — both get the job done.'], correct: 1, explain: 'Reactive waits for the request and apologizes for the miss. Proactive meets the need before it\'s voiced, so nothing is ever asked for because nothing is ever missed.' },
+      { q: 'What is the "scan," and how often should you do it?', options: ['A quick check of your phone between tables.', 'A sweep of your whole section — glasses, plates, faces — done every single time you pass through it.', 'A once-per-shift review with your manager.', 'A check you do only when a table flags you.'], correct: 1, explain: 'The scan is a one-pass sweep of glass levels, plate states, and body language, done every time you cross your section. Making it automatic is how great servers seem to have eyes everywhere.' },
+      { q: 'What does the "one-trip rule" (never walking empty-handed) mean?', options: ['Only make one trip to each table per visit.', 'Every trip out of the kitchen carries something to the floor, and every trip back brings something with it.', 'Never carry more than one plate at a time for safety.', 'Limit yourself to one lap of the floor between orders.'], correct: 1, explain: 'Never walking empty-handed means each trip in either direction is doing work — delivering, clearing, or grabbing what you spotted was needed. It erases return trips.' },
+      { q: 'How do small details "compound" into an exceptional experience?', options: ['They don\'t — only big gestures matter to guests.', 'Catching ten tiny things early erases ten interruptions, ten return trips, and ten moments a guest might feel overlooked.', 'They add up to a bigger tip at the end of one meal.', 'They mainly impress the manager, not the guest.'], correct: 1, explain: 'Each detail caught early removes work and a potential miss before it appears. Stacked up across a meal, that\'s exactly what makes service feel seamless and exceptional.' },
+      { q: 'Why is the observant regular the ultimate test of efficiency and attention?', options: ['Because they always tip the most.', 'Because they read your section the way you should — they see the glass you didn\'t refill and the plate you left, so you can only out-attention them, not charm them.', 'Because they expect free items for being loyal.', 'Because they prefer slower, more formal service.'], correct: 1, explain: 'A sharp regular notices every detail you miss. The only way to win them is to anticipate everything smoothly — and when service feels effortless to them, that\'s the highest compliment there is.' },
+    ],
+  },
+];
+
 export const CURRICULUM: Module[] = [
   // Module 0
   {
@@ -1460,6 +1606,20 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 120,
     lessons: casualDiningStandardLessons,
+  },
+  // Module 8
+  {
+    id: 'casual-dining-floor',
+    title: 'Running the Floor',
+    subtitle: 'Own your section, read the room, never miss a beat.',
+    iconName: 'Utensils',
+    color: '#1B4332',
+    progress: 0,
+    totalLessons: 4,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 200,
+    lessons: casualDiningFloorLessons,
   },
 ];
 

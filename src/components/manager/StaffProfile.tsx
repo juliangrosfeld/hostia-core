@@ -57,6 +57,7 @@ const MODULES = [
   { key: 'complaints', total: 4 },
   { key: 'floor', total: 5 },
   { key: 'guestPsychology', total: 5 },
+  { key: 'casualDiningFloor', total: 4 },
 ] as const;
 
 const STATUS_LABEL: Record<StaffMember['status'], string> = {

@@ -22,6 +22,7 @@ export interface StaffMember {
     complaints: number;
     floor: number;
     guestPsychology: number;
+    casualDiningFloor: number;
   };
 }
 
@@ -32,6 +33,7 @@ export const SKILL_LABELS: Record<keyof StaffMember['skills'], string> = {
   complaints: 'Complaints',
   floor: 'Floor Work',
   guestPsychology: 'Guest Psychology',
+  casualDiningFloor: 'Running the Floor',
 };
 
 export const STAFF: StaffMember[] = [
@@ -52,7 +54,7 @@ export const STAFF: StaffMember[] = [
     joined: '2 years ago',
     color: '#81B29A',
     badges: 8,
-    skills: { greetings: 96, serviceFlow: 94, language: 92, complaints: 90, floor: 94, guestPsychology: 92 },
+    skills: { greetings: 96, serviceFlow: 94, language: 92, complaints: 90, floor: 94, guestPsychology: 92, casualDiningFloor: 93 },
   },
   {
     id: 's2',
@@ -71,7 +73,7 @@ export const STAFF: StaffMember[] = [
     joined: '3 years ago',
     color: '#81B29A',
     badges: 11,
-    skills: { greetings: 98, serviceFlow: 98, language: 96, complaints: 94, floor: 96, guestPsychology: 94 },
+    skills: { greetings: 98, serviceFlow: 98, language: 96, complaints: 94, floor: 96, guestPsychology: 94, casualDiningFloor: 95 },
   },
   {
     id: 's3',
@@ -90,7 +92,7 @@ export const STAFF: StaffMember[] = [
     joined: '8 months ago',
     color: '#E07A5F',
     badges: 5,
-    skills: { greetings: 88, serviceFlow: 86, language: 82, complaints: 80, floor: 84, guestPsychology: 80 },
+    skills: { greetings: 88, serviceFlow: 86, language: 82, complaints: 80, floor: 84, guestPsychology: 80, casualDiningFloor: 83 },
   },
   {
     id: 's4',
@@ -109,7 +111,7 @@ export const STAFF: StaffMember[] = [
     joined: '10 months ago',
     color: '#E07A5F',
     badges: 4,
-    skills: { greetings: 84, serviceFlow: 80, language: 78, complaints: 76, floor: 82, guestPsychology: 78 },
+    skills: { greetings: 84, serviceFlow: 80, language: 78, complaints: 76, floor: 82, guestPsychology: 78, casualDiningFloor: 81 },
   },
   {
     id: 's5',
@@ -128,7 +130,7 @@ export const STAFF: StaffMember[] = [
     joined: '1.5 years ago',
     color: '#81B29A',
     badges: 7,
-    skills: { greetings: 92, serviceFlow: 90, language: 88, complaints: 86, floor: 90, guestPsychology: 88 },
+    skills: { greetings: 92, serviceFlow: 90, language: 88, complaints: 86, floor: 90, guestPsychology: 88, casualDiningFloor: 89 },
   },
   {
     id: 's6',
@@ -147,7 +149,7 @@ export const STAFF: StaffMember[] = [
     joined: '5 months ago',
     color: '#E07A5F',
     badges: 3,
-    skills: { greetings: 76, serviceFlow: 72, language: 68, complaints: 70, floor: 74, guestPsychology: 66 },
+    skills: { greetings: 76, serviceFlow: 72, language: 68, complaints: 70, floor: 74, guestPsychology: 66, casualDiningFloor: 71 },
   },
   {
     id: 's7',
@@ -166,7 +168,7 @@ export const STAFF: StaffMember[] = [
     joined: '4 months ago',
     color: '#D4A574',
     badges: 2,
-    skills: { greetings: 72, serviceFlow: 68, language: 62, complaints: 58, floor: 74, guestPsychology: 60 },
+    skills: { greetings: 72, serviceFlow: 68, language: 62, complaints: 58, floor: 74, guestPsychology: 60, casualDiningFloor: 65 },
   },
   {
     id: 's8',
@@ -185,7 +187,7 @@ export const STAFF: StaffMember[] = [
     joined: '6 weeks ago',
     color: '#C25B43',
     badges: 0,
-    skills: { greetings: 42, serviceFlow: 36, language: 30, complaints: 0, floor: 44, guestPsychology: 0 },
+    skills: { greetings: 42, serviceFlow: 36, language: 30, complaints: 0, floor: 44, guestPsychology: 0, casualDiningFloor: 34 },
   },
   {
     id: 's9',
@@ -204,7 +206,7 @@ export const STAFF: StaffMember[] = [
     joined: '2.5 years ago',
     color: '#81B29A',
     badges: 10,
-    skills: { greetings: 96, serviceFlow: 96, language: 92, complaints: 94, floor: 94, guestPsychology: 92 },
+    skills: { greetings: 96, serviceFlow: 96, language: 92, complaints: 94, floor: 94, guestPsychology: 92, casualDiningFloor: 94 },
   },
   {
     id: 's10',
@@ -223,7 +225,7 @@ export const STAFF: StaffMember[] = [
     joined: '1 week ago',
     color: '#8DA9C4',
     badges: 0,
-    skills: { greetings: 28, serviceFlow: 0, language: 20, complaints: 0, floor: 22, guestPsychology: 0 },
+    skills: { greetings: 28, serviceFlow: 0, language: 20, complaints: 0, floor: 22, guestPsychology: 0, casualDiningFloor: 16 },
   },
 ];
 
