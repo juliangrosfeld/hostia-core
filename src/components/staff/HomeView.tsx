@@ -2,7 +2,7 @@
 
 import { Play, Lock } from 'lucide-react';
 import {
-  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils,
+  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, Trophy,
 } from 'lucide-react';
 import type { Module } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
@@ -135,28 +135,45 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Brain,
   House,
   Utensils,
+  Trophy,
 };
 
 function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
+  const isCertification = module.id === 'phase-1-certification';
+  const isLocked = isCertification && module.available === false;
   const hasRoleplay = module.lessons.some((l) => Boolean(l.scenarioId));
   return (
-    <div className="module-card" onClick={onClick}>
+    <div
+      className="module-card"
+      onClick={onClick}
+      style={isCertification ? { border: '2px solid #B8860B' } : undefined}
+    >
       <div className="module-band" style={{ background: module.color }} />
       <div className="module-card-body">
         <div className="module-card-inner">
           <div className="module-icon-wrap" style={{ background: `${module.color}18` }}>
             <Icon size={22} color={module.color} />
           </div>
-          {module.completedLessons === module.totalLessons && (
-            <span className="module-certified-badge">✓ Complete</span>
+          {isLocked ? (
+            <Lock size={18} color="#B8860B" strokeWidth={2} />
+          ) : (
+            module.completedLessons === module.totalLessons && (
+              <span className="module-certified-badge">✓ Complete</span>
+            )
           )}
         </div>
         <div className="module-card-text">
           <h3 className="display module-title">{module.title}</h3>
           <p className="module-sub">{module.subtitle}</p>
         </div>
-        {hasRoleplay && (
+        {isCertification ? (
+          <div style={{ marginBottom: 6 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', color: '#B8860B', background: 'rgba(184,134,11,0.12)', borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
+              🏆 Phase 1 Final Exam
+            </span>
+          </div>
+        ) : hasRoleplay && (
           <div style={{ marginBottom: 6 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: module.color, background: `${module.color}18`, borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
               ⚡ Live Roleplay

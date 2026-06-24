@@ -1621,6 +1621,20 @@ export const CURRICULUM: Module[] = [
     xpTotal: 200,
     lessons: casualDiningFloorLessons,
   },
+  // Phase 1 Certification (placeholder)
+  {
+    id: 'phase-1-certification',
+    title: 'Phase 1 Certification',
+    subtitle: 'Prove what you know. Unlock Phase 2.',
+    iconName: 'Trophy',
+    color: '#B8860B',
+    progress: 0,
+    totalLessons: 0,
+    completedLessons: 0,
+    available: false,
+    xpTotal: 0,
+    lessons: [],
+  },
 ];
 
 // ─── PROPERTY CURRICULUM RESOLUTION ──────────────────────────
