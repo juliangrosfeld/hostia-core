@@ -1,5 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+
+// Look up the signed-in staff member's property and return its `scenario_context`
+// override, if one is configured. This lets the admin panel give every roleplay
+// scenario the client's specific venue context without touching scenario code.
+// Read with the service-role client because property_overrides is RLS-closed.
+async function getScenarioContext(): Promise<string | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data: profile } = await supabase
+      .from('users')
+      .select('property_id')
+      .eq('auth_id', user.id)
+      .single();
+    if (!profile?.property_id) return null;
+
+    const admin = createAdminClient();
+    const { data: override } = await admin
+      .from('property_overrides')
+      .select('value')
+      .eq('property_id', profile.property_id)
+      .eq('key', 'scenario_context')
+      .maybeSingle();
+
+    const value = override?.value?.trim();
+    return value ? value : null;
+  } catch {
+    // Context is an enhancement — never block the roleplay on a lookup failure.
+    return null;
+  }
+}
 
 // ── Rate limiter ─────────────────────────────────────────────────────────────
 const RATE_LIMIT = 30;
@@ -91,8 +126,15 @@ export async function POST(request: NextRequest) {
   }
 
   // Sanitize inputs
-  const cleanSystemPrompt = stripHtml(systemPrompt);
   const cleanStaffMessage = stripHtml(staffMessage);
+
+  // Inject the client's venue context (configured in the GLAD AI admin panel)
+  // into the system prompt so the AI guest behaves as if it's at their property.
+  let cleanSystemPrompt = stripHtml(systemPrompt);
+  const scenarioContext = await getScenarioContext();
+  if (scenarioContext) {
+    cleanSystemPrompt = `${cleanSystemPrompt}\n\nVENUE CONTEXT (use this for all property-specific details):\n${stripHtml(scenarioContext)}`;
+  }
 
   const conversationText =
     Array.isArray(conversationHistory) && conversationHistory.length > 0
