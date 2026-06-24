@@ -44,9 +44,23 @@ export async function GET() {
     counts.set(row.property_id, (counts.get(row.property_id) ?? 0) + 1)
   }
 
+  // Active users — anyone whose last_active falls within the last 30 days.
+  // Same approach: one query, tallied per property in memory.
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  const { data: activeUsers } = await admin
+    .from('users')
+    .select('property_id')
+    .gte('last_active', thirtyDaysAgo)
+
+  const userCounts = new Map<string, number>()
+  for (const row of activeUsers ?? []) {
+    userCounts.set(row.property_id, (userCounts.get(row.property_id) ?? 0) + 1)
+  }
+
   const withCounts = (properties ?? []).map((p) => ({
     ...p,
     active_module_count: counts.get(p.id) ?? 0,
+    active_users: userCounts.get(p.id) ?? 0,
   }))
 
   return NextResponse.json({ properties: withCounts })

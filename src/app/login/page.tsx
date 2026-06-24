@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -9,7 +9,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [welcome, setWelcome] = useState(false)
   const router = useRouter()
+
+  // Managers who just accepted an invite land here with ?welcome=manager.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('welcome') === 'manager') {
+      setWelcome(true)
+    }
+  }, [])
 
   async function handleLogin() {
     setLoading(true)
@@ -42,6 +50,11 @@ export default function LoginPage() {
         </div>
         <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl p-8">
           <h2 className="text-white text-xl font-semibold mb-6">Sign in to your account</h2>
+          {welcome && (
+            <div className="mb-5 rounded-xl border border-[#C8A97A]/40 bg-[#C8A97A]/10 px-4 py-3 text-sm text-[#D4B88A]">
+              Your account is ready — sign in with your email and new password to get started.
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <label className="text-[#888] text-sm mb-1.5 block">Email</label>

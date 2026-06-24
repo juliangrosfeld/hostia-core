@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Layers, Store, ArrowRight, AlertCircle, Star } from 'lucide-react'
+import { Plus, Layers, Store, ArrowRight, AlertCircle, Star, Users } from 'lucide-react'
 
 const DEMO_PROPERTY_ID = 'f86752e5-f7f1-46a2-acd3-90764ce1c403'
 
@@ -12,6 +12,7 @@ interface Property {
   venue_type: string | null
   primary_color: string | null
   active_module_count: number
+  active_users: number
 }
 
 const VENUE_LABEL: Record<string, string> = {
@@ -98,6 +99,22 @@ function ClientCard({ property, isDemo }: { property: Property; isDemo: boolean 
           <Layers size={15} color="var(--gold-deep)" />
           <b style={{ color: 'var(--ocean-deep)' }}>{property.active_module_count}</b> active module
           {property.active_module_count === 1 ? '' : 's'}
+        </div>
+
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 13,
+            color: 'var(--ink-soft)',
+            fontVariantNumeric: 'tabular-nums',
+            marginTop: -8,
+          }}
+        >
+          <Users size={15} color="var(--gold-deep)" />
+          <b style={{ color: 'var(--ocean-deep)' }}>{property.active_users}</b> active user
+          {property.active_users === 1 ? '' : 's'}
         </div>
 
         <Link

@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Check, AlertCircle, Save, Plus, Trash2, Loader2,
+  UserPlus, Copy, Mail, X,
 } from 'lucide-react'
 import { CURRICULUM } from '@/lib/curriculum'
 
@@ -33,6 +34,17 @@ interface PropertyModule {
 interface Override {
   key: string
   value: string
+}
+interface Manager {
+  id: string
+  full_name: string
+  email: string
+}
+interface PendingInvite {
+  id: string
+  email: string
+  full_name: string
+  invite_link: string
 }
 
 const labelStyle: React.CSSProperties = {
@@ -109,6 +121,28 @@ export default function ClientDetailPage() {
   const [overridesSaving, setOverridesSaving] = useState(false)
   const [overridesMsg, setOverridesMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
 
+  // ── Managers ──────────────────────────────────────────────────
+  const [managers, setManagers] = useState<Manager[]>([])
+  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([])
+  const [managersLoading, setManagersLoading] = useState(true)
+  const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const [inviteName, setInviteName] = useState('')
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteSubmitting, setInviteSubmitting] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [createdLink, setCreatedLink] = useState<string | null>(null)
+  const [copiedLink, setCopiedLink] = useState<string | null>(null)
+
+  async function copyLink(link: string) {
+    try {
+      await navigator.clipboard.writeText(link)
+      setCopiedLink(link)
+      setTimeout(() => setCopiedLink((cur) => (cur === link ? null : cur)), 2000)
+    } catch {
+      // Clipboard blocked — the link stays visible for a manual copy.
+    }
+  }
+
   // ── Load ──────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false
@@ -143,6 +177,64 @@ export default function ClientDetailPage() {
     })()
     return () => { cancelled = true }
   }, [propertyId])
+
+  // ── Load managers + pending invites ───────────────────────────
+  const loadManagers = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/admin/properties/${propertyId}/managers`)
+      const data = await res.json()
+      if (res.ok) {
+        setManagers(data.managers ?? [])
+        setPendingInvites(data.pendingInvites ?? [])
+      }
+    } catch {
+      // Non-fatal — the section just shows empty until a retry.
+    } finally {
+      setManagersLoading(false)
+    }
+  }, [propertyId])
+
+  useEffect(() => {
+    loadManagers()
+  }, [loadManagers])
+
+  // ── Invite a manager ──────────────────────────────────────────
+  function openInviteModal() {
+    setInviteName('')
+    setInviteEmail('')
+    setInviteError(null)
+    setCreatedLink(null)
+    setInviteModalOpen(true)
+  }
+
+  async function submitInvite(e: React.FormEvent) {
+    e.preventDefault()
+    if (inviteSubmitting) return
+    if (!inviteName.trim() || !inviteEmail.trim()) {
+      setInviteError('Name and email are both required.')
+      return
+    }
+    setInviteSubmitting(true)
+    setInviteError(null)
+    try {
+      const res = await fetch(`/api/admin/properties/${propertyId}/managers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name: inviteName.trim(), email: inviteEmail.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setInviteError(data.error || 'Failed to create invite')
+        return
+      }
+      setCreatedLink(data.invite_link)
+      loadManagers()
+    } catch {
+      setInviteError('Network error — please try again')
+    } finally {
+      setInviteSubmitting(false)
+    }
+  }
 
   // ── Property field PATCH ──────────────────────────────────────
   async function patchField(field: string, value: string) {
@@ -342,7 +434,127 @@ export default function ClientDetailPage() {
           </div>
         </section>
 
-        {/* ── 2. Module Library ── */}
+        {/* ── 2. Managers ── */}
+        <section style={cardStyle}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
+            <h2 style={sectionTitleStyle}>Managers</h2>
+            <button
+              onClick={openInviteModal}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: 10, border: 'none',
+                background: '#F5A623', color: '#051956',
+                fontSize: 13.5, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer',
+              }}
+            >
+              <UserPlus size={15} /> Invite Manager
+            </button>
+          </div>
+          <p style={sectionSubStyle}>
+            Managers run this property — they log in, onboard staff, and track progress.
+          </p>
+
+          {managersLoading ? (
+            <div style={{ padding: '8px 0', color: 'var(--ink-soft)', fontSize: 14 }}>Loading…</div>
+          ) : managers.length === 0 && pendingInvites.length === 0 ? (
+            <div
+              style={{
+                padding: '24px', textAlign: 'center', borderRadius: 12,
+                border: '1px dashed var(--sand-deeper)', color: 'var(--ink-soft)', fontSize: 14,
+              }}
+            >
+              No managers yet. Invite the first one to get this property started.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {managers.map((m) => (
+                <div
+                  key={m.id}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '13px 16px', borderRadius: 12,
+                    border: '1px solid var(--sand-deeper)', background: 'white',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: 'var(--sand-warm)', color: 'var(--ocean-deep)',
+                      fontSize: 13, fontWeight: 800,
+                    }}
+                  >
+                    {m.full_name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: 'var(--ocean-deep)' }}>
+                      {m.full_name}
+                    </span>
+                    <span style={{ display: 'block', fontSize: 12.5, color: 'var(--ink-soft)' }}>
+                      {m.email}
+                    </span>
+                  </span>
+                  <span
+                    style={{
+                      flexShrink: 0, fontSize: 10.5, fontWeight: 800, letterSpacing: '0.06em',
+                      textTransform: 'uppercase', color: 'var(--sage-deep)',
+                      background: 'rgba(94,139,126,0.12)', padding: '4px 9px', borderRadius: 999,
+                    }}
+                  >
+                    Active
+                  </span>
+                </div>
+              ))}
+
+              {pendingInvites.map((inv) => (
+                <div
+                  key={inv.id}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '13px 16px', borderRadius: 12,
+                    border: '1px dashed var(--sand-deeper)', background: 'rgba(245,166,35,0.04)',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: 'rgba(245,166,35,0.16)', color: '#8a6000',
+                    }}
+                  >
+                    <Mail size={16} />
+                  </span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ display: 'block', fontSize: 14.5, fontWeight: 700, color: 'var(--ocean-deep)' }}>
+                      {inv.full_name}
+                    </span>
+                    <span style={{ display: 'block', fontSize: 12.5, color: 'var(--ink-soft)' }}>
+                      {inv.email} · Invite sent
+                    </span>
+                  </span>
+                  <button
+                    onClick={() => copyLink(inv.invite_link)}
+                    style={{
+                      flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '8px 12px', borderRadius: 9,
+                      border: '1px solid var(--sand-deeper)', background: 'white',
+                      color: 'var(--ocean-deep)', fontSize: 12.5, fontWeight: 700,
+                      fontFamily: 'inherit', cursor: 'pointer',
+                    }}
+                  >
+                    {copiedLink === inv.invite_link ? (
+                      <><Check size={14} /> Copied</>
+                    ) : (
+                      <><Copy size={14} /> Copy link</>
+                    )}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── 3. Module Library ── */}
         <section style={cardStyle}>
           <h2 style={sectionTitleStyle}>Module Library</h2>
           <p style={sectionSubStyle}>
@@ -411,7 +623,7 @@ export default function ClientDetailPage() {
           </div>
         </section>
 
-        {/* ── 3. Property Overrides ── */}
+        {/* ── 4. Property Overrides ── */}
         <section style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
             <h2 style={sectionTitleStyle}>Property Overrides</h2>
@@ -509,6 +721,151 @@ export default function ClientDetailPage() {
         </section>
 
       </div>
+
+      {/* ── Invite Manager modal ── */}
+      {inviteModalOpen && (
+        <div
+          onClick={() => setInviteModalOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 50,
+            background: 'rgba(5,25,86,0.32)', backdropFilter: 'blur(2px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 460, background: 'white',
+              borderRadius: 18, border: '1px solid var(--sand-deeper)',
+              boxShadow: '0 24px 60px -20px rgba(5,25,86,0.45)', padding: 28,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
+              <h2 style={sectionTitleStyle}>Invite Manager</h2>
+              <button
+                onClick={() => setInviteModalOpen(false)}
+                title="Close"
+                style={{
+                  flexShrink: 0, width: 32, height: 32, borderRadius: 8,
+                  border: '1px solid var(--sand-deeper)', background: 'white',
+                  color: 'var(--ink-soft)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {createdLink ? (
+              <>
+                <p style={{ ...sectionSubStyle, marginBottom: 18 }}>
+                  Invite created. Send this link to the manager. It expires in 7 days.
+                </p>
+                <div
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '12px 14px', borderRadius: 10,
+                    border: '1px solid var(--sand-deeper)', background: 'var(--sand)',
+                    marginBottom: 18,
+                  }}
+                >
+                  <span
+                    style={{
+                      flex: 1, minWidth: 0, fontSize: 12.5, fontFamily: 'monospace',
+                      color: 'var(--ocean-deep)', overflow: 'hidden',
+                      textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {createdLink}
+                  </span>
+                  <button
+                    onClick={() => copyLink(createdLink)}
+                    style={{
+                      flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '8px 12px', borderRadius: 9, border: 'none',
+                      background: '#F5A623', color: '#051956',
+                      fontSize: 12.5, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer',
+                    }}
+                  >
+                    {copiedLink === createdLink ? (
+                      <><Check size={14} /> Copied</>
+                    ) : (
+                      <><Copy size={14} /> Copy</>
+                    )}
+                  </button>
+                </div>
+                <button
+                  onClick={() => setInviteModalOpen(false)}
+                  style={{
+                    width: '100%', padding: '11px 18px', borderRadius: 10,
+                    border: '1px solid var(--sand-deeper)', background: 'white',
+                    color: 'var(--ocean-deep)', fontSize: 14, fontWeight: 700,
+                    fontFamily: 'inherit', cursor: 'pointer',
+                  }}
+                >
+                  Done
+                </button>
+              </>
+            ) : (
+              <form onSubmit={submitInvite}>
+                <p style={{ ...sectionSubStyle, marginBottom: 18 }}>
+                  Create the first manager account for this property. They&apos;ll set their own
+                  password via the invite link.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
+                  <div>
+                    <label htmlFor="inv-name" style={labelStyle}>Full Name</label>
+                    <input
+                      id="inv-name"
+                      type="text"
+                      value={inviteName}
+                      onChange={(e) => setInviteName(e.target.value)}
+                      placeholder="Jordan Rivera"
+                      autoFocus
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="inv-email" style={labelStyle}>Email</label>
+                    <input
+                      id="inv-email"
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="jordan@property.com"
+                      style={inputStyle}
+                    />
+                  </div>
+                </div>
+
+                {inviteError && (
+                  <div style={{ marginBottom: 16 }}>
+                    <Toast tone="err" text={inviteError} />
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={inviteSubmitting}
+                  style={{
+                    width: '100%', display: 'inline-flex', alignItems: 'center',
+                    justifyContent: 'center', gap: 7,
+                    padding: '12px 18px', borderRadius: 10, border: 'none',
+                    background: '#F5A623', color: '#051956',
+                    fontSize: 14, fontWeight: 800, fontFamily: 'inherit',
+                    cursor: inviteSubmitting ? 'default' : 'pointer',
+                    opacity: inviteSubmitting ? 0.6 : 1,
+                  }}
+                >
+                  {inviteSubmitting ? <Loader2 size={15} className="animate-spin" /> : <UserPlus size={15} />}
+                  {inviteSubmitting ? 'Creating…' : 'Create invite'}
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
