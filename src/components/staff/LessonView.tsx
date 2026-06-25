@@ -85,13 +85,13 @@ export default function LessonView({
         </div>
 
         {effectivePhase === 'learn' && (
-          <LearnPhase lesson={lesson} onAdvance={() => setPhase('practice')} />
+          <LearnPhase lesson={lesson} moduleId={module.id} onAdvance={() => setPhase('practice')} />
         )}
         {effectivePhase === 'practice' && (
-          <PracticePhase lesson={lesson} onAdvance={hasApply ? () => setPhase('apply') : onBack} />
+          <PracticePhase lesson={lesson} moduleId={module.id} onAdvance={hasApply ? () => setPhase('apply') : onBack} />
         )}
         {effectivePhase === 'apply' && hasApply && (
-          <ApplyPhase lesson={lesson} onComplete={onBack} />
+          <ApplyPhase lesson={lesson} moduleId={module.id} onComplete={onBack} />
         )}
       </div>
     </div>

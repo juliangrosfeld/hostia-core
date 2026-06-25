@@ -10,7 +10,6 @@ import { type Module, type Lesson } from '@/lib/curriculum'
 import { STAFF } from '@/lib/staff-data'
 import { useUser } from '@/lib/useUser'
 import { useCurriculum } from '@/lib/useCurriculum'
-import { createClient } from '@/lib/supabase/client'
 
 type StaffView = 'home' | 'module' | 'lesson'
 type Phase = 'learn' | 'practice' | 'apply'
@@ -28,10 +27,12 @@ function StaffPageInner() {
   const [activeLessonIndex, setActiveLessonIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('learn')
 
+  // Bump last_active on every staff page load. Done server-side via the
+  // heartbeat route (not a direct client write) so it's reliable and consistent
+  // with how the manager/admin "active" counts read this column.
   useEffect(() => {
     if (!user) return
-    const supabase = createClient()
-    supabase.from('users').update({ last_active: new Date().toISOString() }).eq('id', user.id).then(() => {})
+    fetch('/api/heartbeat', { method: 'POST' }).catch(() => {})
   }, [user?.id])
 
   const goHome = () => { setView('home'); setActiveModule(null); setActiveLesson(null) }

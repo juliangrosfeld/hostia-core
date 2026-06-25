@@ -1,21 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRight, Check, Trophy, Star } from 'lucide-react';
 import type { Lesson } from '@/lib/curriculum';
+import { logLessonCompletion } from '@/lib/completions';
 
 interface PracticePhaseProps {
   lesson: Lesson;
+  moduleId: string;
   onAdvance: () => void;
 }
 
-export default function PracticePhase({ lesson, onAdvance }: PracticePhaseProps) {
+export default function PracticePhase({ lesson, moduleId, onAdvance }: PracticePhaseProps) {
   const [qIdx, setQIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
 
   const quiz = lesson.quiz;
+
+  // Log the practice completion once the quiz is finished (all questions
+  // answered — there's no pass threshold, completing counts). Fire-and-forget.
+  useEffect(() => {
+    if (done) {
+      logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'practice' });
+    }
+  }, [done, moduleId, lesson.id]);
+
+  // If no quiz content for this lesson, advancing past it still completes the
+  // practice phase for progress tracking.
+  const handleEmptyAdvance = () => {
+    logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'practice' });
+    onAdvance();
+  };
 
   // If no quiz content for this lesson
   if (quiz.length === 0) {
@@ -31,7 +48,7 @@ export default function PracticePhase({ lesson, onAdvance }: PracticePhaseProps)
         <p style={{ color: 'var(--ink-soft)', fontSize: 15, marginBottom: 28 }}>
           Practice questions for this lesson are being prepared.
         </p>
-        <button className="btn-brand" onClick={onAdvance}>
+        <button className="btn-brand" onClick={handleEmptyAdvance}>
           Go to Apply <ChevronRight size={16} />
         </button>
       </div>

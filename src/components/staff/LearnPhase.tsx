@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ChevronRight, Lightbulb, FileText } from 'lucide-react';
 import type { Lesson, LearnSection, LangCard, PhraseRow } from '@/lib/curriculum';
 import { useUser } from '@/lib/useUser';
+import { logLessonCompletion } from '@/lib/completions';
 
 // ─── Section renderers ────────────────────────────────────────
 
@@ -285,10 +286,18 @@ function renderSection(section: LearnSection, idx: number) {
 
 interface LearnPhaseProps {
   lesson: Lesson;
+  moduleId: string;
   onAdvance: () => void;
 }
 
-export default function LearnPhase({ lesson, onAdvance }: LearnPhaseProps) {
+export default function LearnPhase({ lesson, moduleId, onAdvance }: LearnPhaseProps) {
+  // Reaching the end of Learn and clicking through to Practice signals the user
+  // finished reading. Log the completion (fire-and-forget) then advance.
+  const handleAdvance = () => {
+    logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'learn' });
+    onAdvance();
+  };
+
   if (lesson.learn.length === 0) {
     return (
       <div className="card" style={{ padding: 48, textAlign: 'center' }}>
@@ -299,7 +308,7 @@ export default function LearnPhase({ lesson, onAdvance }: LearnPhaseProps) {
         <p style={{ color: 'var(--ink-soft)', fontSize: 15, marginBottom: 28 }}>
           This lesson is being finalized. Check back shortly.
         </p>
-        <button className="btn-brand" onClick={onAdvance}>
+        <button className="btn-brand" onClick={handleAdvance}>
           Continue to Practice <ChevronRight size={16} />
         </button>
       </div>
@@ -310,7 +319,7 @@ export default function LearnPhase({ lesson, onAdvance }: LearnPhaseProps) {
     <div className="animate-fade-up">
       {lesson.learn.map((section, i) => renderSection(section, i))}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 40 }}>
-        <button className="btn-brand" onClick={onAdvance}>
+        <button className="btn-brand" onClick={handleAdvance}>
           Ready to practice <ChevronRight size={16} />
         </button>
       </div>

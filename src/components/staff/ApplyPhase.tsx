@@ -5,6 +5,7 @@ import { Send, RotateCcw, Loader2, Lightbulb, Heart, Play, Zap, Brain, Trophy } 
 import { SCENARIOS } from '@/lib/scenarios';
 import type { Lesson } from '@/lib/curriculum';
 import { calculateRoleplayXP, getWarmthLabel } from '@/lib/xp';
+import { logLessonCompletion } from '@/lib/completions';
 
 // ─── Constants ────────────────────────────────────────────────
 
@@ -111,10 +112,11 @@ interface Totals {
 
 interface ApplyPhaseProps {
   lesson: Lesson;
+  moduleId: string;
   onComplete: () => void;
 }
 
-export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
+export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseProps) {
   const scenario = lesson.scenarioId ? SCENARIOS[lesson.scenarioId] : null;
   const startingWarmth = scenario?.startingWarmth ?? 5;
 
@@ -150,6 +152,15 @@ export default function ApplyPhase({ lesson, onComplete }: ApplyPhaseProps) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, isLoading]);
+
+  // Log the Apply completion only on a passed roleplay (failed/capped sessions
+  // don't count as completions). This is SEPARATE from the roleplay_sessions
+  // row (warmth score + transcript) — both fire on a pass. Fire-and-forget.
+  useEffect(() => {
+    if (done && passed) {
+      logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'apply' });
+    }
+  }, [done, passed, moduleId, lesson.id]);
 
   const handleTimerExpire = useCallback(() => {
     if (done || isLoading) return;
