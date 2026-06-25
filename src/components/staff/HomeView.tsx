@@ -1,14 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Play, Lock } from 'lucide-react';
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, Trophy,
 } from 'lucide-react';
 import type { Module } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
-import type { UserProfile } from '@/lib/useUser';
-import { getGreeting } from '@/lib/greeting';
 import { PROPERTY } from '@/lib/config';
 
 // ─── 6-Month Journey data ────────────────────────────────────
@@ -221,31 +218,15 @@ interface HomeViewProps {
   curriculum: Module[];
   onOpenModule: (m: Module) => void;
   viewingAs: StaffMember | null;
-  user: UserProfile | null;
-  propertyName: string;
 }
 
-export default function HomeView({ curriculum, onOpenModule, viewingAs, user, propertyName }: HomeViewProps) {
-  // Time-of-day greeting — computed client-side so it uses the viewer's tz.
-  const [greeting, setGreeting] = useState('Welcome back');
-  useEffect(() => { setGreeting(getGreeting()); }, []);
-
-  const firstName = viewingAs
-    ? viewingAs.name.split(' ')[0]
-    : (user?.full_name?.trim().split(' ')[0] || user?.email?.split('@')[0] || 'there');
-
-  // Real progress signal: a previewed staff member's completed lessons, or the
-  // logged-in user's XP. A brand-new staff member has neither.
-  const hasProgress = viewingAs ? viewingAs.lessons > 0 : (user?.xp ?? 0) > 0;
+export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeViewProps) {
+  const firstName = viewingAs ? viewingAs.name.split(' ')[0] : 'there';
+  const progressPct = viewingAs ? Math.round((viewingAs.lessons / viewingAs.total) * 100) : 50;
 
   const currentModule = curriculum.find((m) => m.available && m.progress > 0 && m.progress < 1)
     ?? curriculum.find((m) => m.available);
   const currentLesson = currentModule?.lessons.find((l) => l.status === 'current');
-  const firstModule = curriculum.find((m) => m.available) ?? curriculum[0];
-
-  const progressPct = viewingAs
-    ? Math.round((viewingAs.lessons / viewingAs.total) * 100)
-    : (currentModule ? Math.round(currentModule.progress * 100) : 0);
 
   const totalXp = curriculum.reduce((a, m) => a + m.xpTotal, 0);
   const totalLessons = curriculum.reduce((a, m) => a + m.totalLessons, 0);
@@ -263,33 +244,19 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, user, pr
               alt="Hostia"
               style={{ height: 32, width: 'auto', objectFit: 'contain', marginBottom: 16 }}
             />
-            <div className="hero-eyebrow">{greeting}, {firstName}</div>
+            <div className="hero-eyebrow">Welcome back, {firstName}</div>
             <h1 className="display hero-title">
               Make every table remember this place.
             </h1>
-            {hasProgress ? (
-              <>
-                <p className="hero-sub">
-                  You're <b style={{ color: 'white' }}>{progressPct}%</b> through{' '}
-                  {currentModule?.title ?? 'your first module'}. Keep your streak alive.
-                </p>
-                {currentModule && (
-                  <button className="btn-brand" onClick={() => onOpenModule(currentModule)}>
-                    <Play size={14} />
-                    {currentLesson ? `Continue: ${currentLesson.title}` : `Start: ${currentModule.title}`}
-                  </button>
-                )}
-              </>
-            ) : (
-              <>
-                <p className="hero-sub">Ready to start your training?</p>
-                {firstModule && (
-                  <button className="btn-brand" onClick={() => onOpenModule(firstModule)}>
-                    <Play size={14} />
-                    Start Module 1
-                  </button>
-                )}
-              </>
+            <p className="hero-sub">
+              You're <b style={{ color: 'white' }}>{progressPct}%</b> through{' '}
+              {currentModule?.title ?? 'your first module'}. Keep your streak alive.
+            </p>
+            {currentModule && (
+              <button className="btn-brand" onClick={() => onOpenModule(currentModule)}>
+                <Play size={14} />
+                {currentLesson ? `Continue: ${currentLesson.title}` : `Start: ${currentModule.title}`}
+              </button>
             )}
           </div>
           <div className="hero-deco" aria-hidden="true">
@@ -302,7 +269,7 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, user, pr
         {/* Gold standard quote */}
         <div style={{ margin: '32px 0', padding: '20px 28px', background: 'var(--ocean-deep)', borderRadius: 16 }}>
           <div className="label-mono" style={{ color: 'var(--brand)', marginBottom: 8 }}>
-            {propertyName} standard
+            {PROPERTY.name} standard
           </div>
           <p style={{ fontFamily: 'Fraunces, serif', fontSize: 17, color: 'rgba(250,247,242,0.9)', lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
             &ldquo;{PROPERTY.goldStandard}&rdquo;

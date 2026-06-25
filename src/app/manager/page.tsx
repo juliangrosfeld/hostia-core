@@ -36,13 +36,7 @@ export default function ManagerPage() {
   return (
     <>
       <TopNav user={navUser} property={navProperty} />
-      {view === 'dashboard' && (
-        <ManagerDashboard
-          onOpenStaff={openStaff}
-          user={user}
-          propertyName={property?.name ?? 'your property'}
-        />
-      )}
+      {view === 'dashboard' && <ManagerDashboard onOpenStaff={openStaff} />}
       {view === 'staff-detail' && selectedStaff && (
         <StaffProfile staff={selectedStaff} onBack={goBack} onViewAs={viewAsStaff} />
       )}

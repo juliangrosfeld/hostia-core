@@ -1,12 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Users, Plus, X, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Bell, Activity, Users, GraduationCap, Award,
+  TrendingUp, AlertTriangle, Star, AlertCircle,
+  Check, Play, MessageSquare, Plus, Pencil, X, Trash2,
+} from 'lucide-react';
+import {
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
+  CartesianGrid, Tooltip,
+} from 'recharts';
 
-import { type StaffMember } from '@/lib/staff-data';
-import { type UserProfile } from '@/lib/useUser';
-import { getGreeting } from '@/lib/greeting';
+import {
+  STAFF, SKILL_LABELS, TREND_DATA, RECENT_ACTIVITY,
+  type StaffMember,
+} from '@/lib/staff-data';
+import { PROPERTY } from '@/lib/config';
 
+import KpiCard, { Sparkline } from './KpiCard';
+import InsightCard from './InsightCard';
 import StaffRow from './StaffRow';
 
 // ─── CRUD helpers ────────────────────────────────────────────
@@ -41,51 +53,34 @@ function makeId(): string {
   return `s-${Date.now()}`;
 }
 
-// Turn a stored last_active timestamp into a short relative string.
-function formatLastActive(ts: string | null): string {
-  if (!ts) return 'Never';
-  const mins = Math.floor((Date.now() - new Date(ts).getTime()) / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-}
+// ─── Activity feed ───────────────────────────────────────────
 
-// Raw users-table row returned by /api/staff/list.
-interface StaffRowData {
-  id: string;
-  full_name: string;
-  email: string;
-  xp: number | null;
-  streak_days: number | null;
-  last_active: string | null;
-}
+type ActivityType = 'completion' | 'badge' | 'start' | 'roleplay' | 'low-score';
 
-// Map a real staff user into the roster's display shape. Analytics fields
-// (score, skills, level…) aren't tracked yet, so they start at zero — these are
-// genuine starting values for a new hire, not mock data.
-function mapToStaffMember(u: StaffRowData): StaffMember {
-  return {
-    id: u.id,
-    name: u.full_name,
-    initials: makeInitials(u.full_name || u.email || '?'),
-    role: 'Staff',
-    dept: 'Floor',
-    level: 1,
-    xp: u.xp ?? 0,
-    streak: u.streak_days ?? 0,
-    score: 0,
-    lessons: 0,
-    total: 28,
-    lastActive: formatLastActive(u.last_active),
-    status: 'new',
-    joined: '',
-    color: '#F5A623',
-    badges: 0,
-    skills: { greetings: 0, serviceFlow: 0, language: 0, complaints: 0, floor: 0, guestPsychology: 0, casualDiningFloor: 0 },
-  };
+const ICON_MAP: Record<ActivityType, React.ElementType> = {
+  completion: Check, badge: Award, start: Play, roleplay: MessageSquare, 'low-score': AlertTriangle,
+};
+const COLOR_MAP: Record<ActivityType, string> = {
+  completion: '#81B29A', badge: '#F5A623', start: '#8DA9C4', roleplay: '#111111', 'low-score': '#E07A5F',
+};
+
+function ActivityItem({
+  who, what, score, when, type, isLast,
+}: { who: string; what: string; score?: number; when: string; type: ActivityType; isLast: boolean }) {
+  const Icon = ICON_MAP[type];
+  const color = COLOR_MAP[type];
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px', borderBottom: isLast ? 'none' : '1px solid var(--sand-deeper)' }}>
+      <div style={{ width: 32, height: 32, borderRadius: 8, background: `${color}18`, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={15} />
+      </div>
+      <div style={{ flex: 1, fontSize: 14 }}>
+        <b>{who}</b>{' '}{what}
+        {score != null && <span style={{ marginLeft: 8, fontSize: 12, color: 'var(--ink-soft)' }}>· score {score}%</span>}
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{when}</div>
+    </div>
+  );
 }
 
 // ─── Form state type ─────────────────────────────────────────
@@ -97,21 +92,11 @@ const BLANK_FORM: FormState = { name: '', role: 'Mesero', color: '#F5A623', emai
 
 interface ManagerDashboardProps {
   onOpenStaff: (s: StaffMember) => void;
-  user: UserProfile | null;
-  propertyName: string;
 }
 
-export default function ManagerDashboard({ onOpenStaff, user, propertyName }: ManagerDashboardProps) {
-  const [staffList, setStaffList] = useState<StaffMember[]>([]);
-  const [staffLoading, setStaffLoading] = useState(true);
-
-  // Time-of-day greeting — computed client-side so it uses the viewer's tz.
-  const [greeting, setGreeting] = useState('Good evening');
-  useEffect(() => { setGreeting(getGreeting()); }, []);
-
-  // Manager's display name, falling back to the part before @ in their email.
-  const managerName = user?.full_name?.trim() || user?.email?.split('@')[0] || 'there';
-  const managerFirst = managerName.split(' ')[0];
+export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps) {
+  const [filter, setFilter] = useState<string>('all');
+  const [staffList, setStaffList] = useState<StaffMember[]>([...STAFF]);
 
   // Modal state
   const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null);
@@ -121,25 +106,6 @@ export default function ManagerDashboard({ onOpenStaff, user, propertyName }: Ma
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // ── Load the real staff roster for this property ─────────
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch('/api/staff/list');
-        const data = await res.json();
-        if (!cancelled && res.ok) {
-          setStaffList((data.staff ?? []).map(mapToStaffMember));
-        }
-      } catch {
-        // Leave the list empty — the empty state will render.
-      } finally {
-        if (!cancelled) setStaffLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   // ── CRUD actions ─────────────────────────────────────────
   const openAdd = () => {
@@ -200,10 +166,10 @@ export default function ManagerDashboard({ onOpenStaff, user, propertyName }: Ma
       }
 
       const member: StaffMember = {
-        id: data.user?.id ?? makeId(),
+        id: makeId(),
         name: form.name.trim(),
         initials: makeInitials(form.name),
-        role: 'Staff',
+        role: form.role,
         dept: ROLE_DEPT[form.role] ?? 'Floor',
         level: 1,
         xp: 0,
@@ -221,7 +187,7 @@ export default function ManagerDashboard({ onOpenStaff, user, propertyName }: Ma
       setStaffList((prev) => [...prev, member]);
       setSubmitting(false);
       closeModal();
-    } catch {
+    } catch (err) {
       setSubmitError('Network error — please try again');
       setSubmitting(false);
     }
@@ -247,8 +213,35 @@ export default function ManagerDashboard({ onOpenStaff, user, propertyName }: Ma
     closeModal();
   };
 
+  // ── KPI math ─────────────────────────────────────────────
   const n = staffList.length;
-  const roster = [...staffList].sort((a, b) => a.name.localeCompare(b.name));
+  const teamAvg  = n > 0 ? Math.round(staffList.reduce((a, s) => a + s.score, 0) / n) : 0;
+  const activeStaff = staffList.filter(
+    (s) => s.lastActive.includes('m ago') || s.lastActive.includes('h ago') || s.lastActive === '1d ago'
+  ).length;
+  const atRisk   = staffList.filter((s) => s.status === 'at-risk').length;
+  const certified = staffList.filter((s) => s.lessons >= 20).length;
+  const stars     = staffList.filter((s) => s.status === 'star');
+
+  // Skill averages sorted weakest first
+  const skillAverages = (Object.keys(SKILL_LABELS) as (keyof typeof SKILL_LABELS)[])
+    .map((k) => ({
+      key: k,
+      skill: SKILL_LABELS[k],
+      avg: n > 0 ? Math.round(staffList.reduce((a, s) => a + s.skills[k], 0) / n) : 0,
+    }))
+    .sort((a, b) => a.avg - b.avg);
+
+  const weakest = skillAverages[0];
+
+  // Filtered roster
+  const depts = ['all', ...Array.from(new Set(staffList.map((s) => s.dept)))];
+  let filtered: StaffMember[];
+  if (filter === 'at-risk')    filtered = staffList.filter((s) => s.status === 'at-risk');
+  else if (filter === 'star')  filtered = staffList.filter((s) => s.status === 'star');
+  else if (filter === 'all')   filtered = staffList;
+  else                         filtered = staffList.filter((s) => s.dept === filter);
+  filtered = [...filtered].sort((a, b) => b.score - a.score);
 
   // ── Render ───────────────────────────────────────────────
   return (
@@ -258,90 +251,201 @@ export default function ManagerDashboard({ onOpenStaff, user, propertyName }: Ma
         {/* ─ Header ─ */}
         <div className="mgr-header">
           <div>
-            <div className="label-mono">Manager dashboard</div>
-            <h1 className="display mgr-title">{greeting}, {managerFirst}.</h1>
-            <p className="mgr-sub">Here&apos;s how {propertyName} is performing.</p>
+            <div className="label-mono">Manager dashboard · Last 30 days</div>
+            <h1 className="display mgr-title">Good evening, Omar.</h1>
+            <p className="mgr-sub">Here's how {PROPERTY.name} is performing.</p>
           </div>
-          {!staffLoading && n > 0 && (
-            <div className="mgr-meta">
-              <div className="mgr-meta-item"><Users size={14} />{n} staff</div>
+          <div className="mgr-meta">
+            <div className="mgr-meta-item"><Users size={14} />{n} staff</div>
+            <div className="mgr-meta-item"><Activity size={14} />{activeStaff} active this week</div>
+            <button className="btn-brand-sm"><Bell size={13} /> Send team nudge</button>
+          </div>
+        </div>
+
+        {/* ─ KPI cards ─ */}
+        <div className="kpi-row">
+          <KpiCard label="Team health" value={`${teamAvg}%`} delta="+15 pts in 30 days" trend="up" icon={Activity} accent="#81B29A">
+            <Sparkline data={TREND_DATA.map((d) => d.score)} color="#81B29A" />
+          </KpiCard>
+
+          <KpiCard label="Active" value={`${activeStaff}/${n}`} delta={`${atRisk} at risk`} trend={atRisk > 1 ? 'warn' : 'flat'} icon={Users} accent="#111111">
+            <div className="avatar-stack">
+              {staffList.slice(0, 6).map((s) => (
+                <div key={s.id} className="mini-avatar" style={{ background: s.color }}>{s.initials}</div>
+              ))}
+              {n > 6 && <div className="mini-avatar mini-avatar-more">+{n - 6}</div>}
+            </div>
+          </KpiCard>
+
+          <KpiCard label="Lessons" value="38" delta="+22% vs last week" trend="up" icon={GraduationCap} accent="#D4A574">
+            <div className="micro-bars">
+              {[4, 6, 5, 8, 7, 6, 5].map((v, i) => (
+                <div key={i} className="micro-bar" style={{ height: `${v * 5}px`, background: '#D4A574' }} />
+              ))}
+            </div>
+          </KpiCard>
+
+          <KpiCard label="Certified" value={`${certified}/${n}`} delta="2 close to certification" trend="flat" icon={Award} accent="#F5A623">
+            <div className="cert-progress">
+              <div style={{ width: `${n > 0 ? (certified / n) * 100 : 0}%` }} />
+            </div>
+          </KpiCard>
+        </div>
+
+        {/* ─ Charts row ─ */}
+        <div className="chart-row">
+          <div className="card chart-card">
+            <div className="card-head">
+              <div>
+                <div className="label-mono">Team average score</div>
+                <div className="card-title">Trending up</div>
+              </div>
+              <div className="trend-chip up"><TrendingUp size={12} /> +15 pts in 30 days</div>
+            </div>
+            <div className="chart-area-container" style={{ height: 200, marginTop: 16 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={TREND_DATA} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="brandFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#F5A623" stopOpacity={0.25} />
+                      <stop offset="100%" stopColor="#F5A623" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5DCC9" vertical={false} />
+                  <XAxis dataKey="day" stroke="#4A5568" fontSize={11} tickLine={false} axisLine={false} label={{ value: 'Day', position: 'insideBottomRight', offset: -5, fontSize: 10, fill: '#4A5568' }} />
+                  <YAxis stroke="#4A5568" fontSize={11} tickLine={false} axisLine={false} domain={[50, 100]} />
+                  <Tooltip contentStyle={{ background: 'white', border: '1px solid var(--sand-deeper)', borderRadius: 8, fontSize: 12 }} formatter={(v) => [`${v}%`, 'Score']} />
+                  <Area type="monotone" dataKey="score" stroke="#F5A623" strokeWidth={2.5} fill="url(#brandFill)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="card chart-card">
+            <div className="card-head">
+              <div>
+                <div className="label-mono">Skill gaps</div>
+                <div className="card-title">Where the team is weakest</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 16 }}>
+              {skillAverages.map((s, i) => (
+                <div key={s.key} style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
+                    <span style={{ fontWeight: i === 0 ? 700 : 400, color: i === 0 ? 'var(--coral-deep)' : 'var(--ink)' }}>
+                      {s.skill}
+                      {i === 0 && <span style={{ marginLeft: 8, fontSize: 9, color: 'var(--coral-deep)', fontWeight: 700, letterSpacing: '0.1em' }}>WEAKEST</span>}
+                    </span>
+                    <span style={{ color: 'var(--ink-soft)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{s.avg}%</span>
+                  </div>
+                  <div className="skill-bar-track">
+                    <div className="skill-bar-fill" style={{ width: `${s.avg}%`, background: i === 0 ? 'var(--coral)' : i === 1 ? 'var(--gold)' : 'var(--sage)' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ─ Insights ─ */}
+        <div className="insight-row">
+          <InsightCard
+            tone="warn"
+            icon={AlertTriangle}
+            title={`${weakest.skill} needs attention`}
+            body={`Team averages ${weakest.avg}% on this skill. Consider making it the focus module this week.`}
+            cta="Assign to team"
+          />
+          <InsightCard
+            tone="alert"
+            icon={AlertCircle}
+            title={`${atRisk} staff at risk`}
+            body="Diego and Robbie haven't engaged in over a week. A nudge or quick 1:1 could re-engage them now."
+            cta="Send nudge"
+          />
+          <InsightCard
+            tone="good"
+            icon={Star}
+            title={stars[0] ? `${stars[0].name.split(' ')[0]} is leading the team` : 'No star performers yet'}
+            body={stars[0]
+              ? `${stars[0].badges} badges, ${stars[0].streak}-day streak, ${stars[0].score}% average. Consider making them a peer coach for new hires.`
+              : 'Keep engaging the team — star performers will surface as scores improve.'}
+            cta={stars[0] ? `View ${stars[0].name.split(' ')[0]}` : 'See roster'}
+          />
+        </div>
+
+        {/* ─ Team roster ─ */}
+        <div className="section-head">
+          <div>
+            <h2 className="display section-title">Team roster</h2>
+            <p className="section-sub">Click anyone to drill into their progress</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            {/* Add staff button */}
+            <button
+              onClick={openAdd}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 16px', borderRadius: 8,
+                background: 'var(--brand)', border: 'none',
+                color: 'var(--brand-deep)', fontWeight: 700,
+                fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
+                fontFamily: 'inherit',
+              }}
+            >
+              <Plus size={14} /> Add staff member
+            </button>
+
+            {/* Filters */}
+            <div className="filters">
+              <div className="filter-group">
+                {depts.map((d) => (
+                  <button key={d} className={filter === d ? 'is-active' : ''} onClick={() => setFilter(d)}>
+                    {d === 'all' ? 'All' : d}
+                  </button>
+                ))}
+                <button className={`warn${filter === 'at-risk' ? ' is-active' : ''}`} onClick={() => setFilter('at-risk')}>At risk</button>
+                <button className={`good${filter === 'star' ? ' is-active' : ''}`} onClick={() => setFilter('star')}>Stars</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="roster-table">
+          <div className="roster-head">
+            <div style={{ flex: 2 }}>Staff</div>
+            <div style={{ flex: 1.2 }}>Department</div>
+            <div style={{ width: 70 }}>Level</div>
+            <div style={{ width: 80 }}>Score</div>
+            <div style={{ flex: 1.2 }}>Progress</div>
+            <div style={{ width: 110 }}>Last active</div>
+            <div style={{ width: 80 }}>Status</div>
+            <div style={{ width: 64 }} />
+          </div>
+          {filtered.map((s) => (
+            <StaffRow
+              key={s.id}
+              staff={s}
+              onClick={() => onOpenStaff(s)}
+              onEdit={() => openEdit(s)}
+            />
+          ))}
+          {filtered.length === 0 && (
+            <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14 }}>
+              No staff match this filter.
             </div>
           )}
         </div>
 
-        {staffLoading ? (
-          <div style={{ padding: '64px 0', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 15 }}>
-            Loading team…
+        {/* ─ Recent activity ─ */}
+        <div className="activity-section">
+          <h2 className="display" style={{ fontSize: 22, marginBottom: 16, color: 'var(--brand-deep)' }}>Recent activity</h2>
+          <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+            {RECENT_ACTIVITY.map((a, i) => (
+              <ActivityItem key={i} who={a.who} what={a.what} score={a.score} when={a.when} type={a.type} isLast={i === RECENT_ACTIVITY.length - 1} />
+            ))}
           </div>
-        ) : n === 0 ? (
-          /* ─ Empty state — brand new property, no staff yet ─ */
-          <div
-            className="card"
-            style={{ textAlign: 'center', padding: '56px 32px', maxWidth: 480, margin: '40px auto' }}
-          >
-            <div
-              style={{
-                width: 56, height: 56, borderRadius: '50%', background: 'var(--sand-warm)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 18px',
-              }}
-            >
-              <Users size={26} color="var(--ink-soft)" />
-            </div>
-            <h2 className="display" style={{ fontSize: 22, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
-              No team yet
-            </h2>
-            <p style={{ fontSize: 14.5, color: 'var(--ink-soft)', lineHeight: 1.55, margin: '0 0 24px' }}>
-              Invite your first staff member to start tracking their progress
-            </p>
-            <button className="btn-brand" style={{ margin: '0 auto' }} onClick={openAdd}>
-              <Plus size={15} /> Invite Staff
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* ─ Team roster ─ */}
-            <div className="section-head">
-              <div>
-                <h2 className="display section-title">Team roster</h2>
-                <p className="section-sub">Click anyone to drill into their progress</p>
-              </div>
-              <button
-                onClick={openAdd}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 8,
-                  background: 'var(--brand)', border: 'none',
-                  color: 'var(--brand-deep)', fontWeight: 700,
-                  fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
-                  fontFamily: 'inherit',
-                }}
-              >
-                <Plus size={14} /> Add staff member
-              </button>
-            </div>
-
-            <div className="roster-table">
-              <div className="roster-head">
-                <div style={{ flex: 2 }}>Staff</div>
-                <div style={{ flex: 1.2 }}>Department</div>
-                <div style={{ width: 70 }}>Level</div>
-                <div style={{ width: 80 }}>Score</div>
-                <div style={{ flex: 1.2 }}>Progress</div>
-                <div style={{ width: 110 }}>Last active</div>
-                <div style={{ width: 80 }}>Status</div>
-                <div style={{ width: 64 }} />
-              </div>
-              {roster.map((s) => (
-                <StaffRow
-                  key={s.id}
-                  staff={s}
-                  onClick={() => onOpenStaff(s)}
-                  onEdit={() => openEdit(s)}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        </div>
 
       </div>
 
@@ -379,7 +483,7 @@ export default function ManagerDashboard({ onOpenStaff, user, propertyName }: Ma
                     <Trash2 size={22} color="var(--coral-deep)" />
                   </div>
                   <h2 className="display" style={{ fontSize: 22, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
-                    Remove {editTarget?.name.split(' ')[0]} from {propertyName}?
+                    Remove {editTarget?.name.split(' ')[0]} from [Property]?
                   </h2>
                   <p style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.55, margin: 0 }}>
                     This cannot be undone.
