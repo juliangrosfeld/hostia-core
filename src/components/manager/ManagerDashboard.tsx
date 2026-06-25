@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Bell, Activity, Users, GraduationCap, Award,
-  TrendingUp, AlertTriangle, Star, AlertCircle,
+  TrendingUp, TrendingDown, AlertTriangle, Star, AlertCircle,
   Check, Play, MessageSquare, Plus, Pencil, X, Trash2,
 } from 'lucide-react';
 import {
@@ -20,6 +20,89 @@ import { PROPERTY } from '@/lib/config';
 import KpiCard, { Sparkline } from './KpiCard';
 import InsightCard from './InsightCard';
 import StaffRow from './StaffRow';
+
+// ─── Real-data dashboard payload (see /api/manager/dashboard) ─────────────────
+
+interface DashboardData {
+  isDemo: false;
+  totalStaff: number;
+  activeStaff: number;
+  atRisk: number;
+  activeAvatars: { initials: string; full_name: string; color: string }[];
+  teamHealth: { current: number; delta: number };
+  lessons: { thisWeek: number; deltaPercent: number | null };
+  certified: { count: number; total: number; closeToCount: number };
+  trendChart: { date: string; score: number }[];
+  skillGaps: { module_id: string; module_title: string; score: number; color: string }[];
+  insights: {
+    weakestSkill: { module_id: string; module_title: string; score: number; message: string } | null;
+    atRiskStaff: { count: number; names: string[]; message: string };
+    topPerformer: { full_name: string; first_name: string; badges: number; streak: number; score: number } | null;
+  };
+  roster: StaffMember[];
+}
+
+type DemoResponse = { isDemo: true };
+type DashboardResponse = DashboardData | DemoResponse;
+
+// Format an integer points-delta into the standard "+X pts in 30 days" copy.
+function formatPtsDelta(delta: number): string {
+  if (delta > 0) return `+${delta} pts in 30 days`;
+  if (delta < 0) return `${delta} pts in 30 days`;
+  return 'No change in 30 days';
+}
+
+// ─── Loading skeleton — keeps the layout, shimmers the metrics ───────────────
+
+function Skel({ w, h = 14, style }: { w: number | string; h?: number; style?: React.CSSProperties }) {
+  return <span className="skel" style={{ width: w, height: h, ...style }} />;
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="mgr-page">
+      <div className="container">
+        <div className="mgr-header">
+          <div>
+            <div className="label-mono">Manager dashboard · Last 30 days</div>
+            <h1 className="display mgr-title">Good evening.</h1>
+            <p className="mgr-sub">Loading your team's performance…</p>
+          </div>
+        </div>
+
+        <div className="kpi-row">
+          {['Team health', 'Active', 'Lessons', 'Certified'].map((label) => (
+            <div key={label} className="kpi-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div className="label-mono">{label}</div>
+                  <div className="kpi-value"><Skel w={70} h={28} /></div>
+                </div>
+                <div className="kpi-icon" style={{ background: 'var(--sand-warm)' }} />
+              </div>
+              <div style={{ marginTop: 12 }}><Skel w={120} h={12} /></div>
+              <div className="kpi-visual"><Skel w="100%" h={40} style={{ borderRadius: 8 }} /></div>
+            </div>
+          ))}
+        </div>
+
+        <div className="chart-row">
+          {[0, 1].map((i) => (
+            <div key={i} className="card chart-card">
+              <div className="card-head">
+                <div>
+                  <div className="label-mono">{i === 0 ? 'Team average score' : 'Skill gaps'}</div>
+                  <div className="card-title"><Skel w={140} h={16} /></div>
+                </div>
+              </div>
+              <div style={{ marginTop: 16 }}><Skel w="100%" h={i === 0 ? 200 : 160} style={{ borderRadius: 10 }} /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ─── CRUD helpers ────────────────────────────────────────────
 
@@ -98,6 +181,35 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const [filter, setFilter] = useState<string>('all');
   const [staffList, setStaffList] = useState<StaffMember[]>([...STAFF]);
 
+  // Real-data plumbing. status drives which render path we take:
+  //  - 'loading' → skeleton
+  //  - 'demo'    → existing hardcoded mock (Hostia Demo property only)
+  //  - 'real'    → live Supabase metrics for the manager's property
+  const [status, setStatus] = useState<'loading' | 'demo' | 'real'>('loading');
+  const [realData, setRealData] = useState<DashboardData | null>(null);
+
+  async function fetchDashboard() {
+    try {
+      const res = await fetch('/api/manager/dashboard');
+      if (!res.ok) { setStatus('demo'); return; } // fail safe → never blank the screen
+      const data: DashboardResponse = await res.json();
+      if (data.isDemo) {
+        setStaffList([...STAFF]);
+        setStatus('demo');
+      } else {
+        setRealData(data);
+        setStaffList(data.roster);
+        setStatus('real');
+      }
+    } catch {
+      setStatus('demo');
+    }
+  }
+
+  useEffect(() => { fetchDashboard(); }, []);
+
+  const isReal = status === 'real' && realData != null;
+
   // Modal state
   const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null);
   const [editTarget, setEditTarget] = useState<StaffMember | null>(null);
@@ -165,28 +277,35 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
         return;
       }
 
-      const member: StaffMember = {
-        id: makeId(),
-        name: form.name.trim(),
-        initials: makeInitials(form.name),
-        role: form.role,
-        dept: ROLE_DEPT[form.role] ?? 'Floor',
-        level: 1,
-        xp: 0,
-        streak: 0,
-        score: 0,
-        lessons: 0,
-        total: 28,
-        lastActive: 'Just added',
-        status: 'new',
-        joined: 'Today',
-        color: form.color,
-        badges: 0,
-        skills: { greetings: 0, serviceFlow: 0, language: 0, complaints: 0, floor: 0, guestPsychology: 0, casualDiningFloor: 0 },
-      };
-      setStaffList((prev) => [...prev, member]);
       setSubmitting(false);
       closeModal();
+
+      if (isReal) {
+        // Real property → re-pull the dashboard so the new hire appears with
+        // their actual id and (zeroed) real metrics rather than a local stub.
+        fetchDashboard();
+      } else {
+        const member: StaffMember = {
+          id: makeId(),
+          name: form.name.trim(),
+          initials: makeInitials(form.name),
+          role: form.role,
+          dept: ROLE_DEPT[form.role] ?? 'Floor',
+          level: 1,
+          xp: 0,
+          streak: 0,
+          score: 0,
+          lessons: 0,
+          total: 28,
+          lastActive: 'Just added',
+          status: 'new',
+          joined: 'Today',
+          color: form.color,
+          badges: 0,
+          skills: { greetings: 0, serviceFlow: 0, language: 0, complaints: 0, floor: 0, guestPsychology: 0, casualDiningFloor: 0 },
+        };
+        setStaffList((prev) => [...prev, member]);
+      }
     } catch (err) {
       setSubmitError('Network error — please try again');
       setSubmitting(false);
@@ -243,7 +362,83 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   else                         filtered = staffList.filter((s) => s.dept === filter);
   filtered = [...filtered].sort((a, b) => b.score - a.score);
 
+  // ── Display values ───────────────────────────────────────
+  // Every metric is sourced from real data when isReal, otherwise from the mock
+  // computations above. The JSX below is a single tree bound to these so the
+  // demo render stays byte-for-byte identical to before.
+  const displayStaffCount = isReal ? realData!.totalStaff : n;
+  const displayActive     = isReal ? realData!.activeStaff : activeStaff;
+  const displayAtRisk     = isReal ? realData!.atRisk : atRisk;
+
+  // Team health
+  const healthValue     = isReal ? realData!.teamHealth.current : teamAvg;
+  const healthDelta     = isReal ? realData!.teamHealth.delta : 15;
+  const healthDeltaText = isReal ? formatPtsDelta(healthDelta) : '+15 pts in 30 days';
+  const healthTrend: 'up' | 'warn' | 'flat' =
+    isReal ? (healthDelta > 0 ? 'up' : healthDelta < 0 ? 'warn' : 'flat') : 'up';
+  const healthSpark = isReal ? realData!.trendChart.map((d) => d.score) : TREND_DATA.map((d) => d.score);
+
+  // Lessons
+  const lessonsDelta = isReal ? realData!.lessons.deltaPercent : null;
+  const lessonsValue = isReal ? String(realData!.lessons.thisWeek) : '38';
+  const lessonsDeltaText = isReal
+    ? (lessonsDelta === null ? 'new this week' : `${lessonsDelta >= 0 ? '+' : ''}${lessonsDelta}% vs last week`)
+    : '+22% vs last week';
+  const lessonsTrend: 'up' | 'warn' | 'flat' = isReal
+    ? (lessonsDelta === null || lessonsDelta > 0 ? 'up' : lessonsDelta < 0 ? 'warn' : 'flat')
+    : 'up';
+  const lessonBars = isReal && realData!.lessons.thisWeek === 0 ? [2, 2, 2, 2, 2, 2, 2] : [4, 6, 5, 8, 7, 6, 5];
+
+  // Certified
+  const certifiedValue = isReal ? `${realData!.certified.count}/${realData!.certified.total}` : `${certified}/${n}`;
+  const certifiedDeltaText = isReal ? `${realData!.certified.closeToCount} close to certification` : '2 close to certification';
+  const certPct = isReal
+    ? (realData!.certified.total > 0 ? (realData!.certified.count / realData!.certified.total) * 100 : 0)
+    : (n > 0 ? (certified / n) * 100 : 0);
+
+  // Trend chart
+  const chartData: { day: string; score: number }[] = isReal
+    ? realData!.trendChart.map((d) => ({ day: d.date.slice(5), score: d.score }))
+    : TREND_DATA.map((d) => ({ day: String(d.day), score: d.score }));
+  const chartDomain: [number, number] = isReal ? [0, 100] : [50, 100];
+  const chartTrendUp = isReal ? healthDelta >= 0 : true;
+  const chartChipClass = isReal ? (healthDelta > 0 ? 'up' : healthDelta < 0 ? 'down' : 'flat') : 'up';
+
+  // Skill gaps (weakest first)
+  const skillRows = isReal
+    ? realData!.skillGaps.map((g) => ({ key: g.module_id, skill: g.module_title, avg: g.score }))
+    : skillAverages;
+
+  // Insight cards
+  const insightWeakestTitle = isReal
+    ? (realData!.insights.weakestSkill ? `${realData!.insights.weakestSkill.module_title} needs attention` : 'No skill data yet')
+    : `${weakest.skill} needs attention`;
+  const insightWeakestBody = isReal
+    ? (realData!.insights.weakestSkill?.message ?? 'Once your team starts roleplays, skill gaps will surface here.')
+    : `Team averages ${weakest.avg}% on this skill. Consider making it the focus module this week.`;
+
+  const insightAtRiskBody = isReal
+    ? realData!.insights.atRiskStaff.message
+    : "Diego and Robbie haven't engaged in over a week. A nudge or quick 1:1 could re-engage them now.";
+
+  const tp = isReal ? realData!.insights.topPerformer : null;
+  const insightStarTitle = isReal
+    ? (tp ? `${tp.first_name} is leading the team` : 'No star performers yet')
+    : (stars[0] ? `${stars[0].name.split(' ')[0]} is leading the team` : 'No star performers yet');
+  const insightStarBody = isReal
+    ? (tp
+        ? `${tp.badges} badge${tp.badges === 1 ? '' : 's'}, ${tp.streak}-day streak, ${tp.score}% average. Consider making them a peer coach for new hires.`
+        : 'Keep engaging the team — star performers will surface as scores improve.')
+    : (stars[0]
+        ? `${stars[0].badges} badges, ${stars[0].streak}-day streak, ${stars[0].score}% average. Consider making them a peer coach for new hires.`
+        : 'Keep engaging the team — star performers will surface as scores improve.');
+  const insightStarCta = isReal
+    ? (tp ? `View ${tp.first_name}` : 'See roster')
+    : (stars[0] ? `View ${stars[0].name.split(' ')[0]}` : 'See roster');
+
   // ── Render ───────────────────────────────────────────────
+  if (status === 'loading') return <DashboardSkeleton />;
+
   return (
     <div className="mgr-page animate-fade-up">
       <div className="container">
@@ -256,38 +451,52 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             <p className="mgr-sub">Here's how {PROPERTY.name} is performing.</p>
           </div>
           <div className="mgr-meta">
-            <div className="mgr-meta-item"><Users size={14} />{n} staff</div>
-            <div className="mgr-meta-item"><Activity size={14} />{activeStaff} active this week</div>
+            <div className="mgr-meta-item"><Users size={14} />{displayStaffCount} staff</div>
+            <div className="mgr-meta-item"><Activity size={14} />{displayActive} active this week</div>
             <button className="btn-brand-sm"><Bell size={13} /> Send team nudge</button>
           </div>
         </div>
 
         {/* ─ KPI cards ─ */}
         <div className="kpi-row">
-          <KpiCard label="Team health" value={`${teamAvg}%`} delta="+15 pts in 30 days" trend="up" icon={Activity} accent="#81B29A">
-            <Sparkline data={TREND_DATA.map((d) => d.score)} color="#81B29A" />
+          <KpiCard label="Team health" value={`${healthValue}%`} delta={healthDeltaText} trend={healthTrend} icon={Activity} accent="#81B29A">
+            <Sparkline data={healthSpark} color="#81B29A" />
           </KpiCard>
 
-          <KpiCard label="Active" value={`${activeStaff}/${n}`} delta={`${atRisk} at risk`} trend={atRisk > 1 ? 'warn' : 'flat'} icon={Users} accent="#111111">
+          <KpiCard label="Active" value={`${displayActive}/${displayStaffCount}`} delta={`${displayAtRisk} at risk`} trend={displayAtRisk > 1 ? 'warn' : 'flat'} icon={Users} accent="#111111">
             <div className="avatar-stack">
-              {staffList.slice(0, 6).map((s) => (
-                <div key={s.id} className="mini-avatar" style={{ background: s.color }}>{s.initials}</div>
-              ))}
-              {n > 6 && <div className="mini-avatar mini-avatar-more">+{n - 6}</div>}
+              {isReal ? (
+                <>
+                  {realData!.activeAvatars.map((a, i) => (
+                    <div key={i} className="mini-avatar" style={{ background: a.color }}>{a.initials}</div>
+                  ))}
+                  {realData!.activeStaff > 6 && <div className="mini-avatar mini-avatar-more">+{realData!.activeStaff - 6}</div>}
+                  {realData!.activeAvatars.length === 0 && (
+                    <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>No active staff yet</span>
+                  )}
+                </>
+              ) : (
+                <>
+                  {staffList.slice(0, 6).map((s) => (
+                    <div key={s.id} className="mini-avatar" style={{ background: s.color }}>{s.initials}</div>
+                  ))}
+                  {n > 6 && <div className="mini-avatar mini-avatar-more">+{n - 6}</div>}
+                </>
+              )}
             </div>
           </KpiCard>
 
-          <KpiCard label="Lessons" value="38" delta="+22% vs last week" trend="up" icon={GraduationCap} accent="#D4A574">
+          <KpiCard label="Lessons" value={lessonsValue} delta={lessonsDeltaText} trend={lessonsTrend} icon={GraduationCap} accent="#D4A574">
             <div className="micro-bars">
-              {[4, 6, 5, 8, 7, 6, 5].map((v, i) => (
+              {lessonBars.map((v, i) => (
                 <div key={i} className="micro-bar" style={{ height: `${v * 5}px`, background: '#D4A574' }} />
               ))}
             </div>
           </KpiCard>
 
-          <KpiCard label="Certified" value={`${certified}/${n}`} delta="2 close to certification" trend="flat" icon={Award} accent="#F5A623">
+          <KpiCard label="Certified" value={certifiedValue} delta={certifiedDeltaText} trend="flat" icon={Award} accent="#F5A623">
             <div className="cert-progress">
-              <div style={{ width: `${n > 0 ? (certified / n) * 100 : 0}%` }} />
+              <div style={{ width: `${certPct}%` }} />
             </div>
           </KpiCard>
         </div>
@@ -298,13 +507,15 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             <div className="card-head">
               <div>
                 <div className="label-mono">Team average score</div>
-                <div className="card-title">Trending up</div>
+                <div className="card-title">{chartTrendUp ? 'Trending up' : 'Trending down'}</div>
               </div>
-              <div className="trend-chip up"><TrendingUp size={12} /> +15 pts in 30 days</div>
+              <div className={`trend-chip ${chartChipClass}`}>
+                {chartTrendUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />} {healthDeltaText}
+              </div>
             </div>
             <div className="chart-area-container" style={{ height: 200, marginTop: 16 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={TREND_DATA} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="brandFill" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#F5A623" stopOpacity={0.25} />
@@ -313,7 +524,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5DCC9" vertical={false} />
                   <XAxis dataKey="day" stroke="#4A5568" fontSize={11} tickLine={false} axisLine={false} label={{ value: 'Day', position: 'insideBottomRight', offset: -5, fontSize: 10, fill: '#4A5568' }} />
-                  <YAxis stroke="#4A5568" fontSize={11} tickLine={false} axisLine={false} domain={[50, 100]} />
+                  <YAxis stroke="#4A5568" fontSize={11} tickLine={false} axisLine={false} domain={chartDomain} />
                   <Tooltip contentStyle={{ background: 'white', border: '1px solid var(--sand-deeper)', borderRadius: 8, fontSize: 12 }} formatter={(v) => [`${v}%`, 'Score']} />
                   <Area type="monotone" dataKey="score" stroke="#F5A623" strokeWidth={2.5} fill="url(#brandFill)" />
                 </AreaChart>
@@ -329,7 +540,12 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
               </div>
             </div>
             <div style={{ marginTop: 16 }}>
-              {skillAverages.map((s, i) => (
+              {skillRows.length === 0 && (
+                <div style={{ padding: '24px 0', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 13 }}>
+                  No roleplay scores yet — skill gaps appear once the team starts practicing.
+                </div>
+              )}
+              {skillRows.map((s, i) => (
                 <div key={s.key} style={{ marginBottom: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
                     <span style={{ fontWeight: i === 0 ? 700 : 400, color: i === 0 ? 'var(--coral-deep)' : 'var(--ink)' }}>
@@ -352,25 +568,23 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
           <InsightCard
             tone="warn"
             icon={AlertTriangle}
-            title={`${weakest.skill} needs attention`}
-            body={`Team averages ${weakest.avg}% on this skill. Consider making it the focus module this week.`}
+            title={insightWeakestTitle}
+            body={insightWeakestBody}
             cta="Assign to team"
           />
           <InsightCard
             tone="alert"
             icon={AlertCircle}
-            title={`${atRisk} staff at risk`}
-            body="Diego and Robbie haven't engaged in over a week. A nudge or quick 1:1 could re-engage them now."
+            title={`${displayAtRisk} staff at risk`}
+            body={insightAtRiskBody}
             cta="Send nudge"
           />
           <InsightCard
             tone="good"
             icon={Star}
-            title={stars[0] ? `${stars[0].name.split(' ')[0]} is leading the team` : 'No star performers yet'}
-            body={stars[0]
-              ? `${stars[0].badges} badges, ${stars[0].streak}-day streak, ${stars[0].score}% average. Consider making them a peer coach for new hires.`
-              : 'Keep engaging the team — star performers will surface as scores improve.'}
-            cta={stars[0] ? `View ${stars[0].name.split(' ')[0]}` : 'See roster'}
+            title={insightStarTitle}
+            body={insightStarBody}
+            cta={insightStarCta}
           />
         </div>
 
@@ -432,7 +646,9 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
           ))}
           {filtered.length === 0 && (
             <div style={{ padding: '32px 0', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14 }}>
-              No staff match this filter.
+              {staffList.length === 0
+                ? 'No team members yet — add your first staff member to get started.'
+                : 'No staff match this filter.'}
             </div>
           )}
         </div>
@@ -441,9 +657,15 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
         <div className="activity-section">
           <h2 className="display" style={{ fontSize: 22, marginBottom: 16, color: 'var(--brand-deep)' }}>Recent activity</h2>
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-            {RECENT_ACTIVITY.map((a, i) => (
-              <ActivityItem key={i} who={a.who} what={a.what} score={a.score} when={a.when} type={a.type} isLast={i === RECENT_ACTIVITY.length - 1} />
-            ))}
+            {isReal ? (
+              <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14 }}>
+                No activity yet. As your team completes lessons and roleplays, it'll show up here.
+              </div>
+            ) : (
+              RECENT_ACTIVITY.map((a, i) => (
+                <ActivityItem key={i} who={a.who} what={a.what} score={a.score} when={a.when} type={a.type} isLast={i === RECENT_ACTIVITY.length - 1} />
+              ))
+            )}
           </div>
         </div>
 

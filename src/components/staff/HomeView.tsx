@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Play, Lock } from 'lucide-react';
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, Trophy,
@@ -220,6 +221,14 @@ interface HomeViewProps {
   viewingAs: StaffMember | null;
 }
 
+interface HomeProgress {
+  isDemo: boolean;
+  started: boolean;
+  percent: number;
+  moduleTitle: string | null;
+  firstModuleTitle?: string | null;
+}
+
 export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeViewProps) {
   const firstName = viewingAs ? viewingAs.name.split(' ')[0] : 'there';
   const progressPct = viewingAs ? Math.round((viewingAs.lessons / viewingAs.total) * 100) : 50;
@@ -227,6 +236,23 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
   const currentModule = curriculum.find((m) => m.available && m.progress > 0 && m.progress < 1)
     ?? curriculum.find((m) => m.available);
   const currentLesson = currentModule?.lessons.find((l) => l.status === 'current');
+
+  // Real-data progress for the hero banner. Only fetched for a real signed-in
+  // staff member (not when a manager is "viewing as" a mock staffer). The demo
+  // property returns isDemo:true and we keep the original mock copy untouched.
+  const [progress, setProgress] = useState<HomeProgress | null>(null);
+  useEffect(() => {
+    if (viewingAs) return; // manager preview → keep mock copy
+    let cancelled = false;
+    fetch('/api/staff/home-progress')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!cancelled && d) setProgress(d); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [viewingAs]);
+
+  // Real (non-demo) staff get live progress text; everyone else keeps mock copy.
+  const useRealBanner = !viewingAs && progress != null && progress.isDemo === false;
 
   const totalXp = curriculum.reduce((a, m) => a + m.xpTotal, 0);
   const totalLessons = curriculum.reduce((a, m) => a + m.totalLessons, 0);
@@ -249,8 +275,24 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
               Make every table remember this place.
             </h1>
             <p className="hero-sub">
-              You're <b style={{ color: 'white' }}>{progressPct}%</b> through{' '}
-              {currentModule?.title ?? 'your first module'}. Keep your streak alive.
+              {useRealBanner ? (
+                progress!.started ? (
+                  <>
+                    You're <b style={{ color: 'white' }}>{progress!.percent}%</b> through{' '}
+                    {progress!.moduleTitle ?? 'your first module'}. Keep your streak alive.
+                  </>
+                ) : (
+                  <>
+                    Ready to start your training? Begin with{' '}
+                    {progress!.firstModuleTitle ?? progress!.moduleTitle ?? 'your first module'}.
+                  </>
+                )
+              ) : (
+                <>
+                  You're <b style={{ color: 'white' }}>{progressPct}%</b> through{' '}
+                  {currentModule?.title ?? 'your first module'}. Keep your streak alive.
+                </>
+              )}
             </p>
             {currentModule && (
               <button className="btn-brand" onClick={() => onOpenModule(currentModule)}>

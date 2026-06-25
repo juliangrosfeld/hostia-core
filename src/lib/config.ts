@@ -1,3 +1,9 @@
+// The Hostia Demo property. When the signed-in manager belongs to this property,
+// the dashboard renders the hardcoded mock data (Omar, 74% team health, etc.) so
+// Julian can sell with a polished, populated screen. Every OTHER property gets
+// real Supabase-backed metrics. Keep this in sync with the demo property's row id.
+export const DEMO_PROPERTY_ID = 'f86752e5-f7f1-46a2-acd3-90764ce1c403';
+
 export const PROPERTY = {
   name: '[Property Name]',
   fullName: '[Property Name]',
