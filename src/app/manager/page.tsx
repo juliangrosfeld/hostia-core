@@ -29,7 +29,7 @@ export default function ManagerPage() {
   };
 
   const navUser = user
-    ? { name: user.full_name, initials: user.full_name.split(' ').map((n) => n[0]).join('').toUpperCase(), role: user.role }
+    ? { name: user.full_name, email: user.email, initials: user.full_name.split(' ').map((n) => n[0]).join('').toUpperCase(), role: user.role }
     : null;
   const navProperty = property ? { name: property.name, primaryColor: property.primary_color } : null;
 

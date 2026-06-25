@@ -46,7 +46,7 @@ function StaffPageInner() {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sand)' }}><div style={{ fontFamily: 'Fraunces, serif', fontSize: 22, color: 'var(--brand-deep)' }}>Loading…</div></div>
   }
 
-  const navUser = user ? { name: user.full_name, initials: user.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase(), role: user.role } : null
+  const navUser = user ? { name: user.full_name, email: user.email, initials: user.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase(), role: user.role } : null
   const navProperty = property ? { name: property.name, primaryColor: property.primary_color } : null
 
   return (

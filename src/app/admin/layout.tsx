@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Home, UserPlus, Library, Utensils } from 'lucide-react'
 import { useUser } from '@/lib/useUser'
+import UserMenu from '@/components/UserMenu'
 
 const NAV = [
   { href: '/admin', label: 'Home', icon: Home },
@@ -122,8 +123,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
 
-        <div style={{ marginTop: 'auto', padding: '8px', fontSize: 11.5, color: 'rgba(255,255,255,0.4)' }}>
-          {user.full_name}
+        <div style={{ marginTop: 'auto', padding: '8px', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <UserMenu
+            fullName={user.full_name}
+            email={user.email}
+            role={user.role}
+            initials={user.full_name.split(' ').map((n) => n[0]).join('').toUpperCase()}
+            dropUp
+            align="left"
+          />
+          <div style={{ minWidth: 0, lineHeight: 1.25 }}>
+            <div
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.85)',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {user.full_name}
+            </div>
+            <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)' }}>Admin</div>
+          </div>
         </div>
       </aside>
 

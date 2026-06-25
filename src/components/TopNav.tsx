@@ -5,11 +5,12 @@ import { usePathname } from 'next/navigation';
 import { BarChart3, GraduationCap, Eye, BookOpen } from 'lucide-react';
 import { PROPERTY } from '@/lib/config';
 import type { StaffMember } from '@/lib/staff-data';
+import UserMenu from '@/components/UserMenu';
 
 interface TopNavProps {
   viewingAs?: StaffMember | null;
   onClearViewAs?: () => void;
-  user?: { name: string; initials: string; role: string } | null;
+  user?: { name: string; email: string; initials: string; role: 'staff' | 'manager' | 'admin' } | null;
   property?: { name: string; primaryColor: string } | null;
 }
 
@@ -101,9 +102,18 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
               )}
             </div>
 
-            <div className="nav-avatar" title={userName}>
-              {initials}
-            </div>
+            {user ? (
+              <UserMenu
+                fullName={user.name}
+                email={user.email}
+                role={user.role}
+                initials={user.initials}
+              />
+            ) : (
+              <div className="nav-avatar" title={userName}>
+                {initials}
+              </div>
+            )}
           </div>
 
         </div>
