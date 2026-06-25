@@ -27,15 +27,51 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  const { pathname } = request.nextUrl
+
   // Protect all routes except login and public pages
   if (
     !user &&
-    !request.nextUrl.pathname.startsWith('/login') &&
-    !request.nextUrl.pathname.startsWith('/auth')
+    !pathname.startsWith('/login') &&
+    !pathname.startsWith('/auth')
   ) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // Server-side role guard (defense in depth). Only the /manager and /admin
+  // areas need a DB lookup — keep public/staff routes free of extra queries.
+  const isManagerArea = pathname.startsWith('/manager')
+  const isAdminArea = pathname.startsWith('/admin')
+
+  if (user && (isManagerArea || isAdminArea)) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('role')
+      .eq('auth_id', user.id)
+      .single()
+
+    const role = profile?.role
+
+    // No profile / lookup failure on a protected route → treat as unauthenticated.
+    if (!role) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    if (isAdminArea && role !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/staff'
+      return NextResponse.redirect(url)
+    }
+
+    if (isManagerArea && role !== 'manager' && role !== 'admin') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/staff'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

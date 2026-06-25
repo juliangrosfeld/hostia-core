@@ -20,6 +20,8 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
   const isStaff = pathname.startsWith('/staff');
   const isLibrary = pathname.startsWith('/admin/library');
   const isAdmin = user?.role === 'admin';
+  // Staff users may only see the Staff tab; manager/admin can preview as staff.
+  const canManage = user?.role === 'manager' || user?.role === 'admin';
 
   const propertyName = property?.name ?? PROPERTY.name;
   const initials = user?.initials ?? 'OE';
@@ -31,7 +33,7 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
         <div className="top-nav-inner">
 
           {/* Left: Hostia logo + BY GLAD AI */}
-          <Link href="/manager" className="brand" style={{ textDecoration: 'none' }}>
+          <Link href={canManage ? '/manager' : '/staff'} className="brand" style={{ textDecoration: 'none' }}>
             <img
               src="/hostia-logo.png"
               alt="Hostia"
@@ -74,14 +76,16 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
             )}
 
             <div className="role-switcher">
-              <Link
-                href="/manager"
-                className={isManager ? 'is-active' : ''}
-                style={{ textDecoration: 'none' }}
-              >
-                <BarChart3 size={13} />
-                Manager
-              </Link>
+              {canManage && (
+                <Link
+                  href="/manager"
+                  className={isManager ? 'is-active' : ''}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <BarChart3 size={13} />
+                  Manager
+                </Link>
+              )}
               <Link
                 href="/staff"
                 className={isStaff ? 'is-active' : ''}
@@ -125,10 +129,12 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
           <GraduationCap size={22} />
           Staff
         </Link>
-        <Link href="/manager" className={`bottom-tab${isManager ? ' is-active' : ''}`}>
-          <BarChart3 size={22} />
-          Manager
-        </Link>
+        {canManage && (
+          <Link href="/manager" className={`bottom-tab${isManager ? ' is-active' : ''}`}>
+            <BarChart3 size={22} />
+            Manager
+          </Link>
+        )}
       </nav>
     </>
   );
