@@ -243,7 +243,14 @@ export async function GET() {
     bucket.push(s.warmth_score);
     warmthByModule.set(s.module_id, bucket);
   }
+  // Only modules explicitly assigned to this property via property_modules count
+  // as skills — never the resolveCurriculum() full-curriculum fallback. So a fine
+  // dining venue doesn't get a "Casual Dining" bar it never assigned.
+  const assignedModuleIds = new Set(
+    (moduleRes.data ?? []).filter((m) => m.is_active).map((m) => m.module_id),
+  );
   const skillGaps = modules
+    .filter((m) => assignedModuleIds.has(m.id))
     // Only modules that actually contain a roleplay are "skills" — warmth only
     // ever comes from roleplay, so non-roleplay modules can't have a real score.
     .filter((m) => m.lessons.some((l) => Boolean(l.scenarioId)))

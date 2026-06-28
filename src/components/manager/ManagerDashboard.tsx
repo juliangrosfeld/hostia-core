@@ -16,6 +16,7 @@ import {
   type StaffMember,
 } from '@/lib/staff-data';
 import { PROPERTY } from '@/lib/config';
+import { useUser } from '@/lib/useUser';
 
 import KpiCard, { Sparkline } from './KpiCard';
 import InsightCard from './InsightCard';
@@ -180,6 +181,14 @@ interface ManagerDashboardProps {
 export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps) {
   const [filter, setFilter] = useState<string>('all');
   const [staffList, setStaffList] = useState<StaffMember[]>([...STAFF]);
+
+  // Logged-in manager + their property. Drives the greeting + property name on
+  // BOTH the demo and real paths (so the demo screen now shows real names too).
+  const { user, property } = useUser();
+  const managerFirstName = user?.full_name?.trim()
+    ? user.full_name.trim().split(/\s+/)[0]
+    : (user?.email ? user.email.split('@')[0] : '');
+  const propertyName = property?.name ?? PROPERTY.name;
 
   // Real-data plumbing. status drives which render path we take:
   //  - 'loading' → skeleton
@@ -381,8 +390,15 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   // Lessons
   const lessonsDelta = isReal ? realData!.lessons.deltaPercent : null;
   const lessonsValue = isReal ? String(realData!.lessons.thisWeek) : '38';
+  // Both this week and last week are zero when there's no lesson activity at all.
+  // deltaPercent is only 0 here when last week was also 0 (else thisWeek=0 → -100%).
+  const lessonsBothZero = isReal && realData!.lessons.thisWeek === 0 && lessonsDelta === 0;
   const lessonsDeltaText = isReal
-    ? (lessonsDelta === null ? 'new this week' : `${lessonsDelta >= 0 ? '+' : ''}${lessonsDelta}% vs last week`)
+    ? (lessonsBothZero
+        ? 'no lessons yet'
+        : lessonsDelta === null
+          ? 'new this week'
+          : `${lessonsDelta >= 0 ? '+' : ''}${lessonsDelta}% vs last week`)
     : '+22% vs last week';
   const lessonsTrend: 'up' | 'warn' | 'flat' = isReal
     ? (lessonsDelta === null || lessonsDelta > 0 ? 'up' : lessonsDelta < 0 ? 'warn' : 'flat')
@@ -408,6 +424,9 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const skillRows = isReal
     ? realData!.skillGaps.map((g) => ({ key: g.module_id, skill: g.module_title, avg: g.score }))
     : skillAverages;
+  // Only flag a "WEAKEST" skill once there's real signal to compare. On the real
+  // path with all-zero scores, the label is meaningless — hide it. Demo: always on.
+  const showWeakest = isReal ? skillRows.some((s) => s.avg > 0) : true;
 
   // Insight cards
   const insightWeakestTitle = isReal
@@ -447,8 +466,8 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
         <div className="mgr-header">
           <div>
             <div className="label-mono">Manager dashboard · Last 30 days</div>
-            <h1 className="display mgr-title">Good evening, Omar.</h1>
-            <p className="mgr-sub">Here's how {PROPERTY.name} is performing.</p>
+            <h1 className="display mgr-title">Good evening{managerFirstName ? `, ${managerFirstName}` : ''}.</h1>
+            <p className="mgr-sub">Here's how {propertyName} is performing.</p>
           </div>
           <div className="mgr-meta">
             <div className="mgr-meta-item"><Users size={14} />{displayStaffCount} staff</div>
@@ -550,7 +569,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 5 }}>
                     <span style={{ fontWeight: i === 0 ? 700 : 400, color: i === 0 ? 'var(--coral-deep)' : 'var(--ink)' }}>
                       {s.skill}
-                      {i === 0 && <span style={{ marginLeft: 8, fontSize: 9, color: 'var(--coral-deep)', fontWeight: 700, letterSpacing: '0.1em' }}>WEAKEST</span>}
+                      {i === 0 && showWeakest && <span style={{ marginLeft: 8, fontSize: 9, color: 'var(--coral-deep)', fontWeight: 700, letterSpacing: '0.1em' }}>WEAKEST</span>}
                     </span>
                     <span style={{ color: 'var(--ink-soft)', fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{s.avg}%</span>
                   </div>
