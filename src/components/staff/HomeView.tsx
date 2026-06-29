@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Play, Lock } from 'lucide-react';
+import { Play, Lock, Trophy as TrophyIcon, CheckCircle2 } from 'lucide-react';
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, Trophy,
 } from 'lucide-react';
-import type { Module } from '@/lib/curriculum';
+import type { Module, Phase } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
-import { PROPERTY } from '@/lib/config';
+import type { PropertyProfile } from '@/lib/useUser';
+import { PROPERTY, DEMO_PROPERTY_ID } from '@/lib/config';
 
 // ─── 6-Month Journey data ────────────────────────────────────
 
@@ -139,16 +140,28 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Trophy,
 };
 
-function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }) {
+function ModuleCard({
+  module, onClick, locked = false, toBeCategorized = false,
+}: {
+  module: Module; onClick: () => void; locked?: boolean; toBeCategorized?: boolean;
+}) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
   const isCertification = module.id === 'phase-1-certification';
-  const isLocked = isCertification && module.available === false;
+  // A module is locked either as the (future) certification, or when it's gated
+  // behind an earlier, not-yet-complete module in the same phase.
+  const isLocked = locked || (isCertification && module.available === false);
   const hasRoleplay = module.lessons.some((l) => Boolean(l.scenarioId));
+  // Progress reads from real completion (completedLessons/totalLessons) so the
+  // bar reflects actual progress on the real-data path.
+  const progressRatio = module.totalLessons > 0 ? module.completedLessons / module.totalLessons : 0;
   return (
     <div
       className="module-card"
-      onClick={onClick}
-      style={isCertification ? { border: '2px solid #B8860B' } : undefined}
+      onClick={isLocked && !isCertification ? undefined : onClick}
+      style={{
+        ...(isCertification ? { border: '2px solid #B8860B' } : undefined),
+        ...(isLocked && !isCertification ? { opacity: 0.55, cursor: 'not-allowed' } : undefined),
+      }}
     >
       <div className="module-band" style={{ background: module.color }} />
       <div className="module-card-body">
@@ -157,7 +170,11 @@ function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }
             <Icon size={22} color={module.color} />
           </div>
           {isLocked ? (
-            <Lock size={18} color="#B8860B" strokeWidth={2} />
+            <Lock size={18} color={isCertification ? '#B8860B' : 'var(--ink-soft)'} strokeWidth={2} />
+          ) : toBeCategorized ? (
+            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', color: 'var(--ink-soft)', background: 'var(--sand-warm)', borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
+              To categorize
+            </span>
           ) : (
             module.completedLessons === module.totalLessons && (
               <span className="module-certified-badge">✓ Complete</span>
@@ -185,7 +202,7 @@ function ModuleCard({ module, onClick }: { module: Module; onClick: () => void }
           <div className="module-progress-bar">
             <div
               className="module-progress-fill"
-              style={{ width: `${module.progress * 100}%`, background: module.color }}
+              style={{ width: `${progressRatio * 100}%`, background: module.color }}
             />
           </div>
           <span style={{ fontSize: 11, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
@@ -215,10 +232,155 @@ function formatCurriculumTime(curriculum: Module[]): string {
   return `~${hours}h ${minutes}m`;
 }
 
+// ─── Phase-aware curriculum (real, non-demo staff) ───────────
+
+// A resolved module plus the gating/categorization flags from /api/curriculum.
+type ResolvedModule = Module & { locked: boolean; toBeCategorized?: boolean };
+interface PhaseGroup { phase: Phase; modules: ResolvedModule[]; }
+interface PhaseData {
+  isDemo: boolean;
+  track: string | null;
+  phases: PhaseGroup[];
+  unassigned: ResolvedModule[];
+  completedPhaseIds: string[];
+}
+
+function PhaseCurriculum({
+  data, onOpenModule,
+}: { data: PhaseData; onOpenModule: (m: Module) => void }) {
+  const ordered = data.phases; // already ordered by phase_number ASC
+  const totalPhases = ordered.length;
+  const completed = new Set(data.completedPhaseIds);
+  const currentIndex = ordered.findIndex((g) => !completed.has(g.phase.id));
+
+  // All phases complete → celebration state.
+  if (currentIndex === -1) {
+    return (
+      <div style={{ marginTop: 48 }}>
+        <div style={{ padding: '40px 32px', borderRadius: 20, textAlign: 'center', background: 'var(--ocean-deep)' }}>
+          <TrophyIcon size={40} color="#F5A623" style={{ marginBottom: 16 }} />
+          <h2 className="display" style={{ fontSize: 30, color: 'white', margin: '0 0 10px' }}>All phases complete!</h2>
+          <p style={{ fontSize: 15, color: 'rgba(250,247,242,0.7)', margin: 0 }}>
+            You&apos;ve earned every certification in your track. Outstanding work.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const current = ordered[currentIndex];
+  const future = ordered.slice(currentIndex + 1);
+  const past = ordered.slice(0, currentIndex);
+
+  // Phase 1 also surfaces the not-yet-categorized ("universal") modules.
+  const isPhaseOne = current.phase.phase_number === 1;
+  const currentModules: ResolvedModule[] = isPhaseOne
+    ? [...current.modules, ...data.unassigned]
+    : current.modules;
+
+  const totalMods = currentModules.length;
+  const doneMods = currentModules.filter(
+    (m) => m.totalLessons > 0 && m.completedLessons >= m.totalLessons,
+  ).length;
+  const pct = totalMods > 0 ? Math.round((doneMods / totalMods) * 100) : 0;
+
+  return (
+    <div style={{ marginTop: 48 }}>
+      {/* Completed phases (small certified tiles) */}
+      {past.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+          {past.map((g) => (
+            <div key={g.phase.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: 12, background: 'rgba(129,178,154,0.12)', border: '1px solid rgba(129,178,154,0.4)' }}>
+              <CheckCircle2 size={16} color="var(--sage-deep)" />
+              <span style={{ fontSize: 13 }}>
+                <b>Phase {g.phase.phase_number}</b> · {g.phase.certification_title}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Current phase header */}
+      <div style={{ padding: '24px 28px', borderRadius: 18, background: 'white', border: '1px solid var(--sand-deeper)', marginBottom: 28 }}>
+        <div className="label-mono" style={{ color: 'var(--brand)', marginBottom: 6 }}>
+          Phase {current.phase.phase_number} of {totalPhases}
+        </div>
+        <h2 className="display" style={{ fontSize: 26, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
+          {current.phase.title}
+        </h2>
+        <p style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.55, margin: '0 0 18px', maxWidth: 620 }}>
+          {current.phase.goal}
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ flex: 1, height: 8, borderRadius: 999, background: 'var(--sand-warm)', overflow: 'hidden' }}>
+            <div style={{ width: `${pct}%`, height: '100%', background: '#F5A623', borderRadius: 999, transition: 'width 0.3s ease' }} />
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
+            {doneMods} / {totalMods} modules
+          </span>
+        </div>
+      </div>
+
+      {/* Current phase modules */}
+      {currentModules.length > 0 ? (
+        <div className="module-grid">
+          {currentModules.map((m) => (
+            <ModuleCard
+              key={m.id}
+              module={m}
+              locked={m.locked}
+              toBeCategorized={m.toBeCategorized}
+              onClick={() => onOpenModule(m)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div style={{ padding: '32px', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14, border: '1px dashed var(--sand-deeper)', borderRadius: 14 }}>
+          No modules assigned to this phase yet.
+        </div>
+      )}
+
+      {/* Locked future phases */}
+      {future.length > 0 && (
+        <div style={{ marginTop: 48 }}>
+          <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', margin: '0 0 18px' }}>
+            What&apos;s next
+          </h3>
+          <div className="module-grid">
+            {future.map((g) => (
+              <div
+                key={g.phase.id}
+                className="module-card"
+                style={{ opacity: 0.55, cursor: 'not-allowed' }}
+              >
+                <div className="module-band" style={{ background: 'var(--ink-soft)' }} />
+                <div className="module-card-body">
+                  <div className="module-card-inner">
+                    <div className="module-icon-wrap" style={{ background: 'var(--sand-warm)' }}>
+                      <Lock size={20} color="var(--ink-soft)" />
+                    </div>
+                  </div>
+                  <div className="module-card-text">
+                    <h3 className="display module-title">Phase {g.phase.phase_number} — {g.phase.title}</h3>
+                    <p className="module-sub">
+                      Locked — complete Phase {current.phase.phase_number} to unlock
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface HomeViewProps {
   curriculum: Module[];
   onOpenModule: (m: Module) => void;
   viewingAs: StaffMember | null;
+  property?: PropertyProfile | null;
 }
 
 interface HomeProgress {
@@ -229,9 +391,28 @@ interface HomeProgress {
   firstModuleTitle?: string | null;
 }
 
-export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeViewProps) {
+export default function HomeView({ curriculum, onOpenModule, viewingAs, property }: HomeViewProps) {
   const firstName = viewingAs ? viewingAs.name.split(' ')[0] : 'there';
   const progressPct = viewingAs ? Math.round((viewingAs.lessons / viewingAs.total) * 100) : 50;
+
+  // Phase-aware layout applies only to a real, signed-in staff member at a
+  // non-demo property. Manager "view as" previews and the Hostia Demo property
+  // keep the original mock layout untouched.
+  const isDemo = property?.id === DEMO_PROPERTY_ID;
+  const phaseEligible = !viewingAs && property != null && !isDemo;
+
+  const [phaseData, setPhaseData] = useState<PhaseData | null>(null);
+  useEffect(() => {
+    if (!phaseEligible) return;
+    let cancelled = false;
+    fetch('/api/curriculum')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!cancelled && d) setPhaseData(d as PhaseData); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [phaseEligible]);
+
+  const usePhaseLayout = phaseEligible && phaseData != null && !phaseData.isDemo && phaseData.phases.length > 0;
 
   const currentModule = curriculum.find((m) => m.available && m.progress > 0 && m.progress < 1)
     ?? curriculum.find((m) => m.available);
@@ -318,23 +499,28 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
           </p>
         </div>
 
-        {/* Curriculum header */}
-        <div className="curriculum-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, marginTop: 48 }}>
-          <h2 className="display" style={{ fontSize: 28, color: 'var(--brand-deep)' }}>Curriculum</h2>
-          <span className="curriculum-sub" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
-            {curriculum.length} modules · {totalLessons} lessons · {totalTime} total
-          </span>
-        </div>
+        {usePhaseLayout ? (
+          /* Phase-aware curriculum — current phase + locked future phases */
+          <PhaseCurriculum data={phaseData!} onOpenModule={onOpenModule} />
+        ) : (
+          <>
+            {/* Curriculum header */}
+            <div className="curriculum-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 24, marginTop: 48 }}>
+              <h2 className="display" style={{ fontSize: 28, color: 'var(--brand-deep)' }}>Curriculum</h2>
+              <span className="curriculum-sub" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
+                {curriculum.length} modules · {totalLessons} lessons · {totalTime} total
+              </span>
+            </div>
 
-        <div className="module-grid">
-          {curriculum.map((m) => (
-            <ModuleCard
-              key={m.id}
-              module={m}
-              onClick={() => onOpenModule(m)}
-            />
-          ))}
-        </div>
+            <div className="module-grid">
+              {curriculum.map((m) => (
+                <ModuleCard
+                  key={m.id}
+                  module={m}
+                  onClick={() => onOpenModule(m)}
+                />
+              ))}
+            </div>
 
         {/* Journey */}
         <div style={{ marginTop: 64 }}>
@@ -371,6 +557,8 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs }: HomeVi
             </div>
           </div>
         </div>
+          </>
+        )}
 
       </div>
     </div>

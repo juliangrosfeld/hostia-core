@@ -22,6 +22,7 @@ export interface PropertyProfile {
   logo_url: string | null
   primary_color: string
   menu_pdf_url: string | null
+  venue_type: string | null
 }
 
 export function useUser() {

@@ -41,7 +41,25 @@ interface DashboardData {
     topPerformer: { full_name: string; first_name: string; badges: number; streak: number; score: number } | null;
   };
   roster: StaffMember[];
+  phaseDistribution: PhaseDistEntry[];
+  selectedPhase: string | null;
 }
+
+interface PhaseDistEntry {
+  phase_id: string;
+  phase_number: number;
+  title: string;
+  count: number;
+}
+
+// Static phase distribution shown on the Hostia Demo property (casual dining).
+const DEMO_PHASE_DISTRIBUTION: PhaseDistEntry[] = [
+  { phase_id: 'casual-dining-phase-1', phase_number: 1, title: 'Foundation', count: 4 },
+  { phase_id: 'casual-dining-phase-2', phase_number: 2, title: 'Service & Operational Foundations', count: 2 },
+  { phase_id: 'casual-dining-phase-3', phase_number: 3, title: 'Guest Service & Loyalty', count: 1 },
+  { phase_id: 'casual-dining-phase-4', phase_number: 4, title: 'Sales & Experience Excellence', count: 1 },
+  { phase_id: 'casual-dining-phase-5', phase_number: 5, title: 'Leadership & Hospitality Excellence', count: 0 },
+];
 
 type DemoResponse = { isDemo: true };
 type DashboardResponse = DashboardData | DemoResponse;
@@ -172,6 +190,82 @@ function ActivityItem({
 interface FormState { name: string; role: string; color: string; email: string; password: string; }
 const BLANK_FORM: FormState = { name: '', role: 'Mesero', color: '#F5A623', email: '', password: '' };
 
+// ─── Phase distribution ──────────────────────────────────────
+// Horizontal bar tiles showing how many staff sit on each phase. Clicking a tile
+// filters the whole dashboard to that phase; "All Phases" resets. `interactive`
+// is false on the demo property, where the numbers are static.
+
+function PhaseDistribution({
+  distribution, selected, onSelect, interactive,
+}: {
+  distribution: PhaseDistEntry[];
+  selected: string | null;
+  onSelect: (phaseId: string | null) => void;
+  interactive: boolean;
+}) {
+  if (distribution.length === 0) return null;
+  const maxCount = Math.max(1, ...distribution.map((d) => d.count));
+  const total = distribution.reduce((a, d) => a + d.count, 0);
+
+  const tileStyle = (active: boolean): React.CSSProperties => ({
+    flex: '1 1 150px',
+    minWidth: 140,
+    textAlign: 'left',
+    padding: '14px 16px',
+    borderRadius: 12,
+    border: active ? '1.5px solid var(--brand)' : '1px solid var(--sand-deeper)',
+    background: active ? 'rgba(245,166,35,0.08)' : 'white',
+    cursor: interactive ? 'pointer' : 'default',
+    fontFamily: 'inherit',
+    transition: 'border-color 0.15s ease, background 0.15s ease',
+  });
+
+  return (
+    <div className="card" style={{ padding: 20, marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+        <div>
+          <div className="label-mono">Phase distribution</div>
+          <div className="card-title">Where your team is in the journey</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        {/* All Phases reset tile */}
+        <button
+          onClick={() => interactive && onSelect(null)}
+          style={tileStyle(selected === null)}
+        >
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 8 }}>
+            All Phases
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--ocean-deep)', lineHeight: 1 }}>{total}</div>
+          <div style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 2 }}>staff total</div>
+        </button>
+
+        {distribution.map((d) => {
+          const active = selected === d.phase_id;
+          return (
+            <button key={d.phase_id} onClick={() => interactive && onSelect(d.phase_id)} style={tileStyle(active)}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-deep)', letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: 8 }}>
+                Phase {d.phase_number}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--ocean-deep)', lineHeight: 1 }}>{d.count}</span>
+                <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{d.count === 1 ? 'staff' : 'staff'}</span>
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--ink-soft)', margin: '4px 0 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {d.title}
+              </div>
+              <div style={{ height: 6, borderRadius: 999, background: 'var(--sand-warm)', overflow: 'hidden' }}>
+                <div style={{ width: `${(d.count / maxCount) * 100}%`, height: '100%', background: active ? 'var(--brand)' : 'var(--sage)', borderRadius: 999 }} />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main dashboard ──────────────────────────────────────────
 
 interface ManagerDashboardProps {
@@ -197,9 +291,13 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const [status, setStatus] = useState<'loading' | 'demo' | 'real'>('loading');
   const [realData, setRealData] = useState<DashboardData | null>(null);
 
-  async function fetchDashboard() {
+  // Selected phase filter (phase_id) — null = all phases. Drives a scoped refetch.
+  const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
+
+  async function fetchDashboard(phase: string | null = null) {
     try {
-      const res = await fetch('/api/manager/dashboard');
+      const url = phase ? `/api/manager/dashboard?phase=${encodeURIComponent(phase)}` : '/api/manager/dashboard';
+      const res = await fetch(url);
       if (!res.ok) { setStatus('demo'); return; } // fail safe → never blank the screen
       const data: DashboardResponse = await res.json();
       if (data.isDemo) {
@@ -217,7 +315,18 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
 
   useEffect(() => { fetchDashboard(); }, []);
 
+  // Selecting a phase re-pulls the dashboard scoped to that phase's staff.
+  const selectPhase = (phaseId: string | null) => {
+    setSelectedPhase(phaseId);
+    fetchDashboard(phaseId);
+  };
+
   const isReal = status === 'real' && realData != null;
+
+  // Metadata for the "Viewing: Phase X" indicator when a phase filter is active.
+  const activePhase = isReal && selectedPhase
+    ? realData!.phaseDistribution.find((d) => d.phase_id === selectedPhase) ?? null
+    : null;
 
   // Modal state
   const [modalMode, setModalMode] = useState<'add' | 'edit' | null>(null);
@@ -475,6 +584,29 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             <button className="btn-brand-sm"><Bell size={13} /> Send team nudge</button>
           </div>
         </div>
+
+        {/* ─ Phase distribution ─ */}
+        <PhaseDistribution
+          distribution={isReal ? realData!.phaseDistribution : DEMO_PHASE_DISTRIBUTION}
+          selected={selectedPhase}
+          onSelect={selectPhase}
+          interactive={isReal}
+        />
+
+        {/* Viewing-phase indicator (only when a phase filter is active) */}
+        {isReal && activePhase && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 14px', borderRadius: 999, background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.4)', color: '#8a6000', fontSize: 13, fontWeight: 700 }}>
+              Viewing: Phase {activePhase.phase_number} — {activePhase.title}
+            </span>
+            <button
+              onClick={() => selectPhase(null)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 12px', borderRadius: 999, border: '1px solid var(--sand-deeper)', background: 'white', color: 'var(--ink-soft)', fontSize: 13, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer' }}
+            >
+              <X size={13} /> Clear filter
+            </button>
+          </div>
+        )}
 
         {/* ─ KPI cards ─ */}
         <div className="kpi-row">

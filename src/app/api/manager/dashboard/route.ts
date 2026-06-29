@@ -88,7 +88,8 @@ function joinNames(names: string[]): string {
 }
 
 // ── Route ────────────────────────────────────────────────────────────────────
-export async function GET() {
+export async function GET(req: Request) {
+  const phaseParam = new URL(req.url).searchParams.get('phase'); // optional phase_id filter
   const supabase = await createClient();
 
   // 1. Auth — must be a signed-in manager or admin.
@@ -131,7 +132,16 @@ export async function GET() {
   //    property_modules (non-sensitive config) is read with the admin client,
   //    mirroring /api/curriculum, because its RLS is closed to non-owners.
   const admin = createAdminClient();
-  const [staffRes, sessionRes, completionRes, moduleRes] = await Promise.all([
+
+  // Property track (venue_type → track 1:1) drives the phase set.
+  const { data: prop } = await admin
+    .from('properties')
+    .select('venue_type')
+    .eq('id', propertyId)
+    .single();
+  const track = (prop?.venue_type as string | null) ?? null;
+
+  const [staffRes, sessionRes, completionRes, moduleRes, phasesRes, phaseCompletionRes] = await Promise.all([
     supabase
       .from('users')
       .select('id, full_name, last_active, xp, streak_days')
@@ -153,6 +163,18 @@ export async function GET() {
       .select('module_id, order_index, is_active')
       .eq('property_id', propertyId)
       .order('order_index'),
+    track
+      ? admin
+          .from('phases')
+          .select('id, phase_number, title')
+          .eq('track', track)
+          .order('phase_number', { ascending: true })
+      : Promise.resolve({ data: [] as { id: string; phase_number: number; title: string }[], error: null }),
+    supabase
+      .from('phase_completions')
+      .select('staff_id, phase_id')
+      .eq('property_id', propertyId)
+      .limit(20_000),
   ]);
 
   if (staffRes.error) console.error('[dashboard] staff query error:', staffRes.error);
@@ -160,12 +182,49 @@ export async function GET() {
   if (completionRes.error) console.error('[dashboard] completions query error:', completionRes.error);
   if (moduleRes.error) console.error('[dashboard] property_modules query error:', moduleRes.error);
 
-  const staff: StaffRow[] = staffRes.data ?? [];
-  const sessions: SessionRow[] = (sessionRes.data ?? []) as SessionRow[];
-  const completions: CompletionRow[] = (completionRes.data ?? []) as CompletionRow[];
+  const allStaff: StaffRow[] = staffRes.data ?? [];
+  const allSessions: SessionRow[] = (sessionRes.data ?? []) as SessionRow[];
+  const allCompletions: CompletionRow[] = (completionRes.data ?? []) as CompletionRow[];
   const modules: Module[] = resolveCurriculum(moduleRes.data);
 
+  // ── Phase placement ───────────────────────────────────────────────────────
+  // A staff member's CURRENT phase = the lowest-numbered phase they haven't yet
+  // completed (no row in phase_completions for it). With no completions everyone
+  // sits on phase 1. Until the Stage-2 exam ships, that's every real staffer.
+  const phaseList = (phasesRes.data ?? []) as { id: string; phase_number: number; title: string }[];
+  const completedPhasesByStaff = new Map<string, Set<string>>();
+  for (const pc of (phaseCompletionRes.data ?? []) as { staff_id: string; phase_id: string }[]) {
+    const set = completedPhasesByStaff.get(pc.staff_id) ?? new Set<string>();
+    set.add(pc.phase_id);
+    completedPhasesByStaff.set(pc.staff_id, set);
+  }
+  const currentPhaseOf = (staffId: string): string | null => {
+    const done = completedPhasesByStaff.get(staffId) ?? new Set<string>();
+    for (const ph of phaseList) if (!done.has(ph.id)) return ph.id;
+    return null; // all phases complete
+  };
+  const currentPhaseByStaff = new Map<string, string | null>();
+  for (const s of allStaff) currentPhaseByStaff.set(s.id, currentPhaseOf(s.id));
+
+  // Distribution is always computed over ALL staff (so the tiles show real totals
+  // regardless of which phase is being filtered to).
+  const phaseDistribution = phaseList.map((ph) => ({
+    phase_id: ph.id,
+    phase_number: ph.phase_number,
+    title: ph.title,
+    count: allStaff.filter((s) => currentPhaseByStaff.get(s.id) === ph.id).length,
+  }));
+
+  // ── Apply the optional phase filter ───────────────────────────────────────
+  // Everything below this point operates on the scoped staff/sessions/completions,
+  // so every metric recomputes for only the staff currently on the chosen phase.
+  const selectedPhase = phaseParam && phaseList.some((p) => p.id === phaseParam) ? phaseParam : null;
+  const staff: StaffRow[] = selectedPhase
+    ? allStaff.filter((s) => currentPhaseByStaff.get(s.id) === selectedPhase)
+    : allStaff;
   const staffIds = new Set(staff.map((s) => s.id));
+  const sessions: SessionRow[] = allSessions.filter((s) => staffIds.has(s.staff_id));
+  const completions: CompletionRow[] = allCompletions.filter((c) => staffIds.has(c.staff_id));
 
   // ── 1–4. Staff counts + active avatars ────────────────────────────────────
   const totalStaff = staff.length;
@@ -249,8 +308,17 @@ export async function GET() {
   const assignedModuleIds = new Set(
     (moduleRes.data ?? []).filter((m) => m.is_active).map((m) => m.module_id),
   );
+  // When a phase is selected, skill gaps scope to that phase's modules. Phase 1
+  // also owns the not-yet-categorized ("universal") modules with no phase_id.
+  const phaseOneId = phaseList[0]?.id;
+  const inSelectedPhase = (m: Module): boolean => {
+    if (!selectedPhase) return true;
+    if (m.phase_id) return m.phase_id === selectedPhase;
+    return selectedPhase === phaseOneId;
+  };
   const skillGaps = modules
     .filter((m) => assignedModuleIds.has(m.id))
+    .filter(inSelectedPhase)
     // Only modules that actually contain a roleplay are "skills" — warmth only
     // ever comes from roleplay, so non-roleplay modules can't have a real score.
     .filter((m) => m.lessons.some((l) => Boolean(l.scenarioId)))
@@ -406,5 +474,7 @@ export async function GET() {
     skillGaps,
     insights: { weakestSkill, atRiskStaff, topPerformer },
     roster,
+    phaseDistribution,
+    selectedPhase,
   });
 }

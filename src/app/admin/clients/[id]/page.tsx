@@ -7,7 +7,7 @@ import {
   ArrowLeft, Check, AlertCircle, Save, Plus, Trash2, Loader2,
   UserPlus, Copy, Mail, X,
 } from 'lucide-react'
-import { CURRICULUM } from '@/lib/curriculum'
+import { CURRICULUM, type Phase } from '@/lib/curriculum'
 
 const VENUE_TYPES = [
   { value: 'casual-dining', label: 'Casual Dining' },
@@ -111,6 +111,7 @@ export default function ClientDetailPage() {
   const [property, setProperty] = useState<Property | null>(null)
   const [assigned, setAssigned] = useState<Set<string>>(new Set())
   const [overrides, setOverrides] = useState<Override[]>([])
+  const [phases, setPhases] = useState<Phase[]>([])
 
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -197,6 +198,19 @@ export default function ClientDetailPage() {
   useEffect(() => {
     loadManagers()
   }, [loadManagers])
+
+  // Load the phases for this property's track, so the module library can be
+  // grouped by phase. Re-runs whenever the venue type changes.
+  useEffect(() => {
+    const track = property?.venue_type
+    if (!track) { setPhases([]); return }
+    let cancelled = false
+    fetch(`/api/phases?track=${encodeURIComponent(track)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!cancelled && d?.phases) setPhases(d.phases as Phase[]) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [property?.venue_type])
 
   // ── Invite a manager ──────────────────────────────────────────
   function openInviteModal() {
@@ -558,11 +572,26 @@ export default function ClientDetailPage() {
         <section style={cardStyle}>
           <h2 style={sectionTitleStyle}>Module Library</h2>
           <p style={sectionSubStyle}>
-            {assignedCount} of {CURRICULUM.length} modules assigned. Toggle to assign or remove.
+            {assignedCount} of {CURRICULUM.length} modules assigned, grouped by phase. Toggle to assign or remove.
           </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {CURRICULUM.map((m) => {
+          {!property.venue_type && (
+            <div
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18,
+                padding: '12px 16px', borderRadius: 12,
+                background: 'rgba(245,166,35,0.08)', border: '1px solid rgba(245,166,35,0.35)',
+                color: '#8a6000', fontSize: 13.5, fontWeight: 500,
+              }}
+            >
+              <AlertCircle size={16} /> Set venue type to enable phase-based assignment.
+            </div>
+          )}
+
+          {(() => {
+            // Group CURRICULUM modules by phase_id. Any module without a phase_id
+            // lands in the "to be categorized" bucket shown last.
+            const renderModuleButton = (m: typeof CURRICULUM[number]) => {
               const isAssigned = assigned.has(m.id)
               const busy = moduleBusy === m.id
               return (
@@ -571,15 +600,9 @@ export default function ClientDetailPage() {
                   onClick={() => !busy && toggleModule(m.id)}
                   disabled={busy}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 14,
-                    padding: '14px 16px',
-                    borderRadius: 12,
-                    textAlign: 'left',
-                    width: '100%',
-                    cursor: busy ? 'default' : 'pointer',
-                    fontFamily: 'inherit',
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '14px 16px', borderRadius: 12, textAlign: 'left', width: '100%',
+                    cursor: busy ? 'default' : 'pointer', fontFamily: 'inherit',
                     background: isAssigned ? 'rgba(245,166,35,0.06)' : 'white',
                     border: isAssigned ? '1.5px solid #F5A623' : '1px solid var(--sand-deeper)',
                     transition: 'border-color 0.15s ease, background 0.15s ease',
@@ -587,23 +610,14 @@ export default function ClientDetailPage() {
                 >
                   <span
                     style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 6,
-                      flexShrink: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                       background: isAssigned ? '#F5A623' : 'var(--sand-warm)',
                       border: isAssigned ? 'none' : '1px solid var(--sand-deeper)',
                       color: '#051956',
                     }}
                   >
-                    {busy ? (
-                      <Loader2 size={13} className="animate-spin" />
-                    ) : isAssigned ? (
-                      <Check size={14} />
-                    ) : null}
+                    {busy ? <Loader2 size={13} className="animate-spin" /> : isAssigned ? <Check size={14} /> : null}
                   </span>
                   <span style={{ width: 8, height: 8, borderRadius: 2, background: m.color, flexShrink: 0 }} />
                   <span style={{ flex: 1, minWidth: 0 }}>
@@ -619,8 +633,46 @@ export default function ClientDetailPage() {
                   </span>
                 </button>
               )
-            })}
-          </div>
+            }
+
+            const groupHeading = (label: string, sub: string) => (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '4px 0 2px' }}>
+                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-deep)' }}>
+                  {label}
+                </span>
+                <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{sub}</span>
+              </div>
+            )
+
+            const uncategorized = CURRICULUM.filter((m) => !m.phase_id)
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                {phases.map((ph) => {
+                  const mods = CURRICULUM.filter((m) => m.phase_id === ph.id)
+                  return (
+                    <div key={ph.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {groupHeading(`Phase ${ph.phase_number} — ${ph.title}`, ph.certification_title)}
+                      {mods.length === 0 ? (
+                        <div style={{ padding: '14px 16px', borderRadius: 12, border: '1px dashed var(--sand-deeper)', color: 'var(--ink-soft)', fontSize: 13 }}>
+                          No modules assigned yet
+                        </div>
+                      ) : (
+                        mods.map(renderModuleButton)
+                      )}
+                    </div>
+                  )
+                })}
+
+                {uncategorized.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {groupHeading('To be categorized', 'Not yet assigned to a phase')}
+                    {uncategorized.map(renderModuleButton)}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
         </section>
 
         {/* ── 4. Property Overrides ── */}

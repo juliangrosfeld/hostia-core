@@ -60,6 +60,23 @@ export interface Module {
   available: boolean;
   xpTotal: number;
   lessons: Lesson[];
+  // Phase placement. Optional because the demo property and any not-yet-categorized
+  // ("universal") modules may have no phase assigned yet. Mirrors the DB columns
+  // modules.phase_id / modules.order_in_phase (see add_phases_architecture.sql).
+  phase_id?: string;
+  order_in_phase?: number;
+}
+
+// A curriculum phase — first-class entity. Mirrors the `phases` DB table.
+export interface Phase {
+  id: string;
+  track: 'casual-dining' | 'fine-dining' | 'fast-casual';
+  phase_number: number;
+  title: string;
+  goal: string;
+  outcome: string;
+  certification_title: string;
+  order_index: number;
 }
 
 // ─── MODULE 0: ONBOARDING — WELCOME TO [PROPERTY] ────────────
@@ -1606,6 +1623,8 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 120,
     lessons: casualDiningStandardLessons,
+    phase_id: 'casual-dining-phase-1',
+    order_in_phase: 1,
   },
   // Module 8
   {
@@ -1620,6 +1639,8 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 200,
     lessons: casualDiningFloorLessons,
+    phase_id: 'casual-dining-phase-1',
+    order_in_phase: 2,
   },
   // Phase 1 Certification (placeholder)
   {
