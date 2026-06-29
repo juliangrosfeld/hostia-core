@@ -271,10 +271,13 @@ function PhaseCurriculum({
   const past = ordered.slice(0, currentIndex);
 
   // Phase 1 also surfaces the not-yet-categorized ("universal") modules.
+  // Safety net: the API already returns each phase's modules sorted by
+  // order_in_phase, but re-sort client-side so render order always follows the
+  // Supabase order_in_phase value rather than CURRICULUM array position.
   const isPhaseOne = current.phase.phase_number === 1;
-  const currentModules: ResolvedModule[] = isPhaseOne
-    ? [...current.modules, ...data.unassigned]
-    : current.modules;
+  const currentModules: ResolvedModule[] = (
+    isPhaseOne ? [...current.modules, ...data.unassigned] : [...current.modules]
+  ).sort((a, b) => (a.order_in_phase ?? 999) - (b.order_in_phase ?? 999));
 
   const totalMods = currentModules.length;
   const doneMods = currentModules.filter(
