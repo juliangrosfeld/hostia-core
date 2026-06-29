@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, Clock, Zap, Check, ChevronRight, Trophy } from 'lucide-react';
+import { ChevronLeft, Clock, Zap, Check, ChevronRight } from 'lucide-react';
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Eye, Star,
 } from 'lucide-react';
@@ -68,7 +68,6 @@ interface ModuleViewProps {
 
 export default function ModuleView({ module, onBack, onOpenLesson }: ModuleViewProps) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
-  const allDone = module.completedLessons === module.totalLessons;
 
   return (
     <div className="page animate-fade-up">
@@ -134,30 +133,6 @@ export default function ModuleView({ module, onBack, onOpenLesson }: ModuleViewP
                 onClick={() => onOpenLesson(l, i)}
               />
             ))}
-          </div>
-
-          {/* Exam card */}
-          <div style={{ marginTop: 20 }}>
-            <h2 className="display" style={{ fontSize: 18, marginBottom: 12, color: 'var(--brand-deep)' }}>
-              Final exam
-            </h2>
-            <div
-              className="exam-card"
-              onClick={() => undefined /* TODO: exam flow */}
-            >
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: allDone ? 'var(--brand)' : 'var(--sand-warm)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Trophy size={22} color={allDone ? 'var(--brand-deep)' : 'var(--ink-soft)'} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>
-                  {module.title} Certification Exam
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: 2 }}>
-                  {allDone ? 'All lessons complete — pass 75% to earn your badge.' : 'Take the final exam'}
-                </div>
-              </div>
-              <ChevronRight size={18} color="var(--brand-deep)" />
-            </div>
           </div>
         </div>
       </div>

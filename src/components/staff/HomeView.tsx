@@ -196,17 +196,24 @@ function ModuleCard({
             </span>
           </div>
         )}
-        <div className="module-progress-row">
-          <div className="module-progress-bar">
-            <div
-              className="module-progress-fill"
-              style={{ width: `${progressRatio * 100}%`, background: module.color }}
-            />
+        {isCertification ? (
+          <div style={{ fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Lock size={12} color="#B8860B" strokeWidth={2} />
+            Complete all Phase 1 modules to unlock
           </div>
-          <span style={{ fontSize: 11, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
-            {module.completedLessons}/{module.totalLessons}
-          </span>
-        </div>
+        ) : (
+          <div className="module-progress-row">
+            <div className="module-progress-bar">
+              <div
+                className="module-progress-fill"
+                style={{ width: `${progressRatio * 100}%`, background: module.color }}
+              />
+            </div>
+            <span style={{ fontSize: 11, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
+              {module.completedLessons}/{module.totalLessons}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

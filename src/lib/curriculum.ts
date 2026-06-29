@@ -1965,20 +1965,6 @@ export const CURRICULUM: Module[] = [
     phase_id: 'casual-dining-phase-1',
     order_in_phase: 2,
   },
-  // Phase 1 Certification (placeholder)
-  {
-    id: 'phase-1-certification',
-    title: 'Phase 1 Certification',
-    subtitle: 'Prove what you know. Unlock Phase 2.',
-    iconName: 'Trophy',
-    color: '#B8860B',
-    progress: 0,
-    totalLessons: 0,
-    completedLessons: 0,
-    available: false,
-    xpTotal: 0,
-    lessons: [],
-  },
   // Fine Dining Phase 1 — Module 1
   {
     id: 'fine-dining-standard',
@@ -2006,6 +1992,20 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 200,
     lessons: fineDiningPresenceLessons,
+  },
+  // Phase 1 Certification (placeholder) — always the final item in the grid.
+  {
+    id: 'phase-1-certification',
+    title: 'Phase 1 Certification',
+    subtitle: 'Prove what you know. Unlock Phase 2.',
+    iconName: 'Trophy',
+    color: '#B8860B',
+    progress: 0,
+    totalLessons: 0,
+    completedLessons: 0,
+    available: false,
+    xpTotal: 0,
+    lessons: [],
   },
 ];
 
