@@ -2,7 +2,7 @@
 
 import { ChevronLeft, Clock, Zap, Check, ChevronRight, Trophy } from 'lucide-react';
 import {
-  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House,
+  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Eye,
 } from 'lucide-react';
 import type { Module, Lesson } from '@/lib/curriculum';
 
@@ -15,6 +15,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Users,
   Brain,
   House,
+  Eye,
 };
 
 function LessonRow({

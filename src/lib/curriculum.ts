@@ -1676,6 +1676,164 @@ const fineDiningStandardLessons: Lesson[] = [
   },
 ];
 
+// ─── FINE DINING PHASE 1 · MODULE 2: PROFESSIONAL APPEARANCE & PRESENCE ─
+
+const fineDiningPresenceLessons: Lesson[] = [
+  {
+    id: 'fdp-body-language',
+    title: 'Body Language That Communicates Care',
+    desc: 'Guests read how you move long before they hear what you say.',
+    duration: '7 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-body-language',
+    learn: [
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'A guest decides how cared for they feel from the way you carry yourself — before you have said a single word.' },
+      { type: 'intro', text: 'In a fine dining room, your body is always speaking. The way you approach a table, where you place your hands, how steadily you stand while a guest is talking — all of it tells the guest, instantly, whether they are in capable hands or being processed. Elegance is not something you switch on at the table. It is the way you cross the room, the way you wait, the way you turn to leave. Master your body language and you communicate care in the silence between words.' },
+      { type: 'steps', title: 'The five signals your body is always sending', items: [
+        { num: 1, title: 'Your approach', body: 'Approach unhurried, on a slight angle rather than head-on, and stop at a respectful distance — close enough to be attentive, never looming over the table. A measured approach tells the guest they have your full attention.' },
+        { num: 2, title: 'Your posture', body: 'Stand tall with shoulders relaxed and open, weight even on both feet. Never lean on the table, the wall, or a chair back. An upright, settled posture says you are present and unrushed, however busy the room.' },
+        { num: 3, title: 'Your pace', body: 'Move deliberately and smoothly. Quick, darting movements read as anxiety and ripple through the room. A calm pace at the table reassures the guest that nothing is more important than they are right now.' },
+        { num: 4, title: 'Your hands', body: 'Keep your hands still and purposeful — at your sides, lightly clasped behind your back, or placing something with care. Never fidget, point, or gesture broadly. Composed hands are the quiet signature of a professional.' },
+        { num: 5, title: 'Acknowledging across the room', body: 'When a guest catches your eye from another table, meet it with a small, warm nod — a silent "I see you, I am coming." A guest who feels seen will wait calmly; a guest who feels invisible grows restless within seconds.' },
+      ]},
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Approach on a gentle angle and pause a beat before speaking.', dont: 'Marching up head-on and starting to talk before you have fully arrived.' },
+        { do: 'Stand square and still, hands composed, while a guest speaks to you.', dont: 'Shifting your weight, glancing across the room, or letting your hands wander.' },
+        { do: 'Return a distant guest\'s glance with a calm, reassuring nod.', dont: 'Pretending not to notice a guest looking for you because your hands are full.' },
+        { do: 'Lower yourself slightly toward the table when speaking to seated guests.', dont: 'Towering over the table and forcing guests to crane upward to meet your eye.' },
+      ]},
+      { type: 'tip-list', title: 'Five body-language habits to build now', items: [
+        'Before you reach a table, slow your last few steps by a fraction.',
+        'Catch yourself the moment you start to lean on something — reset and stand tall.',
+        'Keep your hands behind your back when waiting, so they never fidget.',
+        'Make a habit of scanning your section and nodding to anyone seeking you.',
+        'When a guest is speaking, hold still — stillness is a form of listening.',
+      ]},
+    ],
+    quiz: [
+      { q: 'According to the standard, when does a guest decide how cared for they feel?', options: ['Once they have tasted the first course.', 'From the way you carry yourself, before you say a single word.', 'Only when you present the bill.', 'When they read the online reviews beforehand.'], correct: 1, explain: 'Your body language communicates care in the silence before words. A guest reads how you move and stand long before you speak.' },
+      { q: 'What is the correct way to approach a fine dining table?', options: ['Quickly and head-on, so the guest knows you are attentive.', 'Unhurried, on a slight angle, stopping at a respectful distance.', 'From directly behind, to surprise them pleasantly.', 'As close as possible so they can hear you over the room.'], correct: 1, explain: 'A measured approach on a slight angle, stopping at a respectful distance, signals full attention without looming over the table.' },
+      { q: 'A guest is speaking to you. What does your posture say in that moment?', options: ['It doesn\'t matter as long as you are listening.', 'Standing square and still signals you are present; shifting and glancing away signals distraction.', 'Leaning on the table shows you are relaxed and friendly.', 'Crossing your arms shows you are concentrating.'], correct: 1, explain: 'Stillness is a form of listening. Standing square and composed tells the guest nothing matters more than them right now.' },
+      { q: 'A guest at another table catches your eye while your hands are full. What do you do?', options: ['Look away — you can\'t help them right now anyway.', 'Meet their eye with a small, warm nod that says "I see you, I am coming."', 'Rush over immediately and abandon what you are carrying.', 'Call across the room that you will be there shortly.'], correct: 1, explain: 'A guest who feels seen waits calmly. A small nod acknowledges them silently; a guest who feels invisible grows restless within seconds.' },
+      { q: 'Why does quick, darting movement work against you on the floor?', options: ['It doesn\'t — fast movement shows the guests you are working hard.', 'It reads as anxiety and ripples through the room, undermining the sense of calm.', 'It is only a problem if a guest mentions it.', 'It tires you out before the end of service.'], correct: 1, explain: 'Calm, deliberate movement reassures the room. Darting, anxious movement signals chaos and quietly unsettles every guest who sees it.' },
+    ],
+  },
+  {
+    id: 'fdp-voice',
+    title: 'Voice, Tone & Vocabulary',
+    desc: 'How you speak is as much a part of the room as how it looks.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-voice',
+    learn: [
+      { type: 'intro', text: 'In an elegant room, your voice is an instrument. The same sentence can sound rushed and ordinary or warm and refined depending entirely on your pace, your volume, and the words you choose. Casual phrasing — "no problem," "you guys," "no worries" — instantly drops the room a level, no matter how beautiful the plates. Guests at this level notice language the way they notice a smudged glass. Refining how you speak is not about sounding stiff or scripted; it is about choosing warmth and precision over habit.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Slow down', body: 'Speak a touch slower than feels natural. Rushed speech signals you would rather be elsewhere. A calm, measured pace tells the guest you have all the time in the world for them.' },
+        { num: 2, title: 'Control your volume', body: 'Speak softly enough that the next table cannot follow your conversation, yet clearly enough to be understood the first time. The guest you are serving should feel they are in a private exchange, not a public announcement.' },
+        { num: 3, title: 'Choose elevated words', body: 'Swap habit for intention. "Of course" instead of "no problem." "May I" instead of "can I." "Certainly" instead of "sure." The right word costs nothing and lifts the entire interaction.' },
+        { num: 4, title: 'Warm, never casual', body: 'Refined does not mean cold. You can be genuinely warm — a real smile, real interest — while keeping your language polished. Warmth and elegance live together; slang and elegance do not.' },
+      ]},
+      { type: 'do-dont', title: 'Upgrade your phrases', items: [
+        { do: '"Of course — right away."', dont: '"No problem, I got you."' },
+        { do: '"And for yourself, sir?" / "And for you, madam?"', dont: '"What about you guys?"' },
+        { do: '"My pleasure." / "It would be my pleasure."', dont: '"No worries." / "It\'s all good."' },
+        { do: '"May I clear this for you?"', dont: '"You done with that?"' },
+        { do: '"Certainly. Allow me a moment."', dont: '"Yeah, sure, hang on."' },
+        { do: '"Is there anything else I may bring you?"', dont: '"You guys need anything else?"' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'The slang trap', text: 'Casual phrases are habits, not decisions — they slip out under pressure. The only way to retire them is to practice the refined version until it becomes your automatic response, even on the busiest night.' },
+      { type: 'tip-list', title: 'Five voice habits to build now', items: [
+        'Address guests directly — "sir," "madam," or by name — never "you guys."',
+        'Replace "no problem" with "of course" until it is automatic.',
+        'Lower your volume by a notch when you reach the table.',
+        'Pause for a half-second before answering — it slows your pace naturally.',
+        'Catch one casual phrase you say often and drill its refined replacement.',
+      ]},
+    ],
+    quiz: [
+      { q: 'Why does casual phrasing matter so much in a fine dining room?', options: ['It doesn\'t — guests only care about the food.', 'Guests at this level notice language the way they notice a smudged glass; slang instantly drops the room a level.', 'It only matters with older guests.', 'It matters only when the manager is on the floor.'], correct: 1, explain: 'Refined guests register language as keenly as any other detail. A casual phrase undermines the experience no matter how beautiful the plates are.' },
+      { q: 'A guest thanks you and you want to respond well. What do you say?', options: ['"No problem!"', '"Of course — my pleasure."', '"No worries at all."', '"It\'s all good."'], correct: 1, explain: '"Of course" and "my pleasure" are the elevated responses. "No problem" and "no worries" are casual habits that lower the tone.' },
+      { q: 'How should you manage your volume at the table?', options: ['Speak loudly so the whole party hears you clearly.', 'Soft enough that the next table can\'t follow, clear enough to be understood the first time.', 'As quietly as possible, even if guests must ask you to repeat.', 'Match the volume of the room around you.'], correct: 1, explain: 'The guest should feel they are in a private exchange, not a public announcement — soft but perfectly clear.' },
+      { q: 'You are addressing a mixed table and want to ask the others what they would like. What is the refined approach?', options: ['"What about you guys?"', 'Address each guest directly — "And for yourself, sir?" / "And for you, madam?"', '"Anyone else want anything?"', '"You all good for now?"'], correct: 1, explain: 'Address guests directly and individually. "You guys" is exactly the casual habit fine dining language replaces.' },
+      { q: 'Why do casual phrases tend to "slip out" even when you know better?', options: ['Because the refined versions are too long to say.', 'Because they are habits, not decisions — so they surface under pressure until you drill the replacement.', 'Because guests sometimes prefer them.', 'They don\'t — anyone can simply choose better words on the spot.'], correct: 1, explain: 'Slang is automatic, not chosen. Only practicing the refined version until it becomes your default retires it, even on the busiest night.' },
+    ],
+  },
+  {
+    id: 'fdp-approach',
+    title: 'Approaching Tables & Reading Timing',
+    desc: 'The art of arriving at exactly the right moment — and leaving gracefully.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-approach',
+    learn: [
+      { type: 'intro', text: 'Picture a table of four mid-conversation. One guest is finishing a story, the others are leaning in, laughter building. A weaker server walks straight into the middle of it and breaks the moment to recite the specials. A fine dining professional reads the table from a few steps away, lets the story land, and arrives in the breath that follows — welcomed, not intrusive. Knowing what to say is only half the craft. Knowing when to say it, and when to wait, is what separates polished service from interruption.' },
+      { type: 'steps', title: 'The approach, step by step', items: [
+        { num: 1, title: 'The three-second read', body: 'Before you reach the table, take three seconds to read it. Are they mid-conversation, mid-toast, mid-decision? Or open and ready? The read happens at a glance, from a step or two away, before you commit to speaking.', badge: 'Read first' },
+        { num: 2, title: 'The angle of approach', body: 'Approach so you enter the guests\' field of vision gently, rather than appearing suddenly at a shoulder. Coming in slightly to the side gives them a moment to register you and lets the conversation pause naturally.' },
+        { num: 3, title: 'When to speak', body: 'Speak in the natural gap — when a sentence finishes, when eyes lift toward you, when a guest sets something down. There is almost always a gap within a few seconds. Wait for it rather than forcing your way in.' },
+        { num: 4, title: 'When to wait — or withdraw', body: 'If the moment is wrong — an emotional conversation, a toast, a serious discussion — hold a respectful step back, or withdraw smoothly and return shortly. A held plate is always better than a broken moment.' },
+        { num: 5, title: 'Leaving gracefully', body: 'Close with a brief, warm line, a small nod, and turn away unhurried. Never back away awkwardly or linger waiting for thanks. The exit is as much a part of the interaction as the arrival.' },
+      ]},
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'The guest should never feel interrupted. Your timing should make every arrival feel like it was exactly what they wanted, exactly when they wanted it.' },
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Pause a step away to read the table, then arrive in the natural gap.', dont: 'Walking straight into the middle of a story to deliver your line.' },
+        { do: 'Hold a delayed course one moment longer to let a toast finish.', dont: 'Cutting across a raised glass because the plate is ready now.' },
+        { do: 'Withdraw smoothly and return when a tense conversation has passed.', dont: 'Hovering at the table\'s edge, visibly waiting for them to stop talking.' },
+        { do: 'Close with a warm word, a nod, and an unhurried turn away.', dont: 'Backing away awkwardly or lingering for acknowledgment.' },
+      ]},
+    ],
+    quiz: [
+      { q: 'A table of four is mid-story, laughter building, as you approach with the specials. What does the professional do?', options: ['Deliver the specials now — the information is what matters.', 'Read the table from a step away, let the story land, and arrive in the breath that follows.', 'Interrupt politely with "sorry to break in."', 'Skip the table entirely and come back much later.'], correct: 1, explain: 'Knowing when to speak is half the craft. The professional reads the moment and arrives in the natural gap — welcomed, not intrusive.' },
+      { q: 'What is the "three-second read"?', options: ['Counting to three before you speak at every table.', 'A glance from a step or two away to read whether the table is open or mid-moment before you commit to speaking.', 'The time it takes to recite the specials.', 'A rule that you may only spend three seconds per table.'], correct: 1, explain: 'The three-second read happens at a glance before you arrive — are they mid-conversation, mid-toast, or open and ready?' },
+      { q: 'A course is ready, but the table is mid-toast with glasses raised. What do you do?', options: ['Deliver it now — the kitchen\'s timing comes first.', 'Hold the plate one moment longer and let the toast finish.', 'Set it down quietly between them during the toast.', 'Ask them to pause their toast so you can serve.'], correct: 1, explain: 'A held plate is always better than a broken moment. The right timing protects the guest\'s experience over the kitchen\'s convenience.' },
+      { q: 'The moment is genuinely wrong — an emotional, serious conversation. What is the move?', options: ['Push through gently; the service still has to happen.', 'Hold a respectful step back, or withdraw smoothly and return shortly.', 'Hover at the edge of the table until they notice you.', 'Interrupt with an apology so they know you tried.'], correct: 1, explain: 'When the moment is wrong, withdraw smoothly and return. Hovering or interrupting both break the moment you are trying to protect.' },
+      { q: 'Why does the lesson treat leaving the table as part of the craft?', options: ['It isn\'t — only the arrival and the order matter.', 'The exit shapes the impression too; a warm close and an unhurried turn matter as much as the arrival.', 'Because guests grade you on your exit.', 'Because you must always wait for the guest to thank you first.'], correct: 1, explain: 'The exit is as much a part of the interaction as the arrival. Close warmly, nod, and turn away unhurried — never linger or back away awkwardly.' },
+    ],
+  },
+  {
+    id: 'fdp-invisible',
+    title: 'The Art of Invisible Service',
+    desc: 'The highest service is the kind a guest never notices happening.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-invisible',
+    learn: [
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'The finest service is invisible. The guest\'s glass is always full, the table always clear — and they never once saw you do it.' },
+      { type: 'intro', text: 'There is a level of service above attentive: invisible. The water is refilled without a pause in conversation. The finished plate disappears between sentences. The next course arrives as if it simply materialized. The guest enjoys an effortless evening and never registers the dozens of small movements that made it so. Invisible service is not about hiding — it is about moving with such timing and economy that your care is felt everywhere and noticed nowhere. It is the truest expression of the fine dining craft.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Clear in the gaps', body: 'Clear and reset between conversational beats, not across them. Wait for the natural lull — a pause, a glance away — and remove plates quietly from the right, without asking the table to stop and acknowledge you.' },
+        { num: 2, title: 'Refill before empty, without interrupting', body: 'Watch the water and wine line from across the room. Top up before a glass runs low, approaching from the side, pouring smoothly, withdrawing — all without breaking the flow of the table\'s conversation.' },
+        { num: 3, title: 'Move with purpose', body: 'Every trip carries intent. You arrive knowing exactly what you will do, do it in one smooth motion, and leave. No hovering, no second-guessing, no return trips for what you could have brought the first time.' },
+        { num: 4, title: 'Anticipate, don\'t react', body: 'Invisible service is built on anticipation. The cleared plate, the refilled glass, the fresh cutlery for the next course — all arrive before the guest thinks to want them. A need a guest has to voice is a need you noticed too late.' },
+      ]},
+      { type: 'tip-list', title: 'Invisible-service techniques to master', items: [
+        'Read glass levels from across the room so you never approach just to check.',
+        'Clear from the right, quietly, during a natural pause in conversation.',
+        'Carry the next course\'s cutlery with you so the table is set before the plate lands.',
+        'Pour wine and water with a steady hand and a clean withdrawal — no clinking, no fuss.',
+        'Plan each trip so one smooth pass replaces three hesitant ones.',
+      ]},
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Refill a glass from the side during a lull and withdraw without a word.', dont: 'Interrupting the table to ask "more water?" every few minutes.' },
+        { do: 'Clear a finished plate quietly in the gap between conversation.', dont: 'Reaching across a guest mid-sentence and making them pause for you.' },
+        { do: 'Arrive at the table knowing exactly what you will do, then do it in one motion.', dont: 'Hovering nearby, deciding what to handle while the guests feel watched.' },
+        { do: 'Set the next course\'s cutlery before the plate arrives.', dont: 'Returning three separate times for cutlery, water, and the plate.' },
+      ]},
+    ],
+    quiz: [
+      { q: 'What does "invisible service" actually mean?', options: ['Staying out of sight and letting guests fend for themselves.', 'Moving with such timing and economy that your care is felt everywhere and noticed nowhere.', 'Serving as quickly as possible to minimize contact.', 'Only approaching the table when a guest signals you.'], correct: 1, explain: 'Invisible service is care that is felt everywhere and noticed nowhere — the glass stays full and the table clear, yet the guest never sees you do it.' },
+      { q: 'When should you clear a finished plate from a fine dining table?', options: ['The instant the guest puts down their fork, mid-sentence if needed.', 'In the natural lull between conversational beats, quietly and from the right.', 'Only once you have asked the table if they are finished.', 'At the end of the meal, all at once.'], correct: 1, explain: 'Clear in the gaps, not across them — wait for a natural pause and remove plates quietly without making the table stop to acknowledge you.' },
+      { q: 'How should you handle water and wine refills invisibly?', options: ['Ask "more water?" each time you pass so the guest stays in control.', 'Watch the line from across the room and top up before empty, from the side, without breaking the conversation.', 'Wait until a glass is completely empty so you don\'t over-pour.', 'Leave the bottle on the table for guests to pour themselves.'], correct: 1, explain: 'Anticipate the refill and deliver it smoothly from the side, withdrawing without interrupting — the guest enjoys a full glass and never registers how.' },
+      { q: 'What does "move with purpose" mean for invisible service?', options: ['Walk as fast as you can between tables.', 'Arrive knowing exactly what you will do, do it in one smooth motion, and leave — no hovering or return trips.', 'Only move when a guest is watching.', 'Take the longest route so you can observe more tables.'], correct: 1, explain: 'Every trip carries intent. You arrive knowing your task, do it in one motion, and leave — eliminating hovering and wasted return trips.' },
+      { q: 'A guest has to ask you for more bread. By the standard of invisible service, what does that tell you?', options: ['Nothing — answering requests is the job.', 'You noticed the need too late; invisible service anticipates before the guest thinks to ask.', 'The guest is being demanding.', 'The kitchen should have sent more bread automatically.'], correct: 1, explain: 'A need a guest has to voice is a need you noticed too late. Invisible service is built on anticipation, not reaction.' },
+    ],
+  },
+];
+
 export const CURRICULUM: Module[] = [
   // Module 0
   {
@@ -1834,6 +1992,20 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 200,
     lessons: fineDiningStandardLessons,
+  },
+  // Fine Dining Phase 1 — Module 2
+  {
+    id: 'fine-dining-presence-module',
+    title: 'Professional Appearance & Presence',
+    subtitle: 'Be seen before you speak — elegance starts with how you carry yourself.',
+    iconName: 'Eye',
+    color: '#2c1654',
+    progress: 0,
+    totalLessons: 4,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 200,
+    lessons: fineDiningPresenceLessons,
   },
 ];
 
