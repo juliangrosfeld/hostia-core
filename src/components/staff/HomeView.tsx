@@ -141,9 +141,9 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 function ModuleCard({
-  module, onClick, locked = false, toBeCategorized = false,
+  module, onClick, locked = false,
 }: {
-  module: Module; onClick: () => void; locked?: boolean; toBeCategorized?: boolean;
+  module: Module; onClick: () => void; locked?: boolean;
 }) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
   const isCertification = module.id === 'phase-1-certification';
@@ -171,10 +171,6 @@ function ModuleCard({
           </div>
           {isLocked ? (
             <Lock size={18} color={isCertification ? '#B8860B' : 'var(--ink-soft)'} strokeWidth={2} />
-          ) : toBeCategorized ? (
-            <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.06em', color: 'var(--ink-soft)', background: 'var(--sand-warm)', borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
-              To categorize
-            </span>
           ) : (
             module.completedLessons === module.totalLessons && (
               <span className="module-certified-badge">✓ Complete</span>
@@ -329,7 +325,6 @@ function PhaseCurriculum({
               key={m.id}
               module={m}
               locked={m.locked}
-              toBeCategorized={m.toBeCategorized}
               onClick={() => onOpenModule(m)}
             />
           ))}
@@ -340,32 +335,32 @@ function PhaseCurriculum({
         </div>
       )}
 
-      {/* Locked future phases */}
+      {/* Locked future phases — journey card style */}
       {future.length > 0 && (
         <div style={{ marginTop: 48 }}>
           <h3 className="display" style={{ fontSize: 20, color: 'var(--brand-deep)', margin: '0 0 18px' }}>
-            What&apos;s next
+            Your Journey
           </h3>
-          <div className="module-grid">
+          <div className="journey-grid">
             {future.map((g) => (
-              <div
-                key={g.phase.id}
-                className="module-card"
-                style={{ opacity: 0.55, cursor: 'not-allowed' }}
-              >
-                <div className="module-band" style={{ background: 'var(--ink-soft)' }} />
-                <div className="module-card-body">
-                  <div className="module-card-inner">
-                    <div className="module-icon-wrap" style={{ background: 'var(--sand-warm)' }}>
-                      <Lock size={20} color="var(--ink-soft)" />
-                    </div>
+              <div key={g.phase.id} className="journey-card" style={{ opacity: 0.5 }}>
+                <div className="journey-band" style={{ background: 'var(--ink-soft)' }} />
+                <div className="journey-card-body">
+                  <div className="journey-card-top">
+                    <span
+                      className="journey-badge"
+                      style={{ background: 'var(--sand-warm)', color: 'var(--ink-soft)' }}
+                    >
+                      Coming soon
+                    </span>
+                    <Lock size={15} color="var(--ink-soft)" strokeWidth={2} />
                   </div>
-                  <div className="module-card-text">
-                    <h3 className="display module-title">Phase {g.phase.phase_number} — {g.phase.title}</h3>
-                    <p className="module-sub">
-                      Locked — complete Phase {current.phase.phase_number} to unlock
-                    </p>
+
+                  <div style={{ marginBottom: 4 }}>
+                    <span className="label-mono" style={{ color: 'var(--ink-soft)' }}>Phase {g.phase.phase_number}</span>
                   </div>
+                  <h3 className="display journey-title">{g.phase.title}</h3>
+                  <p className="journey-desc">{g.phase.goal}</p>
                 </div>
               </div>
             ))}
