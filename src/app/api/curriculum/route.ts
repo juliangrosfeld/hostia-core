@@ -87,6 +87,18 @@ export async function GET() {
   // Resolve the property's curriculum from its module rows (content from CURRICULUM).
   const modules = resolveCurriculum(propertyModules);
 
+  // resolveCurriculum returns Module objects from the hardcoded CURRICULUM array,
+  // which don't carry the Supabase order_in_phase / phase_id values. Fetch those
+  // from the modules table so phase grouping + ordering reflect the real DB state.
+  const moduleIds = modules.map((m) => m.id);
+  const { data: moduleRows } = await admin
+    .from('modules')
+    .select('id, phase_id, order_in_phase')
+    .in('id', moduleIds);
+  const moduleMetaMap = new Map(
+    (moduleRows ?? []).map((r) => [r.id, { phase_id: r.phase_id, order_in_phase: r.order_in_phase }])
+  );
+
   // This staff member's real completion data + the phases for their track.
   const [completionRes, phaseCompletionRes, phasesRes] = await Promise.all([
     supabase
@@ -123,22 +135,32 @@ export async function GET() {
   const phases = (phasesRes.data ?? []) as Phase[];
 
   // Split modules: those assigned to a phase vs. the not-yet-categorized rest.
-  const assigned = modules.filter((m) => Boolean(m.phase_id));
-  const unassignedModules = modules.filter((m) => !m.phase_id);
+  const assigned = modules.filter((m) => Boolean(moduleMetaMap.get(m.id)?.phase_id));
+  const unassignedModules = modules.filter((m) => !moduleMetaMap.get(m.id)?.phase_id);
 
   // Build one group per phase (including phases with no modules yet, so the client
   // can render empty/locked future phases). Within a phase, modules go in
   // order_in_phase and each is locked until every earlier one is fully complete.
   const phaseGroups: PhaseGroup[] = phases.map((phase) => {
     const inPhase = assigned
-      .filter((m) => m.phase_id === phase.id)
-      .sort((a, b) => (a.order_in_phase ?? 999) - (b.order_in_phase ?? 999));
+      .filter((m) => moduleMetaMap.get(m.id)?.phase_id === phase.id)
+      .sort((a, b) => {
+        const aOrder = moduleMetaMap.get(a.id)?.order_in_phase ?? 999;
+        const bOrder = moduleMetaMap.get(b.id)?.order_in_phase ?? 999;
+        return aOrder - bOrder;
+      });
 
     let priorComplete = true;
     const enriched: ResolvedModule[] = inPhase.map((m) => {
       const locked = !priorComplete;
       if (!isComplete(m)) priorComplete = false;
-      return { ...m, completedLessons: completedCount(m), locked };
+      return {
+        ...m,
+        phase_id: moduleMetaMap.get(m.id)?.phase_id,
+        order_in_phase: moduleMetaMap.get(m.id)?.order_in_phase,
+        completedLessons: completedCount(m),
+        locked,
+      };
     });
 
     return { phase, modules: enriched };
