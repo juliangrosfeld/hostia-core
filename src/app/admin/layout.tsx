@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Home, UserPlus, Library, Utensils } from 'lucide-react'
+import { Home, UserPlus, Library, Utensils, ChevronLeft } from 'lucide-react'
 import { useUser } from '@/lib/useUser'
 import UserMenu from '@/components/UserMenu'
 
@@ -148,6 +148,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,0.4)' }}>Admin</div>
           </div>
         </div>
+
+        {/* Back to app — subtle, below everything else */}
+        <Link
+          href="/staff"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '8px 12px',
+            fontSize: 12,
+            fontWeight: 500,
+            textDecoration: 'none',
+            color: 'rgba(255,255,255,0.4)',
+            transition: 'color 0.15s ease',
+          }}
+        >
+          <ChevronLeft size={14} /> Back to app
+        </Link>
       </aside>
 
       {/* ── Main ── */}
