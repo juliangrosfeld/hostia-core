@@ -1524,18 +1524,18 @@ const fineDiningStandardLessons: Lesson[] = [
     scenarioId: 'fine-dining-mindset',
     learn: [
       { type: 'intro', text: 'Fine dining is not about being stiff, formal, or robotic. It is about making guests feel genuinely, deeply cared for — at a level most people rarely experience. Every detail you control either elevates or diminishes that feeling. A half-filled water glass, a rushed approach, a distracted look — guests notice all of it. That is the standard you are training for.' },
-      { type: 'intro', text: 'The standard is simple: every action you take either elevates or diminishes the guest experience. There is no neutral.' },
-      { type: 'tip-list', title: 'The four principles of the fine dining mindset', items: [
-        'Hospitality over service — service is delivering food and drink; hospitality is making the guest feel seen, valued, and cared for. Fine dining demands hospitality, not just service.',
-        'Details are not small — in fine dining there are no small details. A wrinkled shirt, a fingerprint on a glass, a mispronounced dish: every detail speaks to the standard of the house.',
-        'Calm is a skill — a busy service will always bring pressure, and fine dining professionals never let it reach the guest. Calm is not something you feel; it is something you perform until it becomes natural.',
-        'Pride in craft — the best fine dining servers take genuine pride in what they do. This is not just a job; it is a craft. Carry it that way.',
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'The standard is simple: every action you take either elevates or diminishes the guest experience. There is no neutral.' },
+      { type: 'steps', title: 'The four principles of the fine dining mindset', items: [
+        { num: 1, title: 'Hospitality over service', body: 'Service is delivering food and drink; hospitality is making the guest feel seen, valued, and cared for. Fine dining demands hospitality, not just service.' },
+        { num: 2, title: 'Details are not small', body: 'In fine dining there are no small details. A wrinkled shirt, a fingerprint on a glass, a mispronounced dish: every detail speaks to the standard of the house.' },
+        { num: 3, title: 'Calm is a skill', body: 'A busy service will always bring pressure, and fine dining professionals never let it reach the guest. Calm is not something you feel; it is something you perform until it becomes natural.' },
+        { num: 4, title: 'Pride in craft', body: 'The best fine dining servers take genuine pride in what they do. This is not just a job; it is a craft. Carry it that way.' },
       ]},
-      { type: 'tip-list', title: 'In practice', items: [
-        'Pause before approaching a table to read the energy, then move — don\'t walk up mid-conversation and launch straight into your opening line.',
-        'Notice a nearly empty glass and refill it before the guest looks for you — never wait until a guest has to wave or call for water.',
-        'When something goes wrong, fix it quietly and efficiently — don\'t over-apologize, make excuses, or involve the guest in the problem.',
-        'Take one breath before re-entering the dining room during a busy service — never carry kitchen stress onto your face or into your pace.',
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Pause before approaching a table to read the energy, then move.', dont: 'Walking up mid-conversation and launching straight into your opening line.' },
+        { do: 'Notice a nearly empty glass and refill it before the guest looks for you.', dont: 'Waiting until a guest has to wave or call for water.' },
+        { do: 'When something goes wrong, fix it quietly and efficiently.', dont: 'Over-apologizing, making excuses, or involving the guest in the problem.' },
+        { do: 'Take one breath before re-entering the dining room during a busy service.', dont: 'Carrying kitchen stress onto your face or into your pace.' },
       ]},
       { type: 'tip-list', title: 'Five fine dining mindset habits', items: [
         'Before every shift: stand in front of a mirror and check that you look the part.',
@@ -1563,19 +1563,19 @@ const fineDiningStandardLessons: Lesson[] = [
     scenarioId: 'fine-dining-presence',
     learn: [
       { type: 'intro', text: 'In a fine dining room, you are always on stage. A guest seated at the far end of the room can see how you walk, how you carry yourself, and whether you look like you belong here. Your presence — posture, pace, expression, energy — communicates your standard before you ever open your mouth.' },
-      { type: 'intro', text: 'The standard: you are always on stage. A guest anywhere in the room can read your energy.' },
-      { type: 'tip-list', title: 'The five elements of fine dining presence', items: [
-        'Posture — stand tall, shoulders relaxed and back, chin level. Don\'t slouch against walls or lean on furniture. Your posture says either "I take this seriously" or "I am just passing through."',
-        'Pace — walk at a calm, purposeful pace. Not slow; purposeful. Never rush through the dining room, because rushing communicates chaos. If you need to move fast, do it through the kitchen.',
-        'Expression — a neutral, warm expression: not a performed smile, not a blank face. You are approachable and calm. If you are stressed, the dining room is not where that shows.',
-        'Voice — speak calmly and at a conversational volume. The table next to the one you are serving should not hear your conversation. Control your volume at all times.',
-        'Hands — hands out of pockets at all times on the floor. They should be at your sides, behind your back, or carrying something. Never crossed arms, never fiddling.',
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'You are always on stage. A guest anywhere in the room can read your energy.' },
+      { type: 'steps', title: 'The five elements of fine dining presence', items: [
+        { num: 1, title: 'Posture', body: 'Stand tall, shoulders relaxed and back, chin level. Don\'t slouch against walls or lean on furniture. Your posture says either "I take this seriously" or "I am just passing through."' },
+        { num: 2, title: 'Pace', body: 'Walk at a calm, purposeful pace. Not slow; purposeful. Never rush through the dining room, because rushing communicates chaos. If you need to move fast, do it through the kitchen.' },
+        { num: 3, title: 'Expression', body: 'A neutral, warm expression: not a performed smile, not a blank face. You are approachable and calm. If you are stressed, the dining room is not where that shows.' },
+        { num: 4, title: 'Voice', body: 'Speak calmly and at a conversational volume. The table next to the one you are serving should not hear your conversation. Control your volume at all times.' },
+        { num: 5, title: 'Hands', body: 'Hands out of pockets at all times on the floor. They should be at your sides, behind your back, or carrying something. Never crossed arms, never fiddling.' },
       ]},
-      { type: 'tip-list', title: 'In practice', items: [
-        'Walk through the dining room at a calm, even pace even when you are in a hurry — don\'t rush visibly, weaving between tables.',
-        'Reset your expression before re-entering the dining room from the kitchen — never bring a stressed or frustrated look onto the floor.',
-        'Stand straight and still while taking an order or speaking to a guest — don\'t shift your weight, lean on the table, or look distracted while a guest is speaking.',
-        'Acknowledge a guest across the room with a small nod if you cannot reach them yet — never ignore a guest who is looking for you because you are finishing something else.',
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Walk through the dining room at a calm, even pace even when you are in a hurry.', dont: 'Rushing visibly, weaving between tables.' },
+        { do: 'Reset your expression before re-entering the dining room from the kitchen.', dont: 'Bringing a stressed or frustrated look onto the floor.' },
+        { do: 'Stand straight and still while taking an order or speaking to a guest.', dont: 'Shifting your weight, leaning on the table, or looking distracted while a guest is speaking.' },
+        { do: 'Acknowledge a guest across the room with a small nod if you cannot reach them yet.', dont: 'Ignoring a guest who is looking for you because you are finishing something else.' },
       ]},
       { type: 'tip-list', title: 'Five presence habits to build now', items: [
         'Before walking into the dining room: take one breath and reset your face.',
@@ -1603,18 +1603,18 @@ const fineDiningStandardLessons: Lesson[] = [
     scenarioId: 'fine-dining-presentation',
     learn: [
       { type: 'intro', text: 'In fine dining, your appearance is part of the guest experience. A stain on your uniform, an untied apron, strong cologne — these things break the spell. Guests notice the entire environment, and you are part of it. Your presentation communicates the level of care the restaurant has for its guests, before you have said a word.' },
-      { type: 'intro', text: 'The standard: your appearance tells guests how seriously you take your craft before you say a single word.' },
-      { type: 'tip-list', title: 'The pre-shift presentation checklist', items: [
-        'Uniform — pressed, stain-free, and properly fitted. If it needs ironing, iron it before you arrive. If it has a stain that won\'t come out, report it and request a replacement.',
-        'Hair — clean, neat, and secured away from the face, with no loose strands that could fall near food. Fine dining guests watch your hands and your hair during service.',
-        'Hands and nails — short, clean, no strong nail polish. Your hands are visible during every interaction — placing plates, pouring wine, presenting menus — so they must be immaculate.',
-        'Scent — no strong perfume, cologne, or deodorant. Fine dining guests are eating, and strong scent interferes with the aroma of food and wine. Subtle is professional.',
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'Your appearance tells guests how seriously you take your craft before you say a single word.' },
+      { type: 'steps', title: 'The pre-shift presentation checklist', items: [
+        { num: 1, title: 'Uniform', body: 'Pressed, stain-free, and properly fitted. If it needs ironing, iron it before you arrive. If it has a stain that won\'t come out, report it and request a replacement.' },
+        { num: 2, title: 'Hair', body: 'Clean, neat, and secured away from the face, with no loose strands that could fall near food. Fine dining guests watch your hands and your hair during service.' },
+        { num: 3, title: 'Hands and nails', body: 'Short, clean, no strong nail polish. Your hands are visible during every interaction — placing plates, pouring wine, presenting menus — so they must be immaculate.' },
+        { num: 4, title: 'Scent', body: 'No strong perfume, cologne, or deodorant. Fine dining guests are eating, and strong scent interferes with the aroma of food and wine. Subtle is professional.' },
       ]},
-      { type: 'tip-list', title: 'In practice', items: [
-        'Arrive with your uniform pressed and your shoes clean, ready before the shift briefing — don\'t iron or fix your uniform during pre-service prep time.',
-        'Check your appearance in a mirror before entering the dining room for the first time — never go straight from the locker room to the floor without a final check.',
-        'Keep your phone stored completely out of sight, in a locker — not in an apron pocket where it can be seen or heard.',
-        'Report a uniform issue to management immediately and ask for a solution — don\'t try to hide a stain or damage through a full service.',
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Arrive with your uniform pressed and your shoes clean, ready before the shift briefing.', dont: 'Ironing or fixing your uniform during pre-service prep time.' },
+        { do: 'Check your appearance in a mirror before entering the dining room for the first time.', dont: 'Going straight from the locker room to the floor without a final check.' },
+        { do: 'Keep your phone stored completely out of sight, in a locker.', dont: 'Tucking it in an apron pocket where it can be seen or heard.' },
+        { do: 'Report a uniform issue to management immediately and ask for a solution.', dont: 'Trying to hide a stain or damage through a full service.' },
       ]},
       { type: 'tip-list', title: 'Pre-shift checklist — run through this every day', items: [
         'Uniform pressed and stain-free.',
@@ -1645,18 +1645,18 @@ const fineDiningStandardLessons: Lesson[] = [
     scenarioId: 'fine-dining-teamwork',
     learn: [
       { type: 'intro', text: 'Guests cannot see what happens between staff members. But they feel it. A team that communicates poorly, covers for each other badly, or shows tension in the dining room — guests sense it even when they cannot name it. A great fine dining team is invisible to guests: seamless, coordinated, and always composed.' },
-      { type: 'intro', text: 'The standard: what happens between staff is invisible to guests. What guests feel from the team is everything.' },
-      { type: 'tip-list', title: 'The four principles of fine dining teamwork', items: [
-        'Cover without being asked — if you see a colleague\'s table needs water, refill it; if their guest is looking around, acknowledge them. You don\'t wait to be asked, you see it and handle it.',
-        'Communicate quietly and precisely — on the floor, all communication between staff is brief, quiet, and purposeful. No personal conversations, no venting, no raised voices, ever. The kitchen is where you decompress; the dining room is where you perform.',
-        'Handle mistakes with solutions, not excuses — when something goes wrong, the only relevant question is what we do right now. Not whose fault it was, not how it happened. Fine dining professionals fix first and debrief later.',
-        'Respect the kitchen relationship — the kitchen and floor are one team. Speak to kitchen staff with respect, communicate clearly about table pace, and never blame the kitchen in front of a guest. Ever.',
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'What happens between staff is invisible to guests. What guests feel from the team is everything.' },
+      { type: 'steps', title: 'The four principles of fine dining teamwork', items: [
+        { num: 1, title: 'Cover without being asked', body: 'If you see a colleague\'s table needs water, refill it; if their guest is looking around, acknowledge them. You don\'t wait to be asked, you see it and handle it.' },
+        { num: 2, title: 'Communicate quietly and precisely', body: 'On the floor, all communication between staff is brief, quiet, and purposeful. No personal conversations, no venting, no raised voices, ever. The kitchen is where you decompress; the dining room is where you perform.' },
+        { num: 3, title: 'Handle mistakes with solutions, not excuses', body: 'When something goes wrong, the only relevant question is what we do right now. Not whose fault it was, not how it happened. Fine dining professionals fix first and debrief later.' },
+        { num: 4, title: 'Respect the kitchen relationship', body: 'The kitchen and floor are one team. Speak to kitchen staff with respect, communicate clearly about table pace, and never blame the kitchen in front of a guest. Ever.' },
       ]},
-      { type: 'tip-list', title: 'In practice', items: [
-        'Notice a colleague is stretched and quietly offer to cover one of their tables — don\'t watch them struggle and wait to be asked for help.',
-        'When something goes wrong, take two seconds to think, then act with calm precision — don\'t visibly panic, argue about fault, or involve the guest in the problem.',
-        'Communicate with kitchen staff clearly, respectfully, and directly — never argue with or vent to them during a service.',
-        'If you disagree with a colleague, handle it after service — not during, and never in the dining room or kitchen mid-service.',
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Notice a colleague is stretched and quietly offer to cover one of their tables.', dont: 'Watching them struggle and waiting to be asked for help.' },
+        { do: 'When something goes wrong, take two seconds to think, then act with calm precision.', dont: 'Visibly panicking, arguing about fault, or involving the guest in the problem.' },
+        { do: 'Communicate with kitchen staff clearly, respectfully, and directly.', dont: 'Arguing with or venting to them during a service.' },
+        { do: 'If you disagree with a colleague, handle it after service.', dont: 'Hashing it out during service, in the dining room or kitchen.' },
       ]},
       { type: 'tip-list', title: 'Five professional conduct rules — no exceptions', items: [
         'Never argue, vent, or show frustration in the dining room.',
