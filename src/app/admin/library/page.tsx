@@ -1,14 +1,29 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ElementType } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Library, GripVertical, Plus, X, Check, Save,
   Eye, EyeOff, BookOpen, Sparkles, AlertCircle,
   ArrowLeft, GraduationCap,
+  Star, Trophy, Utensils, Hand, MessageSquare, Shield, Brain, House,
 } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
+
+// Newer modules store Lucide icon names (e.g. 'Star') instead of emoji strings.
+// Map known names to components; fall back to rendering the raw string (legacy emoji).
+const ICON_MAP: Record<string, ElementType> = {
+  BookOpen, Brain, Eye, Hand, House, MessageSquare, Shield, Star, Trophy, Utensils,
+};
+
+function renderModuleIcon(icon: string | undefined, size: number) {
+  if (icon && ICON_MAP[icon]) {
+    const Icon = ICON_MAP[icon];
+    return <Icon size={size} />;
+  }
+  return icon;
+}
 
 const PROPERTY_ID = 'f86752e5-f7f1-46a2-acd3-90764ce1c403';
 
@@ -409,7 +424,7 @@ export default function LibraryAdminPage() {
                             transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
                           }}
                         >
-                          <div style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{m.icon}</div>
+                          <div style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>{renderModuleIcon(m.icon, 22)}</div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                               <span style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--brand-deep)' }}>
@@ -553,7 +568,7 @@ export default function LibraryAdminPage() {
                           </div>
 
                           <div style={{ fontSize: 18, lineHeight: 1, flexShrink: 0 }}>
-                            {m?.icon ?? '📘'}
+                            {renderModuleIcon(m?.icon, 18) ?? '📘'}
                           </div>
 
                           <div style={{ flex: 1, minWidth: 0 }}>
