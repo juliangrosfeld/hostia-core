@@ -7,14 +7,14 @@ import {
   Library, GripVertical, Plus, X, Check, Save,
   Eye, EyeOff, BookOpen, Sparkles, AlertCircle,
   ArrowLeft, GraduationCap,
-  Star, Trophy, Utensils, Hand, MessageSquare, Shield, Brain, House,
+  Star, Trophy, Utensils, UtensilsCrossed, Hand, MessageSquare, Shield, Brain, House,
 } from 'lucide-react';
 import { useUser } from '@/lib/useUser';
 
 // Newer modules store Lucide icon names (e.g. 'Star') instead of emoji strings.
 // Map known names to components; fall back to rendering the raw string (legacy emoji).
 const ICON_MAP: Record<string, ElementType> = {
-  BookOpen, Brain, Eye, Hand, House, MessageSquare, Shield, Star, Trophy, Utensils,
+  BookOpen, Brain, Eye, Hand, House, MessageSquare, Shield, Star, Trophy, Utensils, UtensilsCrossed,
 };
 
 function renderModuleIcon(icon: string | undefined, size: number) {

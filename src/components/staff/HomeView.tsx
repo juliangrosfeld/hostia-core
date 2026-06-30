@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Play, Lock, Trophy as TrophyIcon, CheckCircle2 } from 'lucide-react';
 import {
-  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, Trophy, Eye, Star,
+  Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, UtensilsCrossed, Trophy, Eye, Star,
 } from 'lucide-react';
 import type { Module, Phase } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
@@ -137,6 +137,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Brain,
   House,
   Utensils,
+  UtensilsCrossed,
   Trophy,
   Eye,
   Star,
