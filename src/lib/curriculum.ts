@@ -1995,6 +1995,157 @@ const fineDiningEtiquetteLessons: Lesson[] = [
   },
 ];
 
+// ─── FINE DINING PHASE 1 · MODULE 4: TABLE SETUP & DINING ROOM STANDARDS ─
+
+const fineDiningTableSetupLessons: Lesson[] = [
+  {
+    id: 'fdt-mise-en-place',
+    title: 'Mise en Place — The Foundation',
+    desc: 'Everything in its place, long before the first guest sits down.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-mise-en-place',
+    learn: [
+      { type: 'intro', text: 'Mise en place — "everything in its place" — is the quiet work that happens before a single guest arrives, and it is where a fine dining evening is quietly won or lost. A room set to standard carries the service effortlessly; a room set carelessly fights you all night.' },
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'By the time the first guest is seated, every detail is already perfect. The setup is not preparation for the standard — the setup is the standard.' },
+      { type: 'steps', title: 'Setting a cover, piece by piece', items: [
+        { num: 1, title: 'The clothed table', body: 'Begin with the base: a pressed, spotless cloth laid square to the table, with an even drop falling the same distance on all four sides. The cloth is the field everything else sits on — a crease or a lopsided hem undermines every detail you place on top of it.', badge: 'Linen' },
+        { num: 2, title: 'The cover position', body: 'The charger or show plate anchors the cover, centred to the chair with the same gap from the table edge at every seat. Covers are spaced evenly around the table so the whole setting reads as one deliberate composition, not a collection of separate places.', badge: 'Anchor' },
+        { num: 3, title: 'Cutlery, outside-in', body: 'Lay cutlery in the order the courses will be used, working outside-in, forks to the left and knives and spoons to the right, blades turned inward. Every handle sits the same distance — about a thumb\'s width — from the table edge, and each piece is aligned with its neighbours.', badge: 'Cutlery' },
+        { num: 4, title: 'Glassware', body: 'Set glasses to the upper right of the cover, polished to an invisible shine and handled only by the stem or base. Position them in a consistent order and angle across every cover, so the room reads evenly when you look down its length.', badge: 'Glass' },
+        { num: 5, title: 'The napkin', body: 'Fold each napkin to the single house standard and place it identically at every cover. Consistency is the point — twelve napkins folded the same way signal a house in control of its details; twelve slightly different ones signal the opposite.', badge: 'Napkin' },
+        { num: 6, title: 'Salt, pepper & the small things', body: 'Salt and pepper, and any shared items, are positioned to the house plan, wiped clean, and checked to be full before service — never topped up in front of guests. A clogged or half-empty cruet discovered mid-service is a setup failure, not a service one.', badge: 'Condiments' },
+        { num: 7, title: 'Candle & centrepiece', body: 'The candle is clean, lit at the right moment, and the centrepiece kept low enough that guests can see one another across the table. Nothing on the table should force a guest to lean around it to meet the eye of the person opposite.', badge: 'Finish' },
+      ]},
+      { type: 'tip-list', title: 'Five setup habits to make automatic', items: [
+        'Measure with your eye at every cover — alignment is felt even when it is never consciously noticed.',
+        'A thumb\'s width from the table edge for every handle and every base — the same, everywhere.',
+        'Polish every glass and every piece of cutlery before it touches the table, never after.',
+        'Check salt, pepper, and cruets are full and clean before service — never during.',
+        'When the table is set, sit or crouch in the guest\'s chair and look at it from their eye line, not yours.',
+      ]},
+    ],
+    quiz: [
+      { q: 'What does "mise en place" mean, and why does it matter so much in fine dining?', options: ['It is the kitchen\'s job, not the floor\'s.', '"Everything in its place" — the room is set to standard before any guest arrives, so the standard is already met when service begins.', 'It means setting up as quickly as possible before doors open.', 'It only matters on fully booked nights.'], correct: 1, explain: 'Mise en place is "everything in its place." A room set to standard carries the evening effortlessly — the setup is not preparation for the standard, it is the standard.' },
+      { q: 'How is cutlery laid at a cover?', options: ['In any order, as long as forks and knives are together.', 'Outside-in in course order, forks left and knives and spoons right, each handle the same distance from the table edge.', 'Inside-out, starting from the plate.', 'Bunched close to the plate to save space.'], correct: 1, explain: 'Cutlery is laid outside-in in the order courses are used, forks left, knives and spoons right, with every handle aligned the same distance — about a thumb\'s width — from the edge.' },
+      { q: 'Where is glassware placed at the cover, and how is it handled?', options: ['To the upper left, held by the bowl.', 'To the upper right, polished, and handled only by the stem or base.', 'Directly above the plate, gripped by the rim.', 'Wherever there is room once the plates are down.'], correct: 1, explain: 'Glasses sit to the upper right of the cover, polished to an invisible shine and handled only by the stem or base — never the bowl or rim.' },
+      { q: 'What is the rule for a candle or centrepiece on a fine dining table?', options: ['The taller and more dramatic, the better.', 'It stays low enough that guests can see one another across the table, and the candle is clean and lit at the right moment.', 'It should sit slightly off-centre for visual interest.', 'It only matters for special occasions.'], correct: 1, explain: 'The centrepiece is kept low enough that no guest has to lean around it to meet the eye of the person opposite — nothing on the table should interrupt the guests\' connection.' },
+      { q: 'You\'ve finished setting a table. What is the final check the lesson recommends?', options: ['Ask a colleague to glance at it on their way past.', 'Look at the finished table from the guest\'s chair and eye line, not from your standing position.', 'Photograph it for the pre-service brief.', 'Move on — if each piece is placed, the table is done.'], correct: 1, explain: 'Sit or crouch in the guest\'s chair and read the table from their eye line. A setting that looks right standing over it can look quite different from where the guest actually sits.' },
+    ],
+  },
+  {
+    id: 'fdt-linen-glassware',
+    title: 'Linen & Glassware Standards',
+    desc: 'The white field and the moving light — the two surfaces a guest never stops seeing.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-linen',
+    learn: [
+      { type: 'do-dont', title: 'The difference a guest feels', items: [
+        { do: 'Lay a crisp, spotless cloth with the same even drop on every side.', dont: 'A cloth with a crease, a faint stain, or a hem hanging longer on one side.' },
+        { do: 'Present glasses polished to an invisible shine, lifted only by the stem.', dont: 'Glassware carrying water spots, lip marks, or fingerprints on the bowl.' },
+        { do: 'Re-lay the table the moment the linen is marked — quietly and completely.', dont: 'Leaving a small stain in place because the cloth is "mostly clean."' },
+        { do: 'Fold every napkin to the same house standard, edges sharp and identical.', dont: 'Napkins folded loosely, each one slightly different from the last.' },
+      ]},
+      { type: 'intro', text: 'Linen and glassware are the two surfaces a guest\'s eye returns to all evening — the white field of the cloth and the light moving through a glass. Both are unforgiving: a single water spot or a faint crease announces itself across a candlelit room. Holding their standard is not fussiness; it is the most visible promise the house makes about how closely it cares for detail.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'The cloth', body: 'Pressed, spotless, and laid square, with an even drop on all sides. One clean cloth — never a patched or doubled layer to hide a flaw beneath. The linen sets the tone of the whole table before a single plate is placed.' },
+        { num: 2, title: 'The napkin', body: 'Folded to one house standard, executed identically every time, and handled with clean hands. The fold is consistent across every cover, so the room reads as one deliberate setting rather than many separate hands.' },
+        { num: 3, title: 'Polishing glassware', body: 'Polish each glass over steam with a clean cloth, holding it by the base, working up the bowl without touching the rim, and inspecting it against the light before it leaves your hand. A glass goes to the table flawless or it does not go at all.' },
+        { num: 4, title: 'Inspect before it travels', body: 'Every piece of linen and glassware is checked away from the table — the table is the wrong place to discover a chip, a spot, or a mark. By the time it reaches the guest, it has already passed inspection.' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'When to re-lay', text: 'The moment a cloth is marked — a wine spill, a stain, a tear — it is replaced, not overlooked. With guests seated, dress the mark discreetly with a clean napkin first so it leaves their sightline at once, then change the linen properly at the next natural break. A visible flaw left in place tells the guest the standard slipped; a calm, unhurried correction tells them it holds.' },
+      { type: 'tip-list', title: 'Five linen & glass habits to build now', items: [
+        'Lift every glass by the stem or base — a hand on the bowl is a fingerprint waiting to show.',
+        'Polish glassware over steam and inspect it against the light before it ever leaves your hand.',
+        'Fold each napkin to the exact same house standard, every single time.',
+        'Check the drop is even on all sides before service — a lopsided hem is the first thing a sharp eye catches.',
+        'A mark or spill on the cloth means re-lay — there is no "mostly clean" at this level.',
+      ]},
+    ],
+    quiz: [
+      { q: 'What is the correct way to handle and prepare a wine glass for the table?', options: ['Wipe it quickly by the bowl and set it down.', 'Polish it over steam holding the base, work up the bowl without touching the rim, and inspect it against the light first.', 'Hold it by the rim for control and breathe on it to clean it.', 'Only polish glasses guests specifically order wine in.'], correct: 1, explain: 'Polish over steam, hold by the base, never touch the rim, and inspect against the light. A glass goes to the table flawless or it does not go at all.' },
+      { q: 'A seated guest points out a small wine stain on the tablecloth mid-meal. What is the correct response?', options: ['Reassure them it\'s barely noticeable and leave it.', 'Dress the mark discreetly with a clean napkin so it leaves their sight, then re-lay the cloth properly at the next natural break.', 'Strip the whole table immediately, mid-course, in front of them.', 'Apologise and offer a discount to make up for it.'], correct: 1, explain: 'A marked cloth is replaced, not overlooked. Dress it discreetly to remove it from sight at once, then re-lay calmly at the natural break — an unhurried correction tells the guest the standard holds.' },
+      { q: 'What is the standard for how a tablecloth is laid?', options: ['Pulled tight on the side guests will sit, looser behind.', 'Pressed, spotless, laid square, with an even drop on all sides — one clean cloth, never a patched or doubled layer.', 'Whatever drop length the cloth happens to give.', 'Doubled up so spills don\'t reach the table.'], correct: 1, explain: 'The cloth is pressed, spotless, and square with an even drop on every side — a single clean cloth, never patched or doubled to hide a flaw beneath.' },
+      { q: 'Why are napkins folded to one identical standard across every cover?', options: ['It\'s purely decorative and not really important.', 'Consistency signals a house in control of its details; mismatched folds signal the opposite.', 'So guests know which napkin is theirs.', 'It makes the napkins easier to count.'], correct: 1, explain: 'The fold is consistent across every cover so the room reads as one deliberate setting. Identical folds signal control of detail; slightly different ones signal its absence.' },
+      { q: 'Where should a chip, spot, or mark on glassware be discovered?', options: ['At the table, where the light is best for checking.', 'Away from the table, during inspection — the table is the wrong place to find a flaw.', 'It doesn\'t matter where, as long as it\'s caught eventually.', 'By the guest, who can ask for a replacement.'], correct: 1, explain: 'Every piece is inspected away from the table. By the time glassware reaches the guest it has already passed inspection — the table is never where a flaw is discovered.' },
+    ],
+  },
+  {
+    id: 'fdt-sideboard',
+    title: 'The Sideboard & Service Station',
+    desc: 'Yours to run, and invisible to the guest — the engine room of a smooth section.',
+    duration: '7 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-sideboard',
+    learn: [
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'The sideboard is yours and invisible to the guest. Everything service needs lives there; nothing the guest should never see does. A glance at it tells you the station is ready — and tells the guest nothing at all.' },
+      { type: 'intro', text: 'Every smooth section has a sideboard — the service station where backup cutlery, clean linen, and the tools of service wait within arm\'s reach. Run well, it lets you reset a table or replace a dropped fork without ever leaving the room, and the guest never knows it is there. Run badly, it becomes a cluttered shelf of used plates and personal odds and ends in full view — the one place where the illusion of effortless service quietly falls apart.' },
+      { type: 'do-dont', title: 'What belongs — and what never does', items: [
+        { do: 'Polished backup cutlery, clean napkins, and spare glassware, sorted and ready.', dont: 'Used plates or dirty glassware left sitting in the guest\'s sightline.' },
+        { do: 'Crumbers, clean service cloths, the wine list, and check presenters, neatly arranged.', dont: 'Personal items — phones, drinks, notebooks, keys — anywhere on the station.' },
+        { do: 'Condiment spares and backups stocked discreetly, below or behind.', dont: 'Open food, rubbish, or anything that looks like clearing-up on display.' },
+        { do: 'A surface ordered well enough to find any item almost without looking.', dont: 'A cluttered top you have to hunt through while a guest waits on you.' },
+      ]},
+      { type: 'steps', title: 'Keeping the station invisible', items: [
+        { num: 1, title: 'Stock before service, never during', body: 'Restock fully at the start of service, and top up again at every natural lull, so you are never raiding an empty station in the middle of a rush. The time to discover you are out of fish forks is before service, not as a guest waits for one.', badge: 'Timing' },
+        { num: 2, title: 'Clear it continuously', body: 'Used items move to the dish area on your next pass through — they never pile up on the sideboard. A well-run station empties as fast as it fills, so it never becomes a visible heap of the evening\'s work.', badge: 'Clearing' },
+        { num: 3, title: 'Position and screen it', body: 'The working face of the station turns away from the room. What sits on top is only ever the clean and ready; anything used or unsightly is kept below, behind, or moved on at once. The guest\'s eye should slide past the sideboard without catching.', badge: 'Placement' },
+        { num: 4, title: 'Reset between seatings', body: 'Return the station to its opening state before the next guests arrive, so every service begins from the same standard. A station that drifts further from order with each seating is a section slowly losing its grip.', badge: 'Reset' },
+      ]},
+      { type: 'callout', tone: 'tip', label: 'The test', text: 'Glance at your sideboard the way a guest at the nearest table would. If you can see anything that reveals the machinery of service — a stacked plate, a phone, a smear, a pile of used napkins — the illusion has a crack in it. A station the guest never even notices is a station run exactly right.' },
+    ],
+    quiz: [
+      { q: 'What belongs on the sideboard during service?', options: ['Whatever you happen to be holding at the time.', 'Polished backup cutlery, clean linen, spare glassware, and the tools of service — ready and sorted.', 'Used plates, so they\'re off the tables quickly.', 'Your phone, in case the manager needs to reach you.'], correct: 1, explain: 'The station holds everything service needs — backup cutlery, clean napkins, spare glassware, crumbers, service cloths — sorted and ready, and nothing the guest should never see.' },
+      { q: 'When should the service station be restocked?', options: ['Whenever you happen to notice it\'s running low, mid-service.', 'Fully before service, and topped up at every natural lull — never raided empty in the middle of a rush.', 'Only at the end of the night.', 'Once a guest asks for something you\'ve run out of.'], correct: 1, explain: 'Stock before service and at every lull. The time to find you\'re out of an item is before service begins, never as a guest waits for it.' },
+      { q: 'Where do personal items — your phone, a drink, your keys — belong during service?', options: ['Tucked discreetly at the back of the sideboard.', 'Nowhere on the station — personal items are kept off it entirely, out of sight.', 'On the station is fine as long as guests can\'t quite see them.', 'In an apron pocket on the station surface.'], correct: 1, explain: 'Personal items never belong on the station. The sideboard holds only the tools of service — anything personal stays out of the room entirely.' },
+      { q: 'How should the sideboard be positioned and screened?', options: ['Facing the room so guests can see how organised you are.', 'Its working face turned away from the room, with only clean and ready items on top and anything used kept out of sight.', 'In the busiest sightline so you can reach it fastest.', 'It doesn\'t matter where it faces.'], correct: 1, explain: 'The working face turns away from the room. Only the clean and ready sits on top; anything used or unsightly is kept below, behind, or cleared at once — the guest\'s eye slides past it.' },
+      { q: 'What is the "test" the lesson gives for a well-run sideboard?', options: ['Whether the manager approves it before service.', 'Glance at it as a guest at the nearest table would — if you can see anything that reveals the work of service, the illusion has a crack.', 'Whether everything is stacked as tightly as possible.', 'Whether it holds enough backup for the whole night.'], correct: 1, explain: 'Look at the station from the nearest guest\'s point of view. A stacked plate, a phone, or a pile of used napkins in their sightline breaks the illusion — a station the guest never notices is one run right.' },
+    ],
+  },
+  {
+    id: 'fdt-room-flow',
+    title: 'Dining Room Flow & Atmosphere',
+    desc: 'The feeling of the room — tended quietly, all evening long.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-room-flow',
+    learn: [
+      { type: 'intro', text: 'A dining room has a feeling before it has anything else — the warmth of the light, the level of the music, the temperature of the air, the sense that someone is quietly minding all of it. Guests rarely name these things, but they feel every one of them. The food and the service live inside this atmosphere, and a great room is tended like an instrument: constantly, invisibly, and always toward the guest\'s comfort. This is the work that never stops, from the first guest to the last.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Sound sits beneath conversation', body: 'Music belongs under the talk of the room, never over it. The test is simple: can a table converse easily without lifting their voices? As the room fills and empties through the evening, the right level shifts with it — what is perfect for a full room is too loud for a quiet one.' },
+        { num: 2, title: 'Light softens as the evening does', body: 'Lighting is set to flatter and to soften as the night goes on. A level that felt right at seven can feel harsh and exposing at nine. Candles stay lit, no table sits in shadow, and no guest squints against a glare. The room should feel warmer as it gets later, not brighter.' },
+        { num: 3, title: 'Temperature you respond to, not set and forget', body: 'A comfortable room is invisible; a cold or stuffy one is all a guest can think about. You read the room as it actually is — filling with people, warming through the evening — and respond to that, rather than trusting a thermostat set hours ago.' },
+        { num: 4, title: 'Atmosphere is felt as one whole', body: 'Guests do not experience sound, light, and warmth as separate things — they feel them as a single impression of the room. A flawless plate served in a room that is too loud and too warm still lands as a flawed evening. The parts only matter as they add up to the whole.' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'Mind the dead zones', text: 'Every room has dead zones — the table by the kitchen door, the seat in the draught, the corner the light never quite reaches, the spot where the music drowns the conversation. Guests seated there quietly receive a lesser version of the evening unless someone notices. Walk your room and find these zones before service does, and give those tables a little more attention and care, never less.' },
+      { type: 'steps', title: 'The fifteen-minute visual sweep', items: [
+        { num: 1, title: 'Pause and read the whole room', body: 'Every quarter-hour, stop and take the room in as a guest would — the light, the sound, the temperature, the energy of the floor. The sweep is a standing habit, not something you do only when a problem appears.', badge: 'Pause' },
+        { num: 2, title: 'Check the levels', body: 'Is the music still beneath the conversation? Has the light gone harsh as the sky outside darkened? Has the filling room grown warm? Catch each drift and adjust it before any guest would think to mention it.', badge: 'Adjust' },
+        { num: 3, title: 'Scan for the overlooked', body: 'Look for the dead-zone table, the guest glancing around for someone, the candle that has burned out, the empty glass across the room. The sweep is how you find the small things before they become the guest\'s problem.', badge: 'Notice' },
+        { num: 4, title: 'Correct quietly, then return to the floor', body: 'Make the small adjustment — the dimmer, the thermostat, the volume, the relit candle — and fold straight back into service, so the room is tended without anyone ever seeing it tended.', badge: 'Correct' },
+      ]},
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Bring the music down a touch as the room empties and voices fall.', dont: 'Holding a full-room level into a near-empty late-evening floor.' },
+        { do: 'Soften the lighting as the evening darkens so the room stays warm.', dont: 'Letting bright early-evening light leave a late table feeling exposed.' },
+        { do: 'Notice a guest fanning themselves and ease the temperature before they ask.', dont: 'Waiting for a guest to complain that the room has grown warm.' },
+        { do: 'Give the table by the kitchen door a little extra attention and warmth.', dont: 'Treating a dead-zone table as a lesser seat and serving it like one.' },
+      ]},
+    ],
+    quiz: [
+      { q: 'What is the right level for music in a fine dining room?', options: ['Loud enough to fill any silence between tables.', 'Beneath the conversation — a table should be able to talk easily without lifting their voices.', 'A fixed level set once at the start of the night.', 'As quiet as possible until guests ask for more.'], correct: 1, explain: 'Music sits under the conversation, never over it. The test is whether a table can talk comfortably without raising their voices — and the right level shifts as the room fills and empties.' },
+      { q: 'What is a "dead zone," and how should you handle the tables in one?', options: ['A table no one books — leave it unset.', 'A seat that receives a lesser version of the evening — by the kitchen, in a draught, in shadow — so you give it more attention and care, not less.', 'An area of the floor you keep guests out of.', 'A table reserved for staff breaks.'], correct: 1, explain: 'Dead zones are seats that quietly get a lesser evening — by the kitchen door, in a draught, in shadow. You find them before service does and give those tables more attention, never less.' },
+      { q: 'What is the fifteen-minute visual sweep?', options: ['A timed walk to check every table has ordered.', 'A standing habit of pausing every quarter-hour to read the whole room as a guest would — light, sound, temperature, energy — and correcting any drift.', 'A fifteen-minute break for staff to reset.', 'A check you do only when the room feels off.'], correct: 1, explain: 'Every quarter-hour you pause and read the room as a guest would, catch any drift in light, sound, or temperature, scan for the overlooked, and correct it quietly — a habit, not a reaction.' },
+      { q: 'A guest is quietly fanning themselves with the menu. What does the standard ask of you?', options: ['Wait until they actually say the room is too warm.', 'Read the signal and ease the temperature before they have to ask.', 'Offer them a glass of iced water and leave the room as it is.', 'Open a nearby window without checking how it affects other tables.'], correct: 1, explain: 'A comfortable room is invisible; you respond to the room as it actually is. Notice the guest fanning themselves and adjust the temperature before they ever have to mention it.' },
+      { q: 'Why does the lesson say atmosphere is "felt as one whole"?', options: ['Because only the lighting really matters to guests.', 'Because guests experience sound, light, and warmth as a single impression — a flawless plate in a too-loud, too-warm room still lands as a flawed evening.', 'Because the parts can each be perfected and forgotten.', 'Because atmosphere is the kitchen\'s responsibility, not the floor\'s.'], correct: 1, explain: 'Guests don\'t register the elements separately — they feel the room as one thing. Even a perfect plate, served into a room that is too loud and too warm, still lands as a flawed evening.' },
+    ],
+  },
+];
+
 export const CURRICULUM: Module[] = [
   // Module 0
   {
@@ -2167,6 +2318,20 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 200,
     lessons: fineDiningEtiquetteLessons,
+  },
+  // Fine Dining Phase 1 — Module 4
+  {
+    id: 'fine-dining-table-setup',
+    title: 'Table Setup & Dining Room Standards',
+    subtitle: 'Before the first guest arrives, the standard is already set.',
+    iconName: 'Layout',
+    color: '#2D4A22',
+    progress: 0,
+    totalLessons: 4,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 200,
+    lessons: fineDiningTableSetupLessons,
   },
   // Phase 1 Certification (placeholder) — always the final item in the grid.
   {
