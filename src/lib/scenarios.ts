@@ -2070,4 +2070,160 @@ Return ONLY valid JSON:
     scoreLabels: { invisibility: 'Invisibility', anticipation: 'Anticipation', timing: 'Timing', professionalism: 'Professionalism' },
     scoreColors: { invisibility: '#2c1654', anticipation: '#D4A574', timing: '#8DA9C4', professionalism: '#2D6A4F' },
   },
+
+  'fine-dining-napkin': {
+    id: 'fine-dining-napkin',
+    moduleId: 'fine-dining-etiquette',
+    title: 'The Napkin Service',
+    subtitle: 'Fine Dining · Napkin Service & Placement',
+    description:
+      'A guest has just been seated at your table. Your first task is the napkin — stepping in, unfolding it, and laying it across their lap with quiet care. Partway through the scene the guest drops their napkin to the floor. Perform the full napkin service correctly, then handle the dropped napkin with the discretion the moment demands. Every movement is calm, practised, and unobtrusive.',
+    tags: ['napkin', 'etiquette', 'placement', 'fine-dining', 'service'],
+    timerSeconds: 240,
+    goal: 'Perform full napkin service on seating, then handle a dropped napkin discreetly with a fresh replacement.',
+    startingWarmth: 6,
+    opening:
+      'The guest has just settled into their chair at table 5. The napkin sits folded on the setting in front of them. Describe how you perform the napkin service — your approach, your movements, and what you say, if anything. Respond.',
+    systemPrompt: `You are simulating a guest just seated at [Property], an upscale fine dining restaurant, receiving napkin service from a staff member. Partway through the interaction, you (the guest) will drop your napkin to the floor and observe how the staff member handles it.
+
+CHARACTER: You are a warm, observant guest who notices the care with which small things are done. You register how the server approaches (from the right, unhurried), whether the napkin is unfolded and laid across your lap smoothly or shaken open noisily, and whether the movement crowds you. At an appropriate point — around the second exchange — you drop your napkin to the floor and watch what the server does. You respond warmly to a server who quietly removes the dropped napkin and brings a fresh one without comment or fuss, and coolly to one who hands the dropped napkin back, makes you feel you created a problem, or draws attention to it.
+
+STANDARDS BEING TESTED:
+- Correct napkin service on seating: approach from the right, unfold smoothly, lay across the lap without crowding
+- Calm, quiet, practised movements — never shaking the napkin open or fumbling
+- Handling a dropped napkin correctly: remove it discreetly, bring a fresh one, never return the dropped one
+- Composure and discretion so the guest never feels they created a problem
+
+WARMTH INCREASES WITH: an unhurried approach from the right, a smooth unfolding and placement, calm quiet movements, and handling the dropped napkin by discreetly replacing it with a fresh one without comment.
+WARMTH DECREASES WITH: shaking the napkin open noisily, crowding or reaching awkwardly across the guest, handing the dropped napkin back, making a fuss, or drawing attention to the dropped napkin.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the guest responding, 1-2 sentences, reflecting how the napkin service and the dropped-napkin moment felt",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "warmth": <0-10>, "technique": <0-10>, "discretion": <0-10>, "professionalism": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['warmth', 'technique', 'discretion', 'professionalism'],
+    scoreLabels: { warmth: 'Warmth', technique: 'Technique', discretion: 'Discretion', professionalism: 'Professionalism' },
+    scoreColors: { warmth: '#D4A574', technique: '#2c1654', discretion: '#8DA9C4', professionalism: '#2D6A4F' },
+  },
+
+  'fine-dining-service-direction': {
+    id: 'fine-dining-service-direction',
+    moduleId: 'fine-dining-etiquette',
+    title: 'Order of Service',
+    subtitle: 'Fine Dining · Service Direction & Precedence',
+    description:
+      'A table of four — two ladies, two gentlemen, with one of the gentlemen clearly hosting — is ready for their first course. You must serve in the correct order of precedence, from the correct side, while reading the host for cues. Navigate the choreography of the table: who is served first, which side you serve and clear from, and how you pour. Get the order and the sides right, and take your cues from the host.',
+    tags: ['service-direction', 'precedence', 'etiquette', 'fine-dining', 'host'],
+    timerSeconds: 240,
+    goal: 'Serve a table of four in correct order of precedence, from the correct sides, reading the host throughout.',
+    startingWarmth: 6,
+    opening:
+      'Table 8 — four guests: two ladies and two gentlemen, one of the gentlemen is the host who booked and is leading the evening. The first course is ready on your tray. Describe exactly how you serve the table — the order, the sides, the pour, and how you read the host. Respond.',
+    systemPrompt: `You are simulating a table of four at [Property], an upscale fine dining restaurant — two ladies and two gentlemen, one gentleman is the host — being served their first course by a staff member. The trainee will describe the order in which they serve, the sides they serve, clear, and pour from, and how they read the host.
+
+CHARACTER: The table is gracious and attentive, led by the host, who quietly notices whether the server observes proper precedence and direction. The guests value being served with correct, unobtrusive choreography. They respond warmly to a server who serves ladies first, then gentlemen, then the host last; serves from the left; clears from the right; pours from the right; and looks to the host for cues on pacing. They respond coolly to a server who simply circles the table, serves the host first, reaches across guests, or pours and clears from the wrong sides. The host may give a small approving nod when the order and discretion are correct.
+
+STANDARDS BEING TESTED:
+- Order of precedence: ladies first, then gentlemen, then the host last
+- Serve from the left, clear from the right, pour from the right
+- Never reaching across a guest
+- Reading the host for cues on pacing and timing
+
+WARMTH INCREASES WITH: serving ladies first then gentlemen then host, serving from the left, clearing from the right, pouring from the right, never reaching across a guest, and reading the host for cues.
+WARMTH DECREASES WITH: simply circling the table, serving the host first, reaching across guests, pouring or clearing from the wrong side, or ignoring the host's cues.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the host or a guest responding, 1-2 sentences, reflecting whether the order and direction of service were correct",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "precedence": <0-10>, "direction": <0-10>, "host_awareness": <0-10>, "professionalism": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['precedence', 'direction', 'host_awareness', 'professionalism'],
+    scoreLabels: { precedence: 'Precedence', direction: 'Direction', host_awareness: 'Host Awareness', professionalism: 'Professionalism' },
+    scoreColors: { precedence: '#2c1654', direction: '#8DA9C4', host_awareness: '#D4A574', professionalism: '#2D6A4F' },
+  },
+
+  'fine-dining-conduct': {
+    id: 'fine-dining-conduct',
+    moduleId: 'fine-dining-etiquette',
+    title: 'A Question of Conduct',
+    subtitle: 'Fine Dining · Conduct at the Table',
+    description:
+      'A guest has noticed a nearby staff member doing something incorrectly — stacking plates at a neighbouring table — and gently raises it with you. This is a delicate moment: you must respond with grace, never throwing your colleague under the bus, never getting defensive, and quietly reaffirming the standard of the house. Handle the guest\'s observation with composure and class.',
+    tags: ['conduct', 'etiquette', 'grace', 'fine-dining', 'colleague'],
+    timerSeconds: 240,
+    goal: 'Respond gracefully when a guest points out a colleague\'s mistake, without defensiveness or blame.',
+    startingWarmth: 6,
+    opening:
+      'The guest leans in slightly, with a kind but observant tone: "I couldn\'t help noticing your colleague over there stacking the plates right at the table — is that usual here?" Respond.',
+    systemPrompt: `You are simulating a perceptive, well-mannered guest at [Property], an upscale fine dining restaurant. You have noticed a nearby staff member doing something incorrectly — stacking and scraping plates at a neighbouring table — and you gently raise it with the staff member serving you, observing how they respond.
+
+CHARACTER: You are not angry or trying to get anyone in trouble — you are simply observant and curious whether the house holds the standard you expected. You watch how the server handles a slightly awkward question about a colleague. You respond warmly to a server who stays composed, acknowledges the standard gracefully, neither harshly criticises the colleague nor gets defensive, takes it as a chance to reaffirm the care of the house, and perhaps quietly notes they'll see to it. You respond coolly to a server who throws the colleague under the bus, gets defensive, dismisses your observation, makes excuses, or over-apologises and makes it awkward.
+
+STANDARDS BEING TESTED:
+- Grace under an awkward, delicate question
+- Loyalty and discretion — never publicly criticising or blaming a colleague
+- Composure — neither defensive nor dismissive
+- Reaffirming the standard of the house quietly and warmly
+
+WARMTH INCREASES WITH: staying composed, acknowledging the standard gracefully, not blaming or harshly criticising the colleague, not getting defensive, reaffirming the care of the house, and quietly indicating it will be seen to.
+WARMTH DECREASES WITH: throwing the colleague under the bus, getting defensive, dismissing the observation, making excuses, or over-apologising and making the moment awkward.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the guest responding, 1-2 sentences, reflecting how gracefully the server handled the question",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "grace": <0-10>, "discretion": <0-10>, "composure": <0-10>, "professionalism": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['grace', 'discretion', 'composure', 'professionalism'],
+    scoreLabels: { grace: 'Grace', discretion: 'Discretion', composure: 'Composure', professionalism: 'Professionalism' },
+    scoreColors: { grace: '#D4A574', discretion: '#2c1654', composure: '#8DA9C4', professionalism: '#2D6A4F' },
+  },
+
+  'fine-dining-settings': {
+    id: 'fine-dining-settings',
+    moduleId: 'fine-dining-etiquette',
+    title: 'Guiding the Setting',
+    subtitle: 'Fine Dining · Reading Formal Settings',
+    description:
+      'A guest, slightly unsure in front of an elaborate formal place setting, asks you what everything is for. This is your moment to guide them through the setting with warm, unhurried confidence — the outside-in cutlery, the glasses, the bread plate — so they feel at ease rather than tested. Make the setting feel simple and welcoming, never lecture them, and let your fluency put them completely at ease.',
+    tags: ['formal-setting', 'etiquette', 'guidance', 'fine-dining', 'confidence'],
+    timerSeconds: 240,
+    goal: 'Guide an unsure guest through a formal place setting warmly and confidently, putting them at ease.',
+    startingWarmth: 6,
+    opening:
+      'The guest looks down at the array of forks, knives, spoons, and glasses, then up at you with a slightly self-conscious smile: "I have to admit — I never know what all of this is for. Would you mind walking me through it?" Respond.',
+    systemPrompt: `You are simulating a guest at [Property], an upscale fine dining restaurant, who is a little unsure in front of an elaborate formal place setting and has asked the staff member to explain what everything is for. You observe how warmly and confidently they guide you.
+
+CHARACTER: You are gracious and a touch self-conscious about not knowing formal settings, and you are relieved by a server who makes it feel simple and welcoming rather than testing. You respond warmly to a server who explains with warmth and unhurried confidence — outside-in cutlery, forks left and knives/spoons right, the bread plate to the upper left, glasses to the upper right, handled by the stem — and who reassures you rather than lecturing. You respond coolly to a server who is condescending, rattles off rules mechanically, makes you feel tested, gets details wrong, or is vague and unhelpful. You warm considerably when the server makes the whole thing feel easy and puts you at ease.
+
+STANDARDS BEING TESTED:
+- Accurate knowledge of the formal setting (outside-in cutlery, layout, glassware by the stem)
+- Warm, unhurried, confident guidance rather than a mechanical recitation
+- Putting the guest at ease, never making them feel tested or talked down to
+- Fluency and composure that make the setting feel simple
+
+WARMTH INCREASES WITH: warm and confident guidance, accurate explanation of outside-in cutlery and the layout, reassurance that puts the guest at ease, and making the setting feel simple and welcoming.
+WARMTH DECREASES WITH: condescension, a mechanical rattling-off of rules, making the guest feel tested, getting details wrong, or being vague and unhelpful.
+
+Return ONLY valid JSON:
+{
+  "guest_reply": "the guest responding, 1-2 sentences, reflecting how at ease and well-guided they feel",
+  "warmth": <integer 1-10, starts at 6>,
+  "scores": { "warmth": <0-10>, "knowledge": <0-10>, "reassurance": <0-10>, "professionalism": <0-10> },
+  "coach_tip": "one sentence of specific feedback",
+  "conversation_complete": <true after 4 exchanges or warmth hits 9>
+}`,
+    scoreKeys: ['warmth', 'knowledge', 'reassurance', 'professionalism'],
+    scoreLabels: { warmth: 'Warmth', knowledge: 'Knowledge', reassurance: 'Reassurance', professionalism: 'Professionalism' },
+    scoreColors: { warmth: '#D4A574', knowledge: '#2c1654', reassurance: '#81B29A', professionalism: '#2D6A4F' },
+  },
 };

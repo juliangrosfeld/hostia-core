@@ -1834,6 +1834,167 @@ const fineDiningPresenceLessons: Lesson[] = [
   },
 ];
 
+// ─── FINE DINING PHASE 1 · MODULE 3: FINE DINING ETIQUETTE ───
+
+const fineDiningEtiquetteLessons: Lesson[] = [
+  {
+    id: 'fde-napkin-service',
+    title: 'Napkin Service & Placement',
+    desc: 'The first touch of the meal — and a quiet measure of the whole house.',
+    duration: '7 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-napkin',
+    learn: [
+      { type: 'intro', text: 'The napkin is the first thing you handle for a guest once they are seated, and how you handle it sets the tone for everything that follows. A napkin laid with care says the evening is in good hands; a napkin tossed across the table or left for the guest to sort out says the opposite. None of it is difficult — it is a handful of small, precise movements done the same way every time. Learn them until they are instinct, and the napkin becomes one more place your care is quietly felt.' },
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'The napkin is placed for the guest, refreshed when they leave the table, and never left for them to manage themselves.' },
+      { type: 'steps', title: 'Napkin service, moment by moment', items: [
+        { num: 1, title: 'On seating', body: 'Once the guest is settled, step in from the right, lift the napkin from the setting, unfold it in one smooth motion, and lay it gently across their lap. With a single guest you may simply present it; the movement is unhurried and never fussy.', badge: 'Seating' },
+        { num: 2, title: 'When a guest steps away', body: 'The moment a guest rises to leave the table, retrieve their napkin, refold it loosely — or replace it with a fresh one — and lay it to the left of the setting, ready for their return. A crumpled napkin left on the chair or table is never the image you leave behind.', badge: 'Stepping away' },
+        { num: 3, title: 'If a napkin is dropped', body: 'A dropped napkin is never returned to the guest. Discreetly remove it from the floor and bring a fresh one, presented quietly and without comment, so the guest is never made to feel they created a problem.', badge: 'Dropped' },
+        { num: 4, title: 'At the end of the meal', body: 'As the guest departs, the napkin is collected with the rest of the setting — never wadded up at the table in their view. The table returns to pristine the moment they leave it.', badge: 'Departure' },
+      ]},
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Unfold and lay the napkin across the lap in one calm, practised motion.', dont: 'Shaking it open noisily or fumbling the fold in front of the guest.' },
+        { do: 'Refold or replace the napkin neatly when a guest steps away.', dont: 'Leaving a crumpled napkin slumped on the chair or table.' },
+        { do: 'Bring a fresh napkin, quietly, when one is dropped.', dont: 'Picking the dropped napkin off the floor and handing it back.' },
+        { do: 'Move in from the right and work without crowding the guest.', dont: 'Reaching across the guest or hovering awkwardly over their shoulder.' },
+      ]},
+      { type: 'tip-list', title: 'Five napkin habits to make automatic', items: [
+        'Settle the guest first; the napkin follows, never the other way around.',
+        'Keep the motion quiet — no snapping the napkin open at the table.',
+        'When a guest rises, reset their napkin before they have crossed the room.',
+        'Always carry a fresh napkin within reach for a dropped or soiled one.',
+        'A dropped napkin goes to the laundry, never back to the guest.',
+      ]},
+    ],
+    quiz: [
+      { q: 'A guest has just been seated. What is the correct napkin service?', options: ['Leave the napkin folded so they can place it themselves.', 'Step in from the right, unfold it smoothly, and lay it gently across their lap.', 'Shake it open over the table and drape it across the plate.', 'Wait until the first course arrives, then hand it to them.'], correct: 1, explain: 'Once the guest is settled, the napkin is unfolded in one calm motion and laid across the lap from the right — placed for the guest, not left for them to manage.' },
+      { q: 'A guest rises to step away from the table mid-meal. What do you do with their napkin?', options: ['Leave it exactly where it fell so you don\'t disturb their place.', 'Retrieve it, refold it loosely or replace it, and set it to the left of the setting.', 'Drape it over the back of their chair.', 'Take it away entirely until they return.'], correct: 1, explain: 'When a guest steps away, the napkin is refolded or replaced and set neatly by the setting, ready for their return — never left crumpled on the chair or table.' },
+      { q: 'A guest drops their napkin on the floor. What is the correct response?', options: ['Pick it up and hand it straight back to them.', 'Leave it — pointing it out would embarrass them.', 'Discreetly remove it and bring a fresh one without comment.', 'Ask the guest whether they would like a replacement.'], correct: 2, explain: 'A dropped napkin is never returned. You remove it quietly and bring a fresh one without comment, so the guest never feels they created a problem.' },
+      { q: 'At the end of the meal, how is the napkin handled?', options: ['Wadded up and left on the table for the next reset.', 'Folded neatly and left at the place for the guest to take.', 'Collected with the rest of the setting once the guest departs, never bundled up in their view.', 'Handed to the guest as they leave.'], correct: 2, explain: 'The napkin is cleared with the setting after the guest departs. The table returns to pristine the moment they leave it — nothing is wadded up in their view.' },
+      { q: 'Why does the way you handle the napkin matter so much?', options: ['It doesn\'t — only the food and wine service count.', 'It is the first thing you handle for the seated guest, so it sets the tone for everything that follows.', 'It only matters if the guest specifically asks about it.', 'It matters solely for hygiene reasons.'], correct: 1, explain: 'The napkin is the first thing you handle once a guest is seated. Handled with care, it quietly signals that the whole evening is in good hands.' },
+    ],
+  },
+  {
+    id: 'fde-service-direction',
+    title: 'Service Direction & Order of Precedence',
+    desc: 'Who is served first, from which side, and how you read the host.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-service-direction',
+    learn: [
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'Serve from the left, clear from the right, pour from the right — and serve guests in order of precedence, never simply going around the table.' },
+      { type: 'intro', text: 'Fine dining service moves in a deliberate order, and a table notices the difference between a server who follows it and one who simply works their way around clockwise. There is a precedence to who is served, a side from which each task is performed, and a quiet rhythm to it all. Above the rules sits one skill: reading the host. The person who booked the table and is hosting it sets the pace, and an attentive server takes their cues from them throughout the meal.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Order of precedence', body: 'Serve ladies first, then gentlemen, then the host last. Where ages or seniority are clearly visible, the most senior guest is honoured first within that order. The host being served last is intentional — it signals their guests have been cared for before them.' },
+        { num: 2, title: 'Serve from the left', body: 'Plated food is placed from the guest\'s left side, with your left hand where possible, so you never reach across the guest. The plate is set down quietly, logo or centrepiece squared to the guest.' },
+        { num: 3, title: 'Clear from the right', body: 'Finished plates and glassware are cleared from the right, so your movement away from the table never crosses in front of the guest. Left to serve, right to clear — the two never collide.' },
+        { num: 4, title: 'Pour from the right', body: 'Water and wine are poured from the right, since the glasses sit to the upper right of the setting. You approach the glass without lifting it from the table, pour, and withdraw cleanly.' },
+      ]},
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Serve the ladies at the table first, then the gentlemen, then the host.', dont: 'Starting with whoever is nearest and circling the table clockwise.' },
+        { do: 'Place each plate from the left and clear each from the right.', dont: 'Reaching across one guest to serve or clear for another.' },
+        { do: 'Pour wine from the right without lifting the glass off the table.', dont: 'Picking up the guest\'s glass to pour, or pouring across the setting.' },
+        { do: 'Glance to the host for a nod before pouring more wine or pacing the next course.', dont: 'Topping up glasses or firing courses without reading the host\'s cues.' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'When the setting won\'t allow it', text: 'A tight banquette or a guest seated against a wall sometimes makes the textbook side impossible. When it does, choose the option that avoids reaching across the guest, do it smoothly, and never make the adjustment obvious. The principle — never cross the guest — outranks the side.' },
+      { type: 'tip-list', title: 'Five precedence habits to build now', items: [
+        'Identify the host the moment the table is seated, and watch them throughout.',
+        'Default order: ladies, then gentlemen, then the host last.',
+        'Left to serve, right to clear — say it until it is muscle memory.',
+        'Glasses live on the right, so water and wine are always poured from the right.',
+        'Before refilling or pacing, look to the host for the quiet nod.',
+      ]},
+    ],
+    quiz: [
+      { q: 'In what order are guests served at a fine dining table?', options: ['Whoever is closest first, then around the table.', 'Ladies first, then gentlemen, then the host last.', 'The host first, as they are paying.', 'Oldest to youngest, regardless of anything else.'], correct: 1, explain: 'The order of precedence is ladies first, then gentlemen, then the host last — the host served last signals their guests were cared for before them.' },
+      { q: 'From which side do you place plated food, and from which side do you clear?', options: ['Serve from the right, clear from the left.', 'Serve and clear both from the left.', 'Serve from the left, clear from the right.', 'Always from whichever side is closer.'], correct: 2, explain: 'Serve from the left, clear from the right. The two movements never cross in front of the guest.' },
+      { q: 'Where do you pour wine and water from, and why?', options: ['From the left, to match the food service.', 'From the right, because the glasses sit to the upper right of the setting.', 'From wherever you can reach the glass most easily.', 'From the right, after lifting the glass off the table.'], correct: 1, explain: 'Glasses sit to the upper right of the setting, so water and wine are poured from the right — approaching the glass without lifting it from the table.' },
+      { q: 'Why is reading the host described as the skill "above the rules"?', options: ['Because the host decides who sits where.', 'Because the host sets the pace of the meal, and an attentive server takes cues from them throughout.', 'Because only the host is allowed to ask for more wine.', 'Because the host must approve each course personally.'], correct: 1, explain: 'The host paces the table. Reading their cues — a nod for more wine, readiness for the next course — sits above the mechanical rules of service.' },
+      { q: 'A guest is seated tight against a wall, making the textbook side impossible. What do you do?', options: ['Insist on the correct side and ask the guest to shift.', 'Choose the side that avoids reaching across the guest, do it smoothly, and don\'t make it obvious.', 'Skip that guest and serve them last from any angle.', 'Reach across the guest quickly to keep to the rule.'], correct: 1, explain: 'The principle — never reach across the guest — outranks the side. When the setting won\'t allow the textbook approach, adapt smoothly and invisibly.' },
+    ],
+  },
+  {
+    id: 'fde-table-conduct',
+    title: 'Conduct at the Table',
+    desc: 'The small disciplines that keep service elegant — and the habits that break it.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-conduct',
+    learn: [
+      { type: 'intro', text: 'Most of what separates refined service from ordinary service happens in the small moments at the table — the reach you didn\'t make, the plates you didn\'t stack, the phrase you chose instead of the casual one. These are disciplines, not instincts; under pressure the easy habit is to reach across, to stack as you clear, to ask "are you still working on that?" Fine dining asks you to hold the higher standard precisely when it is least convenient, because that is when the guest is watching most closely.' },
+      { type: 'steps', title: 'The disciplines that protect the table', items: [
+        { num: 1, title: 'Never reach across a guest', body: 'Reaching across a guest to place or clear puts your arm in their space and breaks the calm of the table. Move around to the correct side instead — always. If the layout makes it genuinely impossible, a quiet "excuse me, may I?" comes first.', badge: 'Space' },
+        { num: 2, title: 'Never stack plates at the table', body: 'Scraping and stacking plates in front of guests turns elegant service into bussing. Clear quietly, carry no more than you can handle gracefully, and do the stacking and scraping out of sight, never at the table.', badge: 'Clearing' },
+        { num: 3, title: 'Never scrape or sort in view', body: 'Anything that looks like cleaning up — scraping leftovers, sorting cutlery, brushing crumbs into a hand at speed — belongs out of the guest\'s sightline. The table should only ever look cared for, never cleaned up after.', badge: 'Discretion' },
+        { num: 4, title: 'Choose the refined phrase', body: 'Replace "Are you still working on that?" with "May I clear this for you?" Working on it frames the meal as a task; may I clear frames it as a courtesy. The words you reach for under pressure reveal your standard.', badge: 'Language' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'The phrase that gives you away', text: '"Are you still working on that?" is the single most common tell of casual-grade service. It treats the meal as labour and rushes the guest. "May I clear this for you?" — or simply reading the cutlery and clearing in the lull — keeps the moment elegant.' },
+      { type: 'do-dont', title: 'Handling a complaint with grace', items: [
+        { do: 'Listen fully, acknowledge sincerely, and fix it quietly and quickly.', dont: 'Interrupting, getting defensive, or explaining why it happened.' },
+        { do: 'Take ownership on behalf of the house — "I\'m so sorry, allow me to put that right."', dont: 'Blaming the kitchen, a colleague, or the guest for the misunderstanding.' },
+        { do: 'Move around the table to clear and re-set, calmly and from the correct side.', dont: 'Reaching across the guest or stacking the offending plates in front of them.' },
+        { do: 'Return discreetly to confirm the correction landed well.', dont: 'Making a performance of the fix or drawing the table\'s attention to it.' },
+      ]},
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'Elegance lives in restraint: never reach across, never stack at the table, never scrape in view, and never let a casual phrase rush a guest. Hold the standard hardest when it is least convenient.' },
+    ],
+    quiz: [
+      { q: 'You need to place a dish but the guest in the way makes the correct side awkward. What is the right move?', options: ['Reach across the guest quickly — it\'s only a moment.', 'Move around to the correct side; if it\'s genuinely impossible, a quiet "excuse me, may I?" comes first.', 'Hand the plate to the guest and ask them to pass it.', 'Set it at the nearest open spot and let them slide it over.'], correct: 1, explain: 'You never reach across a guest. Move to the correct side; only if the layout makes it truly impossible do you ask "excuse me, may I?" before reaching.' },
+      { q: 'Why should you never stack plates at the table?', options: ['It\'s faster to carry them one at a time anyway.', 'Scraping and stacking in front of guests turns elegant service into bussing — it belongs out of sight.', 'Stacked plates are more likely to break.', 'Guests find it unhygienic specifically.'], correct: 1, explain: 'Stacking and scraping at the table makes service look like bussing. Clear quietly and do the stacking and scraping out of the guest\'s sightline.' },
+      { q: 'What is wrong with asking "Are you still working on that?"', options: ['Nothing — it\'s a perfectly polite way to check.', 'It frames the meal as a task and rushes the guest; "May I clear this for you?" frames it as a courtesy.', 'It\'s too formal for most guests.', 'It should be asked only of the host, not other guests.'], correct: 1, explain: '"Working on it" treats the meal as labour and rushes the guest. "May I clear this for you?" keeps the moment a courtesy — the words you reach for reveal your standard.' },
+      { q: 'A guest raises a genuine complaint about their dish. What is the graceful response?', options: ['Explain exactly why the kitchen made the mistake.', 'Listen fully, acknowledge sincerely, take ownership for the house, and fix it quietly and quickly.', 'Apologize repeatedly and hover until they\'re satisfied.', 'Offer a discount immediately to close the matter.'], correct: 1, explain: 'Listen, acknowledge, own it on behalf of the house, and put it right quietly — never interrupt, get defensive, or shift blame to the kitchen or a colleague.' },
+      { q: 'The lesson calls these small moments "disciplines, not instincts." What does that mean for you?', options: ['They come naturally once you\'ve served a few tables.', 'Under pressure the easy habit is the casual one, so you must hold the higher standard precisely when it\'s least convenient.', 'They only matter when a manager is watching.', 'They are optional refinements once the basics are covered.'], correct: 1, explain: 'Under pressure the easy habit is to reach across, stack, or rush. Refined conduct is a discipline you hold hardest when it is least convenient — because that\'s when guests watch most closely.' },
+    ],
+  },
+  {
+    id: 'fde-formal-settings',
+    title: 'Reading & Respecting Formal Settings',
+    desc: 'The place setting as a map — and the silent signals it sends back to you.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-settings',
+    learn: [
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'A formal setting is a map both ways: it guides the guest through the meal, and it tells you — through the position of their cutlery — exactly where they are in it.' },
+      { type: 'intro', text: 'A formal place setting can look intimidating — rows of forks, a fan of glasses, knives and spoons arranged with apparent ceremony. In truth it follows a simple, readable logic, and once you understand it you can guide a guest through it with quiet confidence and read their progress without asking a single question. The setting is not decoration; it is a language. Your job is to be fluent in it, so the guest never has to be.' },
+      { type: 'steps', title: 'Reading the place setting', items: [
+        { num: 1, title: 'Outside-in cutlery', body: 'Cutlery is used from the outside in, one pair per course. The outermost fork and knife are for the first course, working inward with each course that follows. A guest unsure where to start need only begin at the outside — and you can reassure them of exactly that.', badge: 'Cutlery' },
+        { num: 2, title: 'Forks left, knives and spoons right', body: 'Forks sit to the left of the plate, knives and spoons to the right, with knife blades turned toward the plate. Dessert cutlery often rests horizontally above the plate. The bread plate sits to the upper left; glasses to the upper right.', badge: 'Layout' },
+        { num: 3, title: 'Replace cutlery between courses', body: 'As each course is cleared, the used cutlery goes with it, and fresh cutlery for the next course is set if it isn\'t already laid. The guest should always find the right tools waiting, never have to reuse or hunt for them.', badge: 'Between courses' },
+        { num: 4, title: 'Glassware, handled correctly', body: 'Glasses are held by the stem, never the bowl — a warm hand clouds the glass and warms the wine. When setting, adjusting, or clearing glassware, take the stem or base, and keep the rim untouched.', badge: 'Glassware' },
+      ]},
+      { type: 'principles', items: [
+        { num: 1, title: 'The "still eating" signal', body: 'Cutlery resting apart — fork and knife angled open on the plate, often in an inverted V — means the guest is pausing, not finished. The plate stays. Clearing it now interrupts a guest mid-meal.' },
+        { num: 2, title: 'The "finished" signal', body: 'Cutlery placed together — fork and knife laid parallel, typically across the plate around the four-o\'clock position — means the guest is done. That is your cue to clear, in the next natural lull.' },
+        { num: 3, title: 'Read before you ask', body: 'These silent signals exist precisely so the guest never has to announce they\'re finished. Reading the cutlery first, and only asking "may I?" when the signal is genuinely unclear, is the mark of a fluent server.' },
+      ]},
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Reassure an unsure guest to simply work from the outside in.', dont: 'Letting a guest feel lost in front of the setting without quietly guiding them.' },
+        { do: 'Read the cutlery position to know whether to clear or wait.', dont: 'Asking "are you finished?" when the parallel cutlery already tells you.' },
+        { do: 'Set fresh cutlery for each course as the last is cleared.', dont: 'Leaving the guest to reuse a knife or hunt for the right fork.' },
+        { do: 'Lift and place every glass by the stem or base.', dont: 'Grabbing glasses by the bowl and leaving prints on the rim.' },
+      ]},
+      { type: 'tip-list', title: 'Five fluency habits to build now', items: [
+        'Outside-in: the outermost cutlery is always the next course.',
+        'Glances at the plate replace questions — read the cutlery before approaching.',
+        'Fork and knife apart means wait; together means clear.',
+        'Set the next course\'s cutlery before its plate arrives.',
+        'Every glass is handled by the stem or base, never the bowl or rim.',
+      ]},
+    ],
+    quiz: [
+      { q: 'A guest is unsure which fork to use first. What do you tell them?', options: ['Whichever feels most comfortable to them.', 'Work from the outside in — the outermost cutlery is for the first course.', 'Always start with the fork nearest the plate.', 'Wait for you to hand them the correct one each course.'], correct: 1, explain: 'Cutlery is used outside-in, one pair per course. A guest need only begin at the outside, and you can reassure them of exactly that.' },
+      { q: 'A guest\'s fork and knife are resting apart, angled open on the plate. What does this signal?', options: ['They are finished — clear the plate.', 'They are pausing, not finished — the plate stays.', 'They want the next course brought immediately.', 'They are dissatisfied with the dish.'], correct: 1, explain: 'Cutlery resting apart means the guest is pausing, not finished. Clearing now would interrupt them mid-meal — the plate stays.' },
+      { q: 'A guest has laid their fork and knife together, parallel across the plate. What is your cue?', options: ['Leave the plate until they ask you to take it.', 'They are finished — clear in the next natural lull.', 'They want to keep the cutlery for the next course.', 'They are signalling a complaint.'], correct: 1, explain: 'Cutlery placed together, parallel across the plate, means the guest is finished. That is your cue to clear in the next natural lull.' },
+      { q: 'What is the correct way to handle glassware?', options: ['By the bowl, for a secure grip.', 'By the stem or base, never the bowl, to avoid clouding the glass and warming the wine.', 'By the rim, lifting cleanly from the top.', 'However is fastest during a busy service.'], correct: 1, explain: 'Glasses are held by the stem or base. A warm hand on the bowl clouds the glass and warms the wine, and fingers on the rim leave prints.' },
+      { q: 'Why does the lesson call the place setting "a language"?', options: ['Because each piece is labelled for the guest.', 'Because it guides the guest through the meal and tells you, through cutlery position, exactly where they are in it.', 'Because guests are expected to memorise it beforehand.', 'Because the arrangement changes nightly to signal the menu.'], correct: 1, explain: 'The setting works both ways: it maps the meal for the guest and signals their progress back to you. Your job is to be fluent so the guest never has to be.' },
+    ],
+  },
+];
+
 export const CURRICULUM: Module[] = [
   // Module 0
   {
@@ -1992,6 +2153,20 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 200,
     lessons: fineDiningPresenceLessons,
+  },
+  // Fine Dining Phase 1 — Module 3
+  {
+    id: 'fine-dining-etiquette',
+    title: 'Fine Dining Etiquette',
+    subtitle: 'The rules of the table — know them, own them, never break them.',
+    iconName: 'BookOpen',
+    color: '#1B4332',
+    progress: 0,
+    totalLessons: 4,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 200,
+    lessons: fineDiningEtiquetteLessons,
   },
   // Phase 1 Certification (placeholder) — always the final item in the grid.
   {
