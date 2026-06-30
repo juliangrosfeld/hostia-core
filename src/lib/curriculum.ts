@@ -2146,6 +2146,155 @@ const fineDiningTableSetupLessons: Lesson[] = [
   },
 ];
 
+// ─── FINE DINING PHASE 1 · MODULE 5: ANTICIPATORY SERVICE ────
+
+const fineDiningAnticipatoryLessons: Lesson[] = [
+  {
+    id: 'fda-reading-table',
+    title: 'Reading the Table',
+    desc: 'Guests tell you what they need without saying a word. Learn to read it.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-reading',
+    learn: [
+      { type: 'intro', text: 'The best fine dining staff seem to read minds. A guest looks up, and you are already there. The water is poured before the glass runs dry. But it is not magic — it is reading. Guests are always telling you what they need, even when they say nothing. They tell you with their eyes, their hands, and the small things they do at the table. Your job is to learn this quiet language and act on it before the guest has to ask.' },
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'A guest should almost never have to ask you for anything. When they do, you read the table too late.' },
+      { type: 'steps', title: 'The 15-second scan', items: [
+        { num: 1, title: 'Make the scan a habit', body: 'Every time you pass through your section, take fifteen seconds to read it. Not a quick glance — a real look. Check every glass, every plate, every face. Do this on every single pass, until it becomes automatic and you no longer have to think about it.', badge: 'Habit' },
+        { num: 2, title: 'Read the eyes', body: 'A guest looking around the room is searching for you. A guest looking down and relaxed is happy and content. Catch the searching look fast — meet it with a small nod so they know you are coming, then go to them.', badge: 'Eyes' },
+        { num: 3, title: 'Read the hands and the plate', body: 'Cutlery placed together means finished. A hand resting near an empty glass means thirsty. A guest folding their napkin and sitting back is often ready to move on. The table shows you, if you watch for it.', badge: 'Hands' },
+        { num: 4, title: 'Read the mood', body: 'Is the table leaning in and laughing, or quiet and serious? A lively table wants energy and may want to stay longer. A quiet table wants calm and space. Match your service to the mood you see in front of you.', badge: 'Mood' },
+      ]},
+      { type: 'principles', items: [
+        { num: 1, title: 'Comfort comes first', body: 'Water, bread, the room temperature, a clear menu. These are the basics. A guest cannot enjoy anything else until these are right, so you handle them first, fast, and without being asked.' },
+        { num: 2, title: 'Then clarity', body: 'A guest who is unsure what to order, or how the menu works, feels uneasy. Notice the puzzled look at the menu and offer gentle help before they have to ask for it.' },
+        { num: 3, title: 'Then pace', body: 'Once the food is flowing, the main need becomes timing — the right gap between courses, the glass topped up, the table cleared. This is the longest part of the meal to read, and the most important.' },
+        { num: 4, title: 'Then the close', body: 'Near the end, watch for the signs that the meal is winding down. A guest who is ready for the bill should never have to hunt for you to get it.' },
+      ]},
+      { type: 'callout', tone: 'tip', label: 'Every table has its own rhythm', text: 'A couple on a date, a group of friends, a business lunch, a family with children — each one moves at a different speed and wants a different kind of attention. Read which kind of table you have early in the meal, and serve its rhythm, not your own.' },
+    ],
+    quiz: [
+      { q: 'What is the 15-second scan?', options: ['A quick glance at your phone between tables.', 'A real, careful look at your whole section — every glass, plate, and face — on every single pass through it.', 'A check you do once at the start of service.', 'A timed sweep to see which tables have ordered.'], correct: 1, explain: 'The scan is a real look — not a glance — at every glass, plate, and face, done every time you pass through your section, until it becomes automatic.' },
+      { q: 'A guest is looking around the room. What does it mean, and what do you do?', options: ['They are bored — bring the bill.', 'They are searching for you — meet their eye with a small nod so they know you are coming, then go to them.', 'They are admiring the room — leave them be.', 'Nothing — wait until they raise a hand.'], correct: 1, explain: 'A guest looking around is searching for you. Catch it fast, acknowledge them with a small nod so they feel seen, and go to them.' },
+      { q: 'In the order that needs come in, what do you handle first?', options: ['The bill, so the table is ready to turn.', 'Comfort — water, bread, temperature, a clear menu — before anything else.', 'The wine recommendation.', 'A personal conversation to build rapport.'], correct: 1, explain: 'Comfort comes first. A guest cannot enjoy anything else until the basics are right, so you handle water, bread, temperature, and a clear menu first, without being asked.' },
+      { q: 'A guest has placed their knife and fork together on the plate. What is this telling you?', options: ['They want more of the dish.', 'They are finished — clear the plate in the next natural pause.', 'They are unhappy with the food.', 'They are pausing and will eat more.'], correct: 1, explain: 'Cutlery placed together means finished. The table is showing you it is ready to move on — clear quietly in the next natural pause.' },
+      { q: 'Why does the lesson say every table has its own rhythm?', options: ['Because all tables should be served at the same speed.', 'Because a couple, a group of friends, a business lunch, and a family each move at a different speed and want a different kind of attention.', 'Because the kitchen sets the pace for every table.', 'Because rhythm only matters for large groups.'], correct: 1, explain: 'Each type of table moves differently and wants a different kind of attention. Read which kind of table you have early, and serve its rhythm, not your own.' },
+    ],
+  },
+  {
+    id: 'fda-pacing',
+    title: 'Pacing the Meal',
+    desc: 'The right pace belongs to the table — your job is to read it and protect it.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-pacing',
+    learn: [
+      { type: 'intro', text: 'Pace is the heartbeat of a meal. Get it right and the evening flows — each course arrives at the moment the guest is ready for it, with just enough space to breathe in between. Get it wrong and even perfect food feels off. A course that comes too fast makes a guest feel rushed. One that comes too slow makes them feel forgotten. Reading and controlling pace is one of the hardest skills in fine dining, because the right pace is never fixed. It belongs to the table, and you have to read it from them.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Watch the plates, not the clock', body: 'A table is ready for the next course when they are nearly finished — not when a set number of minutes has passed. Read the plates and the speed of eating, and let that tell you when to send the next course to the kitchen.' },
+        { num: 2, title: 'Read the energy', body: 'A table deep in conversation is not ready to be moved on, even if their plates are clear. A table that has gone quiet and is glancing around may be ready for more. The energy tells you as much as the plates do.' },
+        { num: 3, title: 'Leave room to breathe', body: 'Between courses, a guest needs a short pause — to talk, to rest, to finish their wine. Never let the next plate land the second the last one is cleared. The gap is part of the meal, not wasted time.' },
+        { num: 4, title: 'You control the timing', body: 'You are the link between the table and the kitchen. When you read that a table needs to slow down or speed up, you tell the kitchen to hold or send the next course. The pace is yours to manage, not the kitchen\'s to guess.' },
+      ]},
+      { type: 'callout', tone: 'warn', label: 'Never rush a table', text: 'A rushed guest feels it at once, even when nothing is said. Clearing too fast, hovering for the next order, bringing the bill before it is wanted — these all tell a guest that their table is needed back. In fine dining, a guest should always feel the evening is theirs for as long as they want it. Slow the pace down sooner than you speed it up.' },
+      { type: 'steps', title: 'The natural transition moments', items: [
+        { num: 1, title: 'The clear', body: 'When the last guest at the table sets their cutlery together, the course is finished. Clear quietly in the next natural pause. This is the first sign that the meal is ready to move forward.', badge: 'Clear' },
+        { num: 2, title: 'The reset', body: 'Between courses, reset the table for what comes next: the right cutlery, a crumb-down if needed, glasses topped up. This quiet work bridges one course to the next without the guest noticing.', badge: 'Reset' },
+        { num: 3, title: 'The check-in', body: 'A short, well-timed word — "May I bring your next course?" — lets you confirm the pace without rushing the table. Use it when you are unsure, not as a habit on every table.', badge: 'Confirm' },
+        { num: 4, title: 'The wind-down', body: 'As the meal nears its end — coffee, dessert, the last of the wine — let the pace soften. This is the table\'s time to linger, and your job is to be present but unhurried.', badge: 'Close' },
+      ]},
+      { type: 'tip-list', title: 'Five pacing habits to build now', items: [
+        'Read the plates, not your watch — the table decides when it is ready, not the clock.',
+        'Always leave a breathing gap between courses — never let plates land back to back.',
+        'When a table slows down, hold the kitchen; when they pick up, let the next course go.',
+        'When you are unsure of the pace, a short "May I bring your next course?" settles it.',
+        'Slow the pace down sooner than you speed it up — a rushed guest feels it at once.',
+      ]},
+    ],
+    quiz: [
+      { q: 'How do you know a table is ready for the next course?', options: ['When a set number of minutes has passed.', 'When they are nearly finished and the energy is right — you read the plates and the table, not the clock.', 'When the kitchen tells you the dish is ready.', 'When the table is the last one left in your section.'], correct: 1, explain: 'A table is ready when they are nearly finished, not when the clock says so. Read the plates and the energy of the table, and let that set the pace.' },
+      { q: 'Why should you leave a gap between courses?', options: ['To give yourself time to rest.', 'Because a guest needs a short pause to talk, rest, and finish their wine — the gap is part of the meal, not wasted time.', 'To make the kitchen\'s job easier.', 'There is no reason — the next course should come right away.'], correct: 1, explain: 'The gap lets the guest breathe, talk, and finish their wine. It is part of the meal — never let the next plate land the second the last one is cleared.' },
+      { q: 'Who controls the timing of the courses?', options: ['The kitchen, who send food when it is ready.', 'You — you read the table and tell the kitchen when to hold or send the next course.', 'The guest, who must ask for each course.', 'No one — the courses come on a fixed schedule.'], correct: 1, explain: 'You are the link between the table and the kitchen. The pace is yours to manage — you tell the kitchen when to hold and when to send, based on what you read from the table.' },
+      { q: 'A guest feels rushed even though they have not said anything. What likely caused it?', options: ['The food was too good.', 'Clearing too fast, hovering for the next order, or bringing the bill before it was wanted.', 'The room was too quiet.', 'They were given too much time between courses.'], correct: 1, explain: 'A rushed guest feels it without a word being said. Clearing too fast, hovering, or bringing the bill early all signal that their table is needed back. Slow down sooner than you speed up.' },
+      { q: 'When should you use a check-in line like "May I bring your next course?"', options: ['On every table, after every course.', 'When you are genuinely unsure of the pace — to confirm without rushing the table.', 'Never — you should always guess the pace silently.', 'Only when the kitchen is behind.'], correct: 1, explain: 'A short check-in confirms the pace without rushing the table. Use it when you are unsure, not as a habit on every course.' },
+    ],
+  },
+  {
+    id: 'fda-personal',
+    title: 'Personal Touches & Guest Memory',
+    desc: 'Anyone can serve a guest. A great server makes the guest feel known.',
+    duration: '7 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-personal',
+    learn: [
+      { type: 'callout', tone: 'rule', label: 'The Standard', text: 'Anyone can serve a guest. A great server makes the guest feel known. The difference is memory and attention to the small, personal things.' },
+      { type: 'intro', text: 'Two restaurants can serve the same dish on the same plate. What a guest remembers is whether they felt like a person or a number. The small personal touches are what make the difference — using a name with care, remembering that one guest is having the fish, noticing it is a special night and treating it as one. None of this is on the menu. It is the part of fine dining that turns a good meal into a memory, and it costs nothing but attention.' },
+      { type: 'principles', items: [
+        { num: 1, title: 'Use the name with care', body: 'If you know a guest\'s name, use it — but lightly, and at the right moments. A warm "Welcome back, Mr. Lewis" lands well. Using a name in every sentence feels forced. The goal is warmth, not a performance.' },
+        { num: 2, title: 'Remember the small things', body: 'Who ordered the sparkling water. Who cannot eat nuts. Who wanted their steak well done. Hold these in your head through the meal so the guest never has to repeat themselves. Being remembered feels like being cared for.' },
+        { num: 3, title: 'Treat an occasion as an occasion', body: 'A birthday, an anniversary, a celebration — when a guest shares one, mark it warmly. A quiet word, a small gesture from the house, a "congratulations" that feels real. These are the moments a guest will talk about later.' },
+        { num: 4, title: 'Check the dietary notes every course', body: 'An allergy or dietary need is not a one-time note. Carry it with you through every course, every plate, every drink. One missed detail can turn a special evening into a frightening one.' },
+      ]},
+      { type: 'do-dont', title: 'Using a name and a personal touch well', items: [
+        { do: 'Greet a returning guest warmly by name as they arrive.', dont: 'Repeat the guest\'s name in every single sentence until it feels forced.' },
+        { do: 'Remember who ordered what and serve each plate to the right guest without asking.', dont: 'Arrive with the plates and ask "who had the fish?" across the table.' },
+        { do: 'Mark a guest\'s special occasion with a warm, genuine word or gesture.', dont: 'Ignore an anniversary the guest mentioned, or treat the night like any other.' },
+        { do: 'Carry a guest\'s allergy in your mind through every course you serve them.', dont: 'Note an allergy once at the start, then forget it by the main course.' },
+      ]},
+      { type: 'tip-list', title: 'Five memory habits to build now', items: [
+        'Use a guest\'s name warmly, but only at the right moments — never in every sentence.',
+        'Lock in who ordered what, so every plate goes to the right guest without a word.',
+        'When a guest mentions a special occasion, hold it and mark it before they leave.',
+        'Carry every dietary note with you, course by course — never just at the start.',
+        'Notice the small preferences during the meal, and act on them next time without being asked.',
+      ]},
+    ],
+    quiz: [
+      { q: 'How should you use a guest\'s name?', options: ['In every sentence, so they know you remember it.', 'Warmly and lightly, at the right moments — the goal is warmth, not a performance.', 'Never — it is too informal for fine dining.', 'Only when presenting the bill.'], correct: 1, explain: 'Use the name with care — a warm "Welcome back, Mr. Lewis" lands well, but a name in every sentence feels forced. The goal is warmth, not a performance.' },
+      { q: 'The plates are ready to go to a table of four. What does the standard ask of you?', options: ['Carry them out and ask "who had the fish?" at the table.', 'Remember who ordered what, and serve each plate to the right guest without asking.', 'Put all the plates in the middle for guests to sort out.', 'Ask the kitchen to label each plate.'], correct: 1, explain: 'Remembering who ordered what, and serving each plate to the right guest without asking, is a small touch that makes a guest feel cared for.' },
+      { q: 'A returning guest mentioned on a past visit that tonight is their anniversary. What do you do?', options: ['Nothing — it is not your place to bring it up.', 'Mark it warmly — a genuine word, a small gesture, a real "congratulations."', 'Mention it loudly so the whole room joins in.', 'Wait for them to bring it up again first.'], correct: 1, explain: 'When a guest shares an occasion, mark it warmly with a genuine word or gesture. These are exactly the moments a guest remembers and talks about later.' },
+      { q: 'How often should you keep a guest\'s allergy in mind?', options: ['Just once, when they first mention it.', 'Through every course, every plate, and every drink — it is not a one-time note.', 'Only for the main course.', 'Only if the kitchen reminds you.'], correct: 1, explain: 'An allergy is not a one-time note. Carry it with you through every course and every plate — one missed detail can turn a special evening into a frightening one.' },
+      { q: 'What turns a good meal into a memory?', options: ['Expensive ingredients and a large menu.', 'The small personal touches — being remembered, feeling known, having an occasion marked.', 'The speed of the service.', 'The size of the dining room.'], correct: 1, explain: 'Two restaurants can serve the same dish. What a guest remembers is feeling like a person, not a number — and that comes from the small personal touches and memory.' },
+    ],
+  },
+  {
+    id: 'fda-recovery',
+    title: 'Proactive Recovery',
+    desc: 'The best recovery is the one the guest never knows happened.',
+    duration: '8 min',
+    xp: 50,
+    status: 'available',
+    scenarioId: 'fine-dining-recovery',
+    learn: [
+      { type: 'intro', text: 'The best recovery is the one the guest never knows happened. Things go wrong in every service — a dish comes out wrong, a course runs late, a guest is quietly unhappy. The weak server waits until the guest complains, then apologizes. The fine dining professional catches the problem first, often before the guest has fully noticed it, and fixes it so smoothly that the evening is never disturbed. This is the highest form of anticipation: reading not just what a guest needs, but what is about to go wrong — and getting there first.' },
+      { type: 'callout', tone: 'rule', label: 'The golden rule of recovery', text: 'When something goes wrong, the goal is not just to fix it. It is to leave the guest feeling better than if nothing had gone wrong at all. A problem caught early and handled with grace can become the moment a guest remembers most warmly.' },
+      { type: 'steps', title: 'Catching it early — the warning signs', items: [
+        { num: 1, title: 'The unhappy face', body: 'A guest who takes one bite and sets the fork down. A small frown at a plate. A quiet look between two guests after the food arrives. These are the early signs that something is not right — long before a word is said.', badge: 'Watch' },
+        { num: 2, title: 'Step in gently', body: 'When you see a sign, go over quietly and check: "How are you finding everything?" Ask it warmly, not anxiously. This opens the door for the guest to tell you, without turning it into a complaint.', badge: 'Check' },
+        { num: 3, title: 'Catch the kitchen mistake first', body: 'Before a plate leaves your hand, look at it. Wrong dish, wrong temperature, a missing side, an allergy ignored — catch it at the pass, not at the table. The best recovery is the one that never reaches the guest.', badge: 'Intercept' },
+        { num: 4, title: 'Fix it quietly', body: 'When something does go wrong, fix it calmly and without fuss. No panic, no long apology, no blaming the kitchen. Take it away, make it right, and keep the guest comfortable the whole time.', badge: 'Recover' },
+      ]},
+      { type: 'do-dont', title: 'In practice', items: [
+        { do: 'Notice a guest set down their fork after one bite and check in gently.', dont: 'Wait until the guest flags you down to say the dish is wrong.' },
+        { do: 'Check every plate before it leaves your hand for the table.', dont: 'Carry a plate out without looking, and find the mistake at the table.' },
+        { do: 'Fix a wrong dish calmly — take it away and make it right at once.', dont: 'Argue, make excuses, or explain how the kitchen made the error.' },
+        { do: 'After a problem, give the guest a little extra care for the rest of the meal.', dont: 'Fix the issue, then act as if the guest should be grateful it is over.' },
+      ]},
+      { type: 'callout', tone: 'tip', label: 'The quiet save', text: 'Most problems can be solved before they grow, if you catch them in the first few seconds. A wrong plate spotted at the pass, a frown noticed across the room, a late course you warn the table about before they start to wonder — these small, early saves are invisible to the guest, and they are the real work of recovery.' },
+    ],
+    quiz: [
+      { q: 'What is the golden rule of recovery?', options: ['Fix the problem as fast as possible and move on.', 'Leave the guest feeling better than if nothing had gone wrong at all.', 'Always offer a discount when something goes wrong.', 'Explain exactly what went wrong so the guest understands.'], correct: 1, explain: 'The goal is not just to fix the problem — it is to leave the guest feeling better than if nothing had gone wrong. Handled with grace, a problem can become a warm memory.' },
+      { q: 'A guest takes one bite, frowns, and sets the fork down. What do you do?', options: ['Wait until they call you over to complain.', 'Step in gently and ask warmly, "How are you finding everything?"', 'Ignore it — they may just be pausing.', 'Take the plate away without asking.'], correct: 1, explain: 'A bite set down and a small frown are early warning signs. Step in gently and check warmly — this opens the door for the guest to tell you, without making it a complaint.' },
+      { q: 'Where is the best place to catch a kitchen mistake?', options: ['At the table, after the guest points it out.', 'At the pass, before the plate ever leaves your hand for the table.', 'After the meal, in the debrief.', 'It does not matter where you catch it.'], correct: 1, explain: 'Check every plate before it leaves your hand. Catching a wrong dish or temperature at the pass means the best recovery of all — the one that never reaches the guest.' },
+      { q: 'A dish comes out wrong and the guest has noticed. How do you fix it?', options: ['Explain how the kitchen made the mistake.', 'Fix it calmly and without fuss — take it away, make it right, and keep the guest comfortable.', 'Apologize at length so they know you are sorry.', 'Offer a free dessert before doing anything else.'], correct: 1, explain: 'Fix it calmly — no panic, no long apology, no blaming the kitchen. Take it away, make it right, and keep the guest comfortable the whole time.' },
+      { q: 'What is the difference between proactive and reactive recovery?', options: ['Proactive is slower; reactive is faster.', 'Proactive catches the problem early, often before the guest fully notices; reactive waits for the complaint, then apologizes.', 'There is no real difference.', 'Proactive is only for regulars.'], correct: 1, explain: 'Reactive recovery waits for the guest to complain. Proactive recovery reads what is about to go wrong and gets there first — fixing it so smoothly the evening is never disturbed.' },
+    ],
+  },
+];
+
 export const CURRICULUM: Module[] = [
   // Module 0
   {
@@ -2332,6 +2481,20 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 200,
     lessons: fineDiningTableSetupLessons,
+  },
+  // Fine Dining Phase 1 — Module 5
+  {
+    id: 'fine-dining-anticipatory',
+    title: 'Anticipatory Service',
+    subtitle: 'The highest skill in fine dining — knowing what guests need before they do.',
+    iconName: 'Eye',
+    color: '#3D1A0E',
+    progress: 0,
+    totalLessons: 4,
+    completedLessons: 0,
+    available: true,
+    xpTotal: 200,
+    lessons: fineDiningAnticipatoryLessons,
   },
   // Phase 1 Certification (placeholder) — always the final item in the grid.
   {
