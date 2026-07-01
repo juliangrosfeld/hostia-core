@@ -79,6 +79,33 @@ export interface Phase {
   order_index: number;
 }
 
+// Curated topic labels shown as pills on the "Your Journey" phase cards.
+// Future/locked phases have no modules assigned in the database (only Phase 1
+// does, on every track), so pills can't be derived from module titles — these
+// short labels stand in as a preview of what each future phase covers. Keyed by
+// track, then phase_number. Phase 1 is intentionally omitted: it renders as the
+// current-phase header with its real, clickable module cards, not as a pill card.
+export const PHASE_TOPICS: Record<Phase['track'], Record<number, string[]>> = {
+  'fast-casual': {
+    2: ['Counter service flow', 'Guest interactions', 'Operational rhythm', 'Handling the rush', 'Team coordination'],
+    3: ['Speed under pressure', 'Order accuracy', 'Consistency every shift', 'Multitasking', 'Recovering from mistakes'],
+    4: ['Upselling at the register', 'Suggestive selling', 'Product knowledge', 'Reading the guest', 'Driving throughput'],
+  },
+  'casual-dining': {
+    2: ['Service flow', 'Busy floor rhythm', 'Multitasking', 'Table management', 'Operational consistency'],
+    3: ['Warm personal service', 'Building loyalty', 'Repeat guests', 'Remembering regulars', 'Memorable moments'],
+    4: ['Suggestive selling', 'Product knowledge', 'Elevated experience', 'Reading buying signals', 'Driving revenue'],
+    5: ['Leadership mindset', 'Mentoring new staff', 'Upholding standards', 'Taking initiative', 'Running the floor'],
+  },
+  'fine-dining': {
+    2: ['Flawless execution', 'Consistency every service', 'Attention to detail', 'Service precision', 'Grace under pressure'],
+    3: ['Anticipating needs', 'Personalized service', 'Memorable experiences', 'Reading the table', 'Exceeding expectations'],
+    4: ['Menu mastery', 'Wine knowledge', 'Beverage pairings', 'Guiding with authority', 'Confident recommendations'],
+    5: ['Discretion', 'Intuition', 'Elegance', 'Luxury standards', 'Refined guest care'],
+    6: ['Leading by example', 'Mentoring the team', 'Highest standards', 'Conflict resolution', 'Senior responsibility'],
+  },
+};
+
 // ─── MODULE 0: ONBOARDING — WELCOME TO [PROPERTY] ────────────
 
 const onboardingLessons: Lesson[] = [

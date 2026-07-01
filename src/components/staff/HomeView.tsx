@@ -4,7 +4,7 @@ import { Play, Lock, Trophy as TrophyIcon, CheckCircle2, Zap, Flame } from 'luci
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, UtensilsCrossed, Trophy, Eye, Star,
 } from 'lucide-react';
-import type { Module } from '@/lib/curriculum';
+import { PHASE_TOPICS, type Module } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
 import type { PropertyProfile } from '@/lib/useUser';
 import type { PhaseData, ResolvedModule } from '@/lib/useCurriculum';
@@ -361,7 +361,9 @@ function PhaseCurriculum({
             Your Journey
           </h3>
           <div className="journey-grid">
-            {future.map((g) => (
+            {future.map((g) => {
+              const topics = PHASE_TOPICS[g.phase.track]?.[g.phase.phase_number] ?? [];
+              return (
               <div key={g.phase.id} className="journey-card" style={{ opacity: 0.5 }}>
                 <div className="journey-band" style={{ background: 'var(--ink-soft)' }} />
                 <div className="journey-card-body">
@@ -382,16 +384,17 @@ function PhaseCurriculum({
                   <div className="journey-level">→ {g.phase.certification_title}</div>
                   <p className="journey-desc">{g.phase.goal}</p>
 
-                  {g.modules.length > 0 && (
+                  {topics.length > 0 && (
                     <div className="journey-topics">
-                      {g.modules.map((m) => (
-                        <span key={m.id} className="journey-topic-chip">{m.title}</span>
+                      {topics.map((t) => (
+                        <span key={t} className="journey-topic-chip">{t}</span>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
