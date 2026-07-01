@@ -464,13 +464,8 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
         {/* Hero banner */}
         <div className="hero-banner">
           <div className="hero-content">
-            {property?.logo_url && (
-              <img
-                src={property.logo_url}
-                alt={property.name ?? 'Logo'}
-                style={{ height: 32, width: 'auto', objectFit: 'contain', marginBottom: 16 }}
-              />
-            )}
+            {/* Property logo intentionally not rendered for now (still saved in
+                the DB via the admin upload — just hidden in the UI). */}
             <div className="hero-eyebrow">Welcome back, {firstName}</div>
             <h1 className="display hero-title">
               Make every table remember this place.
