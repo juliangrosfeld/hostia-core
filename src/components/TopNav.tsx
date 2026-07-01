@@ -32,13 +32,15 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
       <div className="top-nav">
         <div className="top-nav-inner">
 
-          {/* Left: property logo (falls back to Hostia) + BY GLAD AI */}
+          {/* Left: property logo (only when set) + BY GLAD AI */}
           <Link href={canManage ? '/manager' : '/staff'} className="brand" style={{ textDecoration: 'none' }}>
-            <img
-              src={property?.logoUrl || '/hostia-logo.png'}
-              alt={property?.logoUrl ? propertyName : 'Hostia'}
-              style={{ height: 32, width: 'auto', objectFit: 'contain' }}
-            />
+            {property?.logoUrl && (
+              <img
+                src={property.logoUrl}
+                alt={propertyName}
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+              />
+            )}
             <span className="brand-tag">BY GLAD AI</span>
           </Link>
 

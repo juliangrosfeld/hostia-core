@@ -464,11 +464,13 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
         {/* Hero banner */}
         <div className="hero-banner">
           <div className="hero-content">
-            <img
-              src={property?.logo_url || '/hostia-logo.png'}
-              alt={property?.logo_url ? (property.name ?? 'Logo') : 'Hostia'}
-              style={{ height: 32, width: 'auto', objectFit: 'contain', marginBottom: 16 }}
-            />
+            {property?.logo_url && (
+              <img
+                src={property.logo_url}
+                alt={property.name ?? 'Logo'}
+                style={{ height: 32, width: 'auto', objectFit: 'contain', marginBottom: 16 }}
+              />
+            )}
             <div className="hero-eyebrow">Welcome back, {firstName}</div>
             <h1 className="display hero-title">
               Make every table remember this place.
@@ -522,8 +524,8 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
           </div>
         </div>
 
-        {/* Gold standard quote */}
-        <div style={{ margin: '32px 0', padding: '20px 28px', background: 'var(--ocean-deep)', borderRadius: 16 }}>
+        {/* Gold standard quote — brand-colored background, matching the hero */}
+        <div style={{ margin: '32px 0', padding: '20px 28px', background: 'linear-gradient(135deg, var(--brand-color, #1B2B4B) 0%, color-mix(in srgb, var(--brand-color, #1B2B4B) 62%, #000) 100%)', borderRadius: 16 }}>
           <div className="label-mono" style={{ color: 'var(--brand)', marginBottom: 8 }}>
             {PROPERTY.name} standard
           </div>
