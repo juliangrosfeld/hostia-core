@@ -32,9 +32,15 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
       <div className="top-nav">
         <div className="top-nav-inner">
 
-          {/* Left: BY GLAD AI. Property logo intentionally not rendered for now
-              (still saved in the DB via the admin upload — just hidden here). */}
+          {/* Left: property logo (only when set) + BY GLAD AI */}
           <Link href={canManage ? '/manager' : '/staff'} className="brand" style={{ textDecoration: 'none' }}>
+            {property?.logoUrl && (
+              <img
+                src={property.logoUrl}
+                alt={propertyName}
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+              />
+            )}
             <span className="brand-tag">BY GLAD AI</span>
           </Link>
 
