@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import {
   Bell, Activity, Users, GraduationCap, Award,
   TrendingUp, TrendingDown, AlertTriangle, Star, AlertCircle,
-  Check, Play, MessageSquare, Plus, Pencil, X, Trash2,
+  Check, Play, MessageSquare, Plus, Pencil, X, Trash2, Loader2,
 } from 'lucide-react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
@@ -268,6 +268,128 @@ function PhaseDistribution({
 
 // ─── Main dashboard ──────────────────────────────────────────
 
+// ── Delete-staff confirmation modal ───────────────────────────────────────────
+// Typed confirmation gate: the "Remove Staff Member" button stays disabled until
+// the manager types the staff member's name (case-insensitive). ESC / backdrop
+// click cancel unless a delete is in flight. onConfirm returns true on success
+// (parent unmounts) or false on failure (modal stays open to retry).
+function DeleteStaffModal({
+  staffName,
+  propertyName,
+  onCancel,
+  onConfirm,
+}: {
+  staffName: string;
+  propertyName: string;
+  onCancel: () => void;
+  onConfirm: () => Promise<boolean>;
+}) {
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !busy) onCancel(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [busy, onCancel]);
+
+  const matches = text.trim().toLowerCase() === staffName.trim().toLowerCase();
+
+  async function handleConfirm() {
+    if (!matches || busy) return;
+    setBusy(true);
+    const ok = await onConfirm();
+    if (!ok) setBusy(false);
+  }
+
+  return (
+    <div
+      onClick={() => { if (!busy) onCancel(); }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(17,17,17,0.55)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: 'var(--sand)', borderRadius: 20, padding: 32,
+          width: '100%', maxWidth: 440,
+          border: '1.5px solid var(--coral-deep)',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.2)', animation: 'slideIn 0.2s ease',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: '50%',
+            background: 'rgba(224,122,95,0.12)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 16px',
+          }}>
+            <Trash2 size={22} color="var(--coral-deep)" />
+          </div>
+          <h3 style={{ fontSize: 19, fontWeight: 800, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
+            Remove {staffName} from {propertyName}?
+          </h3>
+          <p style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--ink-soft)', margin: 0 }}>
+            This will permanently delete <strong style={{ color: 'var(--ink)' }}>{staffName}</strong>&apos;s
+            account and all their training data — lessons, roleplays, progress. This cannot be undone.
+          </p>
+        </div>
+
+        <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 8 }}>
+          Type their name to confirm:
+        </label>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={staffName}
+          autoFocus
+          disabled={busy}
+          style={{
+            width: '100%', border: '1px solid var(--sand-deeper)', borderRadius: 10,
+            padding: '11px 14px', fontSize: 15, fontFamily: 'inherit',
+            color: 'var(--ink)', outline: 'none', background: 'white', marginBottom: 22,
+          }}
+        />
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={() => { if (!busy) onCancel(); }}
+            disabled={busy}
+            style={{
+              flex: 1, padding: '11px 18px', borderRadius: 10,
+              border: '1px solid var(--sand-deeper)', background: 'white',
+              color: 'var(--ink)', fontSize: 14, fontWeight: 700,
+              fontFamily: 'inherit', cursor: busy ? 'default' : 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={!matches || busy}
+            style={{
+              flex: 1, display: 'inline-flex', alignItems: 'center',
+              justifyContent: 'center', gap: 7,
+              padding: '11px 18px', borderRadius: 10, border: 'none',
+              background: 'var(--coral-deep)', color: 'white',
+              fontSize: 14, fontWeight: 800, fontFamily: 'inherit',
+              cursor: !matches || busy ? 'default' : 'pointer',
+              opacity: !matches || busy ? 0.5 : 1,
+            }}
+          >
+            {busy && <Loader2 size={15} className="animate-spin" />}
+            {busy ? 'Removing…' : 'Remove Staff Member'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface ManagerDashboardProps {
   onOpenStaff: (s: StaffMember) => void;
 }
@@ -336,6 +458,34 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Permanent staff deletion (real properties only).
+  const [deleteStaffTarget, setDeleteStaffTarget] = useState<StaffMember | null>(null);
+  const [toast, setToast] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null);
+  const showToast = (tone: 'ok' | 'err', text: string) => {
+    setToast({ tone, text });
+    setTimeout(() => setToast(null), tone === 'ok' ? 3000 : 5000);
+  };
+
+  async function handleDeleteStaff(): Promise<boolean> {
+    const target = deleteStaffTarget;
+    if (!target) return false;
+    try {
+      const res = await fetch(`/api/manager/staff/${target.id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) {
+        showToast('err', data.error || 'Failed to remove staff member');
+        return false;
+      }
+      setStaffList((prev) => prev.filter((s) => s.id !== target.id));
+      showToast('ok', `${target.name} removed`);
+      setDeleteStaffTarget(null);
+      return true;
+    } catch {
+      showToast('err', 'Network error — please try again');
+      return false;
+    }
+  }
 
   // ── CRUD actions ─────────────────────────────────────────
   const openAdd = () => {
@@ -785,7 +935,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             <div style={{ flex: 1.2 }}>Progress</div>
             <div style={{ width: 110 }}>Last active</div>
             <div style={{ width: 80 }}>Status</div>
-            <div style={{ width: 64 }} />
+            <div style={{ width: 96 }} />
           </div>
           {filtered.map((s) => (
             <StaffRow
@@ -793,6 +943,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
               staff={s}
               onClick={() => onOpenStaff(s)}
               onEdit={() => openEdit(s)}
+              onDelete={isReal ? () => setDeleteStaffTarget(s) : undefined}
             />
           ))}
           {filtered.length === 0 && (
@@ -1073,6 +1224,35 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
               </>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ─ Delete staff confirmation modal ─ */}
+      {deleteStaffTarget && (
+        <DeleteStaffModal
+          staffName={deleteStaffTarget.name}
+          propertyName={propertyName}
+          onCancel={() => setDeleteStaffTarget(null)}
+          onConfirm={handleDeleteStaff}
+        />
+      )}
+
+      {/* ─ Floating toast ─ */}
+      {toast && (
+        <div
+          style={{
+            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 1100, display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '12px 18px', borderRadius: 12,
+            background: 'white',
+            border: `1px solid ${toast.tone === 'ok' ? 'var(--sage-deep)' : 'var(--coral-deep)'}`,
+            boxShadow: '0 16px 40px rgba(0,0,0,0.18)',
+            fontSize: 14, fontWeight: 700,
+            color: toast.tone === 'ok' ? 'var(--sage-deep)' : 'var(--coral-deep)',
+          }}
+        >
+          {toast.tone === 'ok' ? <Check size={16} /> : <AlertCircle size={16} />}
+          {toast.text}
         </div>
       )}
     </div>

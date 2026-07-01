@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Check, AlertCircle, Save, Plus, Trash2, Loader2,
@@ -86,6 +86,141 @@ const sectionSubStyle: React.CSSProperties = {
   color: 'var(--ink-soft)',
 }
 
+// Unambiguous destructive red for delete surfaces.
+const DANGER_RED = '#d64545'
+
+// Reusable "type to confirm" deletion modal. The destructive button stays
+// disabled until the typed text matches `expected`. ESC and backdrop click
+// cancel (unless a delete is in flight). onConfirm does the actual work and
+// returns true on success (parent unmounts the modal) or false on failure
+// (modal stays open so the user can retry).
+function ConfirmDeleteModal({
+  title,
+  warning,
+  inputLabel,
+  placeholder,
+  expected,
+  caseInsensitive = false,
+  confirmLabel,
+  onCancel,
+  onConfirm,
+}: {
+  title: string
+  warning: React.ReactNode
+  inputLabel: string
+  placeholder: string
+  expected: string
+  caseInsensitive?: boolean
+  confirmLabel: string
+  onCancel: () => void
+  onConfirm: () => Promise<boolean>
+}) {
+  const [text, setText] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !busy) onCancel()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [busy, onCancel])
+
+  const matches = caseInsensitive
+    ? text.trim().toLowerCase() === expected.trim().toLowerCase()
+    : text === expected
+
+  async function handleConfirm() {
+    if (!matches || busy) return
+    setBusy(true)
+    const ok = await onConfirm()
+    if (!ok) setBusy(false)
+  }
+
+  return (
+    <div
+      onClick={() => { if (!busy) onCancel() }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 60,
+        background: 'rgba(5,25,86,0.32)', backdropFilter: 'blur(2px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 460, background: 'white',
+          borderRadius: 18, border: `1px solid ${DANGER_RED}`,
+          boxShadow: '0 24px 60px -20px rgba(5,25,86,0.45)', padding: 28,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+          <h2 style={{ ...sectionTitleStyle, color: DANGER_RED }}>{title}</h2>
+          <button
+            onClick={() => { if (!busy) onCancel() }}
+            title="Close"
+            disabled={busy}
+            style={{
+              flexShrink: 0, width: 32, height: 32, borderRadius: 8,
+              border: '1px solid var(--sand-deeper)', background: 'white',
+              color: 'var(--ink-soft)', cursor: busy ? 'default' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <p style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--ink)', margin: '0 0 20px' }}>
+          {warning}
+        </p>
+
+        <label style={labelStyle}>{inputLabel}</label>
+        <input
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={placeholder}
+          autoFocus
+          disabled={busy}
+          style={{ ...inputStyle, marginBottom: 20 }}
+        />
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={() => { if (!busy) onCancel() }}
+            disabled={busy}
+            style={{
+              flex: 1, padding: '11px 18px', borderRadius: 10,
+              border: '1px solid var(--sand-deeper)', background: 'var(--sand)',
+              color: 'var(--ink)', fontSize: 14, fontWeight: 700,
+              fontFamily: 'inherit', cursor: busy ? 'default' : 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={!matches || busy}
+            style={{
+              flex: 1, display: 'inline-flex', alignItems: 'center',
+              justifyContent: 'center', gap: 7,
+              padding: '11px 18px', borderRadius: 10, border: 'none',
+              background: DANGER_RED, color: 'white',
+              fontSize: 14, fontWeight: 800, fontFamily: 'inherit',
+              cursor: !matches || busy ? 'default' : 'pointer',
+              opacity: !matches || busy ? 0.5 : 1,
+            }}
+          >
+            {busy && <Loader2 size={15} className="animate-spin" />}
+            {busy ? 'Deleting…' : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function Toast({ tone, text }: { tone: 'ok' | 'err'; text: string }) {
   return (
     <div
@@ -106,7 +241,19 @@ function Toast({ tone, text }: { tone: 'ok' | 'err'; text: string }) {
 
 export default function ClientDetailPage() {
   const params = useParams<{ id: string }>()
+  const router = useRouter()
   const propertyId = params.id
+
+  // Floating page-level toast for the destructive actions.
+  const [pageToast, setPageToast] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
+  const showToast = useCallback((tone: 'ok' | 'err', text: string) => {
+    setPageToast({ tone, text })
+    setTimeout(() => setPageToast(null), tone === 'ok' ? 3000 : 5000)
+  }, [])
+
+  // Delete flows.
+  const [deletePropertyOpen, setDeletePropertyOpen] = useState(false)
+  const [deleteManagerTarget, setDeleteManagerTarget] = useState<Manager | null>(null)
 
   const [property, setProperty] = useState<Property | null>(null)
   const [assigned, setAssigned] = useState<Set<string>>(new Set())
@@ -247,6 +394,60 @@ export default function ClientDetailPage() {
       setInviteError('Network error — please try again')
     } finally {
       setInviteSubmitting(false)
+    }
+  }
+
+  // ── Deletes ───────────────────────────────────────────────────
+  async function confirmDeleteProperty(): Promise<boolean> {
+    try {
+      const res = await fetch(`/api/admin/properties/${propertyId}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast('err', data.error || 'Failed to delete property')
+        return false
+      }
+      showToast('ok', 'Property deleted')
+      router.push('/admin')
+      return true
+    } catch {
+      showToast('err', 'Network error — please try again')
+      return false
+    }
+  }
+
+  async function confirmDeleteManager(): Promise<boolean> {
+    const target = deleteManagerTarget
+    if (!target) return false
+    try {
+      const res = await fetch(`/api/admin/properties/${propertyId}/managers/${target.id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast('err', data.error || 'Failed to remove manager')
+        return false
+      }
+      setManagers((prev) => prev.filter((m) => m.id !== target.id))
+      showToast('ok', 'Manager removed')
+      setDeleteManagerTarget(null)
+      return true
+    } catch {
+      showToast('err', 'Network error — please try again')
+      return false
+    }
+  }
+
+  async function cancelInvite(inv: PendingInvite) {
+    if (!window.confirm(`Cancel the invite for ${inv.full_name}? This can't be undone.`)) return
+    try {
+      const res = await fetch(`/api/admin/properties/${propertyId}/invites/${inv.id}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast('err', data.error || 'Failed to cancel invite')
+        return
+      }
+      setPendingInvites((prev) => prev.filter((i) => i.id !== inv.id))
+      showToast('ok', 'Invite cancelled')
+    } catch {
+      showToast('err', 'Network error — please try again')
     }
   }
 
@@ -517,6 +718,18 @@ export default function ClientDetailPage() {
                   >
                     Active
                   </span>
+                  <button
+                    onClick={() => setDeleteManagerTarget(m)}
+                    style={{
+                      flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
+                      padding: '6px 11px', borderRadius: 9,
+                      border: `1px solid ${DANGER_RED}`, background: 'white',
+                      color: DANGER_RED, fontSize: 12, fontWeight: 700,
+                      fontFamily: 'inherit', cursor: 'pointer',
+                    }}
+                  >
+                    <Trash2 size={13} /> Remove
+                  </button>
                 </div>
               ))}
 
@@ -561,6 +774,18 @@ export default function ClientDetailPage() {
                     ) : (
                       <><Copy size={14} /> Copy link</>
                     )}
+                  </button>
+                  <button
+                    onClick={() => cancelInvite(inv)}
+                    style={{
+                      flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
+                      padding: '8px 11px', borderRadius: 9,
+                      border: `1px solid ${DANGER_RED}`, background: 'white',
+                      color: DANGER_RED, fontSize: 12.5, fontWeight: 700,
+                      fontFamily: 'inherit', cursor: 'pointer',
+                    }}
+                  >
+                    <X size={13} /> Cancel invite
                   </button>
                 </div>
               ))}
@@ -772,7 +997,108 @@ export default function ClientDetailPage() {
           </div>
         </section>
 
+        {/* ── 5. Danger Zone ── */}
+        <section
+          style={{
+            ...cardStyle,
+            border: `1.5px solid ${DANGER_RED}`,
+            background: 'rgba(214,69,69,0.03)',
+            marginTop: 12,
+          }}
+        >
+          <h2 style={{ ...sectionTitleStyle, color: DANGER_RED }}>Danger Zone</h2>
+          <p style={sectionSubStyle}>
+            Permanent, irreversible actions. Proceed with care.
+          </p>
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: 16, flexWrap: 'wrap',
+              padding: '16px 18px', borderRadius: 12,
+              border: `1px solid ${DANGER_RED}`, background: 'white',
+            }}
+          >
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 14.5, fontWeight: 700, color: 'var(--ocean-deep)' }}>
+                Delete this property
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: 2 }}>
+                Deletes the property and every manager, staff member, and all training data.
+              </div>
+            </div>
+            <button
+              onClick={() => setDeletePropertyOpen(true)}
+              style={{
+                flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7,
+                padding: '10px 16px', borderRadius: 10, border: 'none',
+                background: DANGER_RED, color: 'white',
+                fontSize: 13.5, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer',
+              }}
+            >
+              <Trash2 size={15} /> Delete Property
+            </button>
+          </div>
+        </section>
+
       </div>
+
+      {/* ── Delete Property modal ── */}
+      {deletePropertyOpen && (
+        <ConfirmDeleteModal
+          title={`Delete ${property.name} permanently?`}
+          warning={
+            <>
+              This will permanently delete <strong>{property.name}</strong> and ALL data — every
+              manager, every staff member, all training progress, all roleplay sessions, all module
+              assignments. This cannot be undone.
+            </>
+          }
+          inputLabel="Type the property name to confirm:"
+          placeholder={property.name}
+          expected={property.name}
+          confirmLabel="Delete Property"
+          onCancel={() => setDeletePropertyOpen(false)}
+          onConfirm={confirmDeleteProperty}
+        />
+      )}
+
+      {/* ── Remove Manager modal ── */}
+      {deleteManagerTarget && (
+        <ConfirmDeleteModal
+          title={`Remove ${deleteManagerTarget.full_name}?`}
+          warning={
+            <>
+              This will permanently delete{' '}
+              <strong>{deleteManagerTarget.full_name}</strong>&apos;s account. They will lose access
+              immediately.
+            </>
+          }
+          inputLabel="Type the manager's email to confirm:"
+          placeholder={deleteManagerTarget.email}
+          expected={deleteManagerTarget.email}
+          confirmLabel="Remove Manager"
+          onCancel={() => setDeleteManagerTarget(null)}
+          onConfirm={confirmDeleteManager}
+        />
+      )}
+
+      {/* ── Floating toast for destructive actions ── */}
+      {pageToast && (
+        <div
+          style={{
+            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+            zIndex: 70, display: 'inline-flex', alignItems: 'center', gap: 8,
+            padding: '12px 18px', borderRadius: 12,
+            background: 'white', border: `1px solid ${pageToast.tone === 'ok' ? 'var(--sage-deep)' : DANGER_RED}`,
+            boxShadow: '0 16px 40px -16px rgba(5,25,86,0.4)',
+            fontSize: 14, fontWeight: 700,
+            color: pageToast.tone === 'ok' ? 'var(--sage-deep)' : DANGER_RED,
+          }}
+        >
+          {pageToast.tone === 'ok' ? <Check size={16} /> : <AlertCircle size={16} />}
+          {pageToast.text}
+        </div>
+      )}
 
       {/* ── Invite Manager modal ── */}
       {inviteModalOpen && (

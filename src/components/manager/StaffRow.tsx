@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, Pencil } from 'lucide-react';
+import { ChevronRight, Pencil, Trash2 } from 'lucide-react';
 import type { StaffMember } from '@/lib/staff-data';
 
 const STATUS_LABEL: Record<StaffMember['status'], string> = {
@@ -12,7 +12,7 @@ const STATUS_LABEL: Record<StaffMember['status'], string> = {
   new: 'New',
 };
 
-export default function StaffRow({ staff: s, onClick, onEdit }: { staff: StaffMember; onClick: () => void; onEdit: () => void }) {
+export default function StaffRow({ staff: s, onClick, onEdit, onDelete }: { staff: StaffMember; onClick: () => void; onEdit: () => void; onDelete?: () => void }) {
   const [hovered, setHovered] = useState(false);
   const pct = (s.lessons / s.total) * 100;
   const scoreColor =
@@ -81,8 +81,8 @@ export default function StaffRow({ staff: s, onClick, onEdit }: { staff: StaffMe
         <span className={`status-pill status-${s.status}`}>{STATUS_LABEL[s.status]}</span>
       </div>
 
-      {/* Edit + arrow */}
-      <div style={{ width: 64, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+      {/* Edit + delete + arrow */}
+      <div style={{ width: 96, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
         {hovered && (
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
@@ -105,6 +105,28 @@ export default function StaffRow({ staff: s, onClick, onEdit }: { staff: StaffMe
             }}
           >
             <Pencil size={12} />
+          </button>
+        )}
+        {hovered && onDelete && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            title="Remove staff member"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 28, height: 28, borderRadius: 7,
+              border: '1.5px solid var(--sand-deeper)',
+              background: 'white', cursor: 'pointer',
+              color: 'var(--coral-deep)', flexShrink: 0,
+              transition: 'color 0.1s, border-color 0.1s',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--coral-deep)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--sand-deeper)';
+            }}
+          >
+            <Trash2 size={12} />
           </button>
         )}
         <div style={{ color: 'var(--ink-soft)', display: 'flex', alignItems: 'center' }}>
