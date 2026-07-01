@@ -308,12 +308,21 @@ function PhaseCurriculum({
 
       {/* Current phase header */}
       <div style={{ padding: '24px 28px', borderRadius: 18, background: 'white', border: '1px solid var(--sand-deeper)', marginBottom: 28 }}>
-        <div className="label-mono" style={{ color: 'var(--brand)', marginBottom: 6 }}>
-          Phase {current.phase.phase_number} of {totalPhases}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <span
+            className="journey-badge"
+            style={{ background: 'rgba(245,166,35,0.15)', color: '#8a6000', borderColor: 'rgba(245,166,35,0.4)' }}
+          >
+            YOU ARE HERE
+          </span>
+          <span className="label-mono" style={{ color: 'var(--brand)' }}>
+            Phase {current.phase.phase_number} of {totalPhases}
+          </span>
         </div>
-        <h2 className="display" style={{ fontSize: 26, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
+        <h2 className="display" style={{ fontSize: 26, color: 'var(--brand-deep)', margin: '0 0 6px' }}>
           {current.phase.title}
         </h2>
+        <div className="journey-level" style={{ marginBottom: 10 }}>→ {current.phase.certification_title}</div>
         <p style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.55, margin: '0 0 18px', maxWidth: 620 }}>
           {current.phase.goal}
         </p>
@@ -370,7 +379,16 @@ function PhaseCurriculum({
                     <span className="label-mono" style={{ color: 'var(--ink-soft)' }}>Phase {g.phase.phase_number}</span>
                   </div>
                   <h3 className="display journey-title">{g.phase.title}</h3>
+                  <div className="journey-level">→ {g.phase.certification_title}</div>
                   <p className="journey-desc">{g.phase.goal}</p>
+
+                  {g.modules.length > 0 && (
+                    <div className="journey-topics">
+                      {g.modules.map((m) => (
+                        <span key={m.id} className="journey-topic-chip">{m.title}</span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
