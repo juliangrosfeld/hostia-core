@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Play, Lock, Trophy as TrophyIcon, CheckCircle2, Zap, Flame } from 'lucide-react';
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, UtensilsCrossed, Trophy, Eye, Star,
 } from 'lucide-react';
-import type { Module, Phase } from '@/lib/curriculum';
+import type { Module } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
 import type { PropertyProfile } from '@/lib/useUser';
+import type { PhaseData, ResolvedModule } from '@/lib/useCurriculum';
+import type { HomeProgress } from '@/lib/useHomeProgress';
 import { PROPERTY, DEMO_PROPERTY_ID } from '@/lib/config';
-import { useStaffXPAndStreak } from '@/lib/useStaffXPAndStreak';
 
 // ─── 6-Month Journey data ────────────────────────────────────
 
@@ -245,17 +245,8 @@ function formatCurriculumTime(curriculum: Module[]): string {
 }
 
 // ─── Phase-aware curriculum (real, non-demo staff) ───────────
-
-// A resolved module plus the gating/categorization flags from /api/curriculum.
-type ResolvedModule = Module & { locked: boolean; toBeCategorized?: boolean };
-interface PhaseGroup { phase: Phase; modules: ResolvedModule[]; }
-interface PhaseData {
-  isDemo: boolean;
-  track: string | null;
-  phases: PhaseGroup[];
-  unassigned: ResolvedModule[];
-  completedPhaseIds: string[];
-}
+// PhaseData / PhaseGroup / ResolvedModule are defined in useCurriculum (single
+// source of truth) and imported above.
 
 function PhaseCurriculum({
   data, onOpenModule,
@@ -392,63 +383,36 @@ function PhaseCurriculum({
 
 interface HomeViewProps {
   curriculum: Module[];
+  phaseData: PhaseData | null;
+  progress: HomeProgress | null;
+  earnedXp: number;
+  streak: number;
   onOpenModule: (m: Module) => void;
   viewingAs: StaffMember | null;
   property?: PropertyProfile | null;
 }
 
-interface HomeProgress {
-  isDemo: boolean;
-  started: boolean;
-  percent: number;
-  moduleTitle: string | null;
-  firstModuleTitle?: string | null;
-}
-
-export default function HomeView({ curriculum, onOpenModule, viewingAs, property }: HomeViewProps) {
+export default function HomeView({
+  curriculum, phaseData, progress, earnedXp, streak, onOpenModule, viewingAs, property,
+}: HomeViewProps) {
   const firstName = viewingAs ? viewingAs.name.split(' ')[0] : 'there';
   const progressPct = viewingAs ? Math.round((viewingAs.lessons / viewingAs.total) * 100) : 50;
 
-  // Total earned XP + current streak for the hero banner. Handles demo (mock),
-  // manager "view as" (mock staffer), and real live staff — see the hook.
-  const { totalXp: earnedXp, streak } = useStaffXPAndStreak(viewingAs);
-
+  // phaseData, progress and earnedXp/streak arrive as already-resolved props —
+  // the staff page fetches them and gates its first paint on that data, so the
+  // hero and curriculum render their real state immediately (no fallback flicker).
+  //
   // Phase-aware layout applies only to a real, signed-in staff member at a
   // non-demo property. Manager "view as" previews and the Hostia Demo property
   // keep the original mock layout untouched.
   const isDemo = property?.id === DEMO_PROPERTY_ID;
   const phaseEligible = !viewingAs && property != null && !isDemo;
 
-  const [phaseData, setPhaseData] = useState<PhaseData | null>(null);
-  useEffect(() => {
-    if (!phaseEligible) return;
-    let cancelled = false;
-    fetch('/api/curriculum')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!cancelled && d) setPhaseData(d as PhaseData); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [phaseEligible]);
-
   const usePhaseLayout = phaseEligible && phaseData != null && !phaseData.isDemo && phaseData.phases.length > 0;
 
   const currentModule = curriculum.find((m) => m.available && m.progress > 0 && m.progress < 1)
     ?? curriculum.find((m) => m.available);
   const currentLesson = currentModule?.lessons.find((l) => l.status === 'current');
-
-  // Real-data progress for the hero banner. Only fetched for a real signed-in
-  // staff member (not when a manager is "viewing as" a mock staffer). The demo
-  // property returns isDemo:true and we keep the original mock copy untouched.
-  const [progress, setProgress] = useState<HomeProgress | null>(null);
-  useEffect(() => {
-    if (viewingAs) return; // manager preview → keep mock copy
-    let cancelled = false;
-    fetch('/api/staff/home-progress')
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!cancelled && d) setProgress(d); })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, [viewingAs]);
 
   // Real (non-demo) staff get live progress text; everyone else keeps mock copy.
   const useRealBanner = !viewingAs && progress != null && progress.isDemo === false;

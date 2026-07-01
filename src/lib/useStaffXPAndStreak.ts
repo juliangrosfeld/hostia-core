@@ -32,11 +32,13 @@ export function useStaffXPAndStreak(viewingAs: StaffMember | null): StaffXPAndSt
     fetch('/api/staff/xp-streak')
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (cancelled || !d) return;
-        if (d.isDemo) setData({ totalXp: DEMO_XP, streak: DEMO_STREAK });
-        else setData({ totalXp: d.totalXp ?? 0, streak: d.streak ?? 0 });
+        if (cancelled) return;
+        // Always resolve `data` (never leave it null) so `loading` clears even on
+        // a failed/non-OK request — the staff page gates its first paint on this.
+        if (d?.isDemo) setData({ totalXp: DEMO_XP, streak: DEMO_STREAK });
+        else setData({ totalXp: d?.totalXp ?? 0, streak: d?.streak ?? 0 });
       })
-      .catch(() => {});
+      .catch(() => { if (!cancelled) setData({ totalXp: 0, streak: 0 }); });
     return () => { cancelled = true; };
   }, [viewingAs]);
 

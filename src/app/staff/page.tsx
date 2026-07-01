@@ -11,6 +11,8 @@ import { STAFF } from '@/lib/staff-data'
 import { useUser } from '@/lib/useUser'
 import { useCurriculum } from '@/lib/useCurriculum'
 import { useLessonCompletions } from '@/lib/useLessonCompletions'
+import { useHomeProgress } from '@/lib/useHomeProgress'
+import { useStaffXPAndStreak } from '@/lib/useStaffXPAndStreak'
 
 type StaffView = 'home' | 'module' | 'lesson'
 type Phase = 'learn' | 'practice' | 'apply'
@@ -19,11 +21,15 @@ function StaffPageInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, property, loading } = useUser()
-  const { curriculum, loading: curriculumLoading } = useCurriculum()
+  const { curriculum, phaseData, loading: curriculumLoading } = useCurriculum()
   const asId = searchParams.get('as')
   const viewingAs = asId ? (STAFF.find((s) => s.id === asId) ?? null) : null
   // Real staff → their completed lessons; manager "view as" keeps mock status.
   const { completedKeys } = useLessonCompletions(!viewingAs)
+  // Hero data — fetched here and gated below, so HomeView paints its real hero
+  // copy + XP/streak on the first render (no mock-then-real flicker).
+  const { progress, loading: progressLoading } = useHomeProgress(viewingAs)
+  const { totalXp: earnedXp, streak, loading: xpLoading } = useStaffXPAndStreak(viewingAs)
   const [view, setView] = useState<StaffView>('home')
   const [activeModule, setActiveModule] = useState<Module | null>(null)
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
@@ -46,7 +52,7 @@ function StaffPageInner() {
   const backToModule = () => { setView('module'); setActiveLesson(null) }
   const clearViewAs = () => { router.push('/manager') }
 
-  if (loading || curriculumLoading) {
+  if (loading || curriculumLoading || progressLoading || xpLoading) {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sand)' }}><div style={{ fontFamily: 'Fraunces, serif', fontSize: 22, color: 'var(--brand-deep)' }}>Loading…</div></div>
   }
 
@@ -58,7 +64,7 @@ function StaffPageInner() {
   return (
     <div style={{ '--brand-color': brandColor } as React.CSSProperties}>
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
-      {view === 'home' && <HomeView curriculum={curriculum} onOpenModule={openModule} viewingAs={viewingAs} property={property} />}
+      {view === 'home' && <HomeView curriculum={curriculum} phaseData={phaseData} progress={progress} earnedXp={earnedXp} streak={streak} onOpenModule={openModule} viewingAs={viewingAs} property={property} />}
       {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} />}
       {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} />}
     </div>
