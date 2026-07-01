@@ -410,6 +410,10 @@ body {
 .hero-title { font-size: 42px; line-height: 1.05; margin: 8px 0 14px; color: white; }
 .hero-sub { font-size: 15px; color: rgba(250,247,242,0.6); line-height: 1.55; margin-bottom: 24px; }
 .hero-deco { position: absolute; top: 0; right: 0; bottom: 0; width: 50%; pointer-events: none; }
+.hero-stats {
+  position: absolute; right: 48px; top: 50%; transform: translateY(-50%);
+  z-index: 3; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
 .deco-circle {
   position: absolute; border-radius: 50%;
 }
@@ -872,6 +876,11 @@ button, a, [role="button"] { touch-action: manipulation; }
   .hero-sub { font-size: 14px; margin-bottom: 20px; }
   .hero-deco { display: none; }
   .hero-content { max-width: 100%; min-height: 0; }
+  /* No open right-hand space on mobile — flow the pills below the text. */
+  .hero-stats {
+    position: static; transform: none; flex-direction: row;
+    align-items: flex-start; flex-wrap: wrap; margin-top: 18px;
+  }
 
   /* ─ Module grid — single column, horizontal card layout ─ */
   .module-grid { grid-template-columns: 1fr; gap: 14px; }

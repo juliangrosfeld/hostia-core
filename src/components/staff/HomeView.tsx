@@ -490,20 +490,8 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
                 </>
               )}
             </p>
-            {/* Bottom-left cluster: XP + streak pills sit above the Continue
-                button and fill the empty lower-left space of the hero. */}
+            {/* Continue button, bottom-anchored in the left column. */}
             <div style={{ marginTop: 'auto' }}>
-              {/* Total XP + current streak */}
-              <div style={{ display: 'flex', gap: 10, marginBottom: 14, flexWrap: 'wrap' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                  <Zap size={14} color="var(--brand)" fill="var(--brand)" />
-                  {earnedXp.toLocaleString()} XP
-                </span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600 }}>
-                  <Flame size={14} color="#F5A623" />
-                  {streak} day streak
-                </span>
-              </div>
               {currentModule && (
                 <button className="btn-brand" onClick={() => onOpenModule(currentModule)}>
                   <Play size={14} />
@@ -516,6 +504,18 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
             <div className="deco-circle deco-circle-1" />
             <div className="deco-circle deco-circle-2" />
             <div className="deco-circle deco-circle-3" />
+          </div>
+          {/* XP + streak pills: right side of the banner, vertically centered,
+              in the open space beside the heading/text. */}
+          <div className="hero-stats">
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+              <Zap size={14} color="var(--brand)" fill="var(--brand)" />
+              {earnedXp.toLocaleString()} XP
+            </span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600 }}>
+              <Flame size={14} color="#F5A623" />
+              {streak} day streak
+            </span>
           </div>
         </div>
 
