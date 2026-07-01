@@ -509,24 +509,24 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
               centered, in the open space beside the heading/text. */}
           <div className="hero-stats">
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                <Zap size={26} color="var(--brand)" fill="var(--brand)" />
-                <span style={{ fontSize: 36, fontWeight: 800, lineHeight: 1, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Zap size={40} color="var(--brand)" fill="var(--brand)" />
+                <span style={{ fontSize: 54, fontWeight: 800, lineHeight: 1, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
                   {earnedXp.toLocaleString()}
                 </span>
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
                 XP
               </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                <Flame size={26} color="#F5A623" />
-                <span style={{ fontSize: 36, fontWeight: 800, lineHeight: 1, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Flame size={40} color="#F5A623" />
+                <span style={{ fontSize: 54, fontWeight: 800, lineHeight: 1, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
                   {streak}
                 </span>
               </div>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
                 Day Streak
               </span>
             </div>
