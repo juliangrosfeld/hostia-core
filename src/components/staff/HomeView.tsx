@@ -93,7 +93,14 @@ function JourneyCard({ phase }: { phase: JourneyPhase }) {
       className="journey-card"
       style={{ opacity: phase.locked ? 0.5 : 1 }}
     >
-      <div className="journey-band" style={{ background: phase.color }} />
+      <div
+        className="journey-band"
+        style={{
+          background: phase.locked
+            ? 'color-mix(in srgb, var(--brand-color, #1B2B4B) 35%, white)'
+            : 'var(--brand-color, #1B2B4B)',
+        }}
+      />
       <div className="journey-card-body">
         <div className="journey-card-top">
           <span
@@ -365,7 +372,7 @@ function PhaseCurriculum({
               const topics = PHASE_TOPICS[g.phase.track]?.[g.phase.phase_number] ?? [];
               return (
               <div key={g.phase.id} className="journey-card" style={{ opacity: 0.5 }}>
-                <div className="journey-band" style={{ background: 'var(--ink-soft)' }} />
+                <div className="journey-band" style={{ background: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 35%, white)' }} />
                 <div className="journey-card-body">
                   <div className="journey-card-top">
                     <span
