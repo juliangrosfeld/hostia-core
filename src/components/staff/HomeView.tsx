@@ -505,17 +505,31 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
             <div className="deco-circle deco-circle-2" />
             <div className="deco-circle deco-circle-3" />
           </div>
-          {/* XP + streak pills: right side of the banner, vertically centered,
-              in the open space beside the heading/text. */}
+          {/* XP + streak stat callouts: right side of the banner, vertically
+              centered, in the open space beside the heading/text. */}
           <div className="hero-stats">
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-              <Zap size={14} color="var(--brand)" fill="var(--brand)" />
-              {earnedXp.toLocaleString()} XP
-            </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600 }}>
-              <Flame size={14} color="#F5A623" />
-              {streak} day streak
-            </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                <Zap size={26} color="var(--brand)" fill="var(--brand)" />
+                <span style={{ fontSize: 36, fontWeight: 800, lineHeight: 1, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
+                  {earnedXp.toLocaleString()}
+                </span>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
+                XP
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                <Flame size={26} color="#F5A623" />
+                <span style={{ fontSize: 36, fontWeight: 800, lineHeight: 1, color: 'white', fontVariantNumeric: 'tabular-nums' }}>
+                  {streak}
+                </span>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>
+                Day Streak
+              </span>
+            </div>
           </div>
         </div>
 
