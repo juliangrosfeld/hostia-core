@@ -88,16 +88,10 @@ export async function GET() {
   const modules = resolveCurriculum(propertyModules);
 
   // resolveCurriculum returns Module objects from the hardcoded CURRICULUM array,
-  // which don't carry the Supabase order_in_phase / phase_id values. Fetch those
-  // from the modules table so phase grouping + ordering reflect the real DB state.
+  // which don't carry the Supabase order_in_phase / phase_id values. We fetch those
+  // from module_phase_assignments below (after we know this property's phases) so a
+  // universal module resolves to the right phase + order for each track.
   const moduleIds = modules.map((m) => m.id);
-  const { data: moduleRows } = await admin
-    .from('modules')
-    .select('id, phase_id, order_in_phase')
-    .in('id', moduleIds);
-  const moduleMetaMap = new Map(
-    (moduleRows ?? []).map((r) => [r.id, { phase_id: r.phase_id, order_in_phase: r.order_in_phase }])
-  );
 
   // This staff member's real completion data + the phases for their track.
   const [completionRes, phaseCompletionRes, phasesRes] = await Promise.all([
@@ -133,6 +127,20 @@ export async function GET() {
 
   const completedPhaseIds = (phaseCompletionRes.data ?? []).map((r) => r.phase_id);
   const phases = (phasesRes.data ?? []) as Phase[];
+
+  // Resolve each module's phase + order via module_phase_assignments, filtered to
+  // only this property's track phases. A module can be assigned to multiple phases
+  // (one per track), but the .in('phase_id', phaseIds) filter keeps just the one
+  // that belongs to this track — so universal modules land in the right phase/order.
+  const phaseIds = phases.map((p) => p.id);
+  const { data: mpaRows } = await admin
+    .from('module_phase_assignments')
+    .select('module_id, phase_id, order_in_phase')
+    .in('module_id', moduleIds)
+    .in('phase_id', phaseIds);
+  const moduleMetaMap = new Map(
+    (mpaRows ?? []).map((r) => [r.module_id, { phase_id: r.phase_id, order_in_phase: r.order_in_phase }])
+  );
 
   // Split modules: those assigned to a phase vs. the not-yet-categorized rest.
   const assigned = modules.filter((m) => Boolean(moduleMetaMap.get(m.id)?.phase_id));
