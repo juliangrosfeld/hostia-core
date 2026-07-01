@@ -5,6 +5,7 @@ import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Eye, Star, UtensilsCrossed,
 } from 'lucide-react';
 import type { Module, Lesson } from '@/lib/curriculum';
+import { isLessonComplete } from '@/lib/useLessonCompletions';
 
 // Icon map matching curriculum iconName strings
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -21,28 +22,28 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 function LessonRow({
-  num, lesson, onClick,
+  num, lesson, isDone, onClick,
 }: {
-  num: number; lesson: Lesson; onClick: () => void;
+  num: number; lesson: Lesson; isDone: boolean; onClick: () => void;
 }) {
-  const isDone = lesson.status === 'completed';
-  const isCurrent = lesson.status === 'current';
+  // A completed lesson never shows the "current" (Continue) emphasis.
+  const isCurrent = !isDone && lesson.status === 'current';
 
   return (
     <div
-      className={`lesson-row${isCurrent ? ' is-current' : ''}`}
+      className={`lesson-row${isDone ? ' is-done' : ''}${isCurrent ? ' is-current' : ''}`}
       onClick={onClick}
     >
       <div className={`lesson-num${isDone ? ' is-done' : ''}${isCurrent ? ' is-current' : ''}`}>
-        {isDone ? <Check size={16} /> : num}
+        {isDone ? <Check size={16} strokeWidth={3} /> : num}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="lesson-title-row" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
           <span className="lesson-title" style={{ fontWeight: 700, fontSize: 15 }}>{lesson.title}</span>
           {isCurrent && <span className="badge-pill" style={{ flexShrink: 0 }}>Continue</span>}
           {isDone && (
-            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--sage-deep)', letterSpacing: '0.08em', textTransform: 'uppercase', flexShrink: 0 }}>
-              ✓ Done
+            <span className="lesson-done-tag" style={{ flexShrink: 0 }}>
+              <Check size={11} strokeWidth={3} /> Completed
             </span>
           )}
         </div>
@@ -65,9 +66,10 @@ interface ModuleViewProps {
   module: Module;
   onBack: () => void;
   onOpenLesson: (lesson: Lesson, index: number) => void;
+  completedKeys: ReadonlySet<string>;
 }
 
-export default function ModuleView({ module, onBack, onOpenLesson }: ModuleViewProps) {
+export default function ModuleView({ module, onBack, onOpenLesson, completedKeys }: ModuleViewProps) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
 
   return (
@@ -131,6 +133,7 @@ export default function ModuleView({ module, onBack, onOpenLesson }: ModuleViewP
                 key={l.id}
                 num={i + 1}
                 lesson={l}
+                isDone={isLessonComplete(module.id, l, completedKeys)}
                 onClick={() => onOpenLesson(l, i)}
               />
             ))}

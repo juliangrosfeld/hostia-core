@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Play, Lock, Trophy as TrophyIcon, CheckCircle2 } from 'lucide-react';
+import { Play, Lock, Trophy as TrophyIcon, CheckCircle2, Zap, Flame } from 'lucide-react';
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, UtensilsCrossed, Trophy, Eye, Star,
 } from 'lucide-react';
@@ -9,6 +9,7 @@ import type { Module, Phase } from '@/lib/curriculum';
 import type { StaffMember } from '@/lib/staff-data';
 import type { PropertyProfile } from '@/lib/useUser';
 import { PROPERTY, DEMO_PROPERTY_ID } from '@/lib/config';
+import { useStaffXPAndStreak } from '@/lib/useStaffXPAndStreak';
 
 // ─── 6-Month Journey data ────────────────────────────────────
 
@@ -157,9 +158,12 @@ function ModuleCard({
   // Progress reads from real completion (completedLessons/totalLessons) so the
   // bar reflects actual progress on the real-data path.
   const progressRatio = module.totalLessons > 0 ? module.completedLessons / module.totalLessons : 0;
+  // Fully complete (every lesson done) — distinct success treatment. Never for
+  // the certification card or a locked/empty module.
+  const isComplete = !isLocked && !isCertification && module.totalLessons > 0 && module.completedLessons >= module.totalLessons;
   return (
     <div
-      className="module-card"
+      className={`module-card${isComplete ? ' is-complete' : ''}`}
       onClick={isLocked && !isCertification ? undefined : onClick}
       style={{
         ...(isCertification ? { border: '2px solid #B8860B' } : undefined),
@@ -175,8 +179,10 @@ function ModuleCard({
           {isLocked ? (
             <Lock size={18} color={isCertification ? '#B8860B' : 'var(--ink-soft)'} strokeWidth={2} />
           ) : (
-            module.completedLessons === module.totalLessons && (
-              <span className="module-certified-badge">✓ Complete</span>
+            isComplete && (
+              <span className="module-complete-badge">
+                <CheckCircle2 size={13} /> Complete
+              </span>
             )
           )}
         </div>
@@ -403,6 +409,10 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
   const firstName = viewingAs ? viewingAs.name.split(' ')[0] : 'there';
   const progressPct = viewingAs ? Math.round((viewingAs.lessons / viewingAs.total) * 100) : 50;
 
+  // Total earned XP + current streak for the hero banner. Handles demo (mock),
+  // manager "view as" (mock staffer), and real live staff — see the hook.
+  const { totalXp: earnedXp, streak } = useStaffXPAndStreak(viewingAs);
+
   // Phase-aware layout applies only to a real, signed-in staff member at a
   // non-demo property. Manager "view as" previews and the Hostia Demo property
   // keep the original mock layout untouched.
@@ -483,6 +493,17 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
                 </>
               )}
             </p>
+            {/* Total XP + current streak */}
+            <div style={{ display: 'flex', gap: 10, margin: '18px 0 4px', flexWrap: 'wrap' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                <Zap size={14} color="var(--brand)" fill="var(--brand)" />
+                {earnedXp.toLocaleString()} XP
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,0.12)', color: 'white', fontSize: 13, fontWeight: 600 }}>
+                <Flame size={14} color="#F5A623" />
+                {streak} day streak
+              </span>
+            </div>
             {currentModule && (
               <button className="btn-brand" onClick={() => onOpenModule(currentModule)}>
                 <Play size={14} />

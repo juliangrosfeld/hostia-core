@@ -10,6 +10,7 @@ import { type Module, type Lesson } from '@/lib/curriculum'
 import { STAFF } from '@/lib/staff-data'
 import { useUser } from '@/lib/useUser'
 import { useCurriculum } from '@/lib/useCurriculum'
+import { useLessonCompletions } from '@/lib/useLessonCompletions'
 
 type StaffView = 'home' | 'module' | 'lesson'
 type Phase = 'learn' | 'practice' | 'apply'
@@ -21,6 +22,8 @@ function StaffPageInner() {
   const { curriculum, loading: curriculumLoading } = useCurriculum()
   const asId = searchParams.get('as')
   const viewingAs = asId ? (STAFF.find((s) => s.id === asId) ?? null) : null
+  // Real staff → their completed lessons; manager "view as" keeps mock status.
+  const { completedKeys } = useLessonCompletions(!viewingAs)
   const [view, setView] = useState<StaffView>('home')
   const [activeModule, setActiveModule] = useState<Module | null>(null)
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
@@ -54,8 +57,8 @@ function StaffPageInner() {
     <>
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
       {view === 'home' && <HomeView curriculum={curriculum} onOpenModule={openModule} viewingAs={viewingAs} property={property} />}
-      {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} />}
-      {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} />}
+      {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} />}
+      {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} />}
     </>
   )
 }

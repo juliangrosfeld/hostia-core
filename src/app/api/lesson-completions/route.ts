@@ -11,6 +11,54 @@ function isNonEmptyString(v: unknown): v is string {
   return typeof v === 'string' && v.trim().length > 0;
 }
 
+// GET: the signed-in staff member's completed lessons. Reuses the exact same
+// "any phase completion counts" definition as the home-progress / curriculum
+// module-progress endpoints — a lesson is completed once it has at least one
+// lesson_completions row (learn, practice, or apply). Returns distinct
+// { module_id, lesson_id } pairs so the client can mark lessons done without
+// re-deriving completion. RLS scopes the read to the caller's own rows.
+export async function GET() {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { data: profile } = await supabase
+    .from('users')
+    .select('id, property_id')
+    .eq('auth_id', user.id)
+    .single();
+
+  if (!profile?.property_id) {
+    return NextResponse.json({ completed: [] });
+  }
+
+  const { data, error } = await supabase
+    .from('lesson_completions')
+    .select('module_id, lesson_id')
+    .eq('property_id', profile.property_id)
+    .eq('staff_id', profile.id);
+
+  if (error) {
+    console.error('[lesson-completions] read error:', error);
+    return NextResponse.json({ error: 'Could not load completions' }, { status: 500 });
+  }
+
+  // De-dupe (a lesson has one row per finished phase) → distinct lessons.
+  const seen = new Set<string>();
+  const completed: { module_id: string; lesson_id: string }[] = [];
+  for (const row of data ?? []) {
+    const key = `${row.module_id}::${row.lesson_id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    completed.push({ module_id: row.module_id, lesson_id: row.lesson_id });
+  }
+
+  return NextResponse.json({ completed });
+}
+
 // POST: log that the signed-in staff member finished a lesson phase.
 // Idempotent — repeat calls for the same (staff, lesson, phase) are no-ops and
 // report already_completed: true. Uses the standard (anon, session-bound)

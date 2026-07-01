@@ -1,7 +1,8 @@
 'use client';
 
-import { ChevronLeft, Clock, Zap, BookOpen, Target, Play } from 'lucide-react';
+import { ChevronLeft, Clock, Zap, BookOpen, Target, Play, CheckCircle2, RotateCcw } from 'lucide-react';
 import type { Module, Lesson } from '@/lib/curriculum';
+import { isLessonComplete } from '@/lib/useLessonCompletions';
 import LearnPhase from './LearnPhase';
 import PracticePhase from './PracticePhase';
 import ApplyPhase from './ApplyPhase';
@@ -38,15 +39,19 @@ interface LessonViewProps {
   phase: Phase;
   setPhase: (p: Phase) => void;
   onBack: () => void;
+  completedKeys: ReadonlySet<string>;
 }
 
 export default function LessonView({
-  module, lesson, lessonIndex, phase, setPhase, onBack,
+  module, lesson, lessonIndex, phase, setPhase, onBack, completedKeys,
 }: LessonViewProps) {
   // Apply ("Live roleplay") only exists for lessons backed by a scenario.
   // Onboarding lessons have no scenarioId, so they show only Learn & Practice.
   const hasApply = Boolean(lesson.scenarioId);
   const effectivePhase: Phase = phase === 'apply' && !hasApply ? 'practice' : phase;
+
+  // Same completion check as the module lesson list — reused, not re-derived.
+  const isDone = isLessonComplete(module.id, lesson, completedKeys);
 
   return (
     <div className="page animate-fade-up">
@@ -74,6 +79,28 @@ export default function LessonView({
             </span>
           </div>
         </div>
+
+        {/* Completed banner — this lesson was already finished. Redoing it is
+            always allowed (re-completing is idempotent server-side). */}
+        {isDone && (
+          <div className="lesson-done-banner">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+              <CheckCircle2 size={20} color="var(--sage-deep)" />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--sage-deep)' }}>Completed</div>
+                <div style={{ fontSize: 12.5, color: 'var(--ink-soft)' }}>
+                  You&apos;ve finished this lesson. Redo any phase to sharpen it.
+                </div>
+              </div>
+            </div>
+            <button
+              className="btn-ghost lesson-redo-btn"
+              onClick={() => setPhase('learn')}
+            >
+              <RotateCcw size={13} /> Redo
+            </button>
+          </div>
+        )}
 
         {/* Phase nav */}
         <div className="phase-nav">

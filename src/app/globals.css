@@ -419,19 +419,20 @@ body {
 }
 .module-card:hover:not(.is-locked) { transform: translateY(-3px); box-shadow: 0 16px 40px -12px rgba(17,17,17,0.18); }
 .module-card.is-locked { opacity: 0.55; cursor: not-allowed; }
+/* Fully-completed module — muted success border + tint so it reads as done at a glance. */
+.module-card.is-complete { border-color: rgba(129,178,154,0.5); background: linear-gradient(to bottom, rgba(129,178,154,0.07), white 55%); }
+.module-complete-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(129,178,154,0.18); color: var(--sage-deep);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px;
+}
 .module-band { height: 4px; }
 .module-title { font-size: 18px; color: var(--brand-deep); margin: 0 0 6px; line-height: 1.2; }
 .module-sub { font-size: 13px; color: var(--ink-soft); line-height: 1.45; margin: 0 0 18px; min-height: 38px; }
 .module-progress-row { display: flex; align-items: center; gap: 10px; }
 .module-progress-bar { flex: 1; height: 5px; background: var(--sand-warm); border-radius: 999px; overflow: hidden; }
 .module-progress-fill { height: 100%; border-radius: 999px; transition: width 0.5s; }
-.module-certified-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: rgba(245,166,35,0.15); color: #8a6000;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
-  padding: 3px 8px; border-radius: 999px;
-}
-
 /* Module card layout helpers */
 .module-card-body { padding: 24px; }
 .module-card-inner {
@@ -460,6 +461,24 @@ body {
 .lesson-row:hover:not(.is-locked) { border-color: var(--brand); transform: translateX(2px); }
 .lesson-row.is-locked { opacity: 0.5; cursor: not-allowed; }
 .lesson-row.is-current { border-color: var(--brand); background: linear-gradient(to right, rgba(245,166,35,0.06), white 60%); }
+/* Completed lesson — muted success treatment, slightly de-emphasised since it's done. */
+.lesson-row.is-done { border-color: rgba(129,178,154,0.45); background: linear-gradient(to right, rgba(129,178,154,0.09), white 65%); }
+.lesson-row.is-done:hover:not(.is-locked) { border-color: var(--sage); }
+.lesson-row.is-done .lesson-title { color: var(--brand-deep); }
+.lesson-done-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(129,178,154,0.18); color: var(--sage-deep);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 999px;
+}
+/* Completed banner in the individual lesson header. */
+.lesson-done-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 18px; margin-bottom: 20px;
+  background: rgba(129,178,154,0.1); border: 1px solid rgba(129,178,154,0.4);
+  border-radius: 14px;
+}
+.lesson-redo-btn { flex-shrink: 0; padding: 8px 14px; font-size: 13px; }
 .lesson-num {
   width: 36px; height: 36px; border-radius: 50%; background: var(--sand-warm);
   display: flex; align-items: center; justify-content: center;
@@ -865,7 +884,7 @@ button, a, [role="button"] { touch-action: manipulation; }
   }
   .module-card-inner { grid-area: icon; margin-bottom: 0; justify-content: flex-start; }
   .module-icon-wrap { width: 48px !important; height: 48px !important; }
-  .module-certified-badge { display: none; }
+  .module-complete-badge { display: none; }
   .module-card-text { grid-area: text; min-width: 0; }
   .module-progress-row { grid-area: progress; }
   .module-title { font-size: 15px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
