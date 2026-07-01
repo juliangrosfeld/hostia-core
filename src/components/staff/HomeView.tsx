@@ -465,8 +465,8 @@ export default function HomeView({ curriculum, onOpenModule, viewingAs, property
         <div className="hero-banner">
           <div className="hero-content">
             <img
-              src="/hostia-logo.png"
-              alt="Hostia"
+              src={property?.logo_url || '/hostia-logo.png'}
+              alt={property?.logo_url ? (property.name ?? 'Logo') : 'Hostia'}
               style={{ height: 32, width: 'auto', objectFit: 'contain', marginBottom: 16 }}
             />
             <div className="hero-eyebrow">Welcome back, {firstName}</div>

@@ -57,15 +57,17 @@ export default function ManagerPage() {
   const navUser = user
     ? { name: user.full_name, email: user.email, initials: user.full_name.split(' ').map((n) => n[0]).join('').toUpperCase(), role: user.role }
     : null;
-  const navProperty = property ? { name: property.name, primaryColor: property.primary_color } : null;
+  const navProperty = property ? { name: property.name, primaryColor: property.primary_color, logoUrl: property.logo_url } : null;
+  // Expose the property's brand color to TopNav via --brand-color.
+  const brandColor = property?.primary_color || '#1B2B4B';
 
   return (
-    <>
+    <div style={{ '--brand-color': brandColor } as React.CSSProperties}>
       <TopNav user={navUser} property={navProperty} />
       {view === 'dashboard' && <ManagerDashboard onOpenStaff={openStaff} />}
       {view === 'staff-detail' && selectedStaff && (
         <StaffProfile staff={selectedStaff} onBack={goBack} onViewAs={viewAsStaff} />
       )}
-    </>
+    </div>
   );
 }

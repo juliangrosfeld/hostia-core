@@ -11,7 +11,7 @@ interface TopNavProps {
   viewingAs?: StaffMember | null;
   onClearViewAs?: () => void;
   user?: { name: string; email: string; initials: string; role: 'staff' | 'manager' | 'admin' } | null;
-  property?: { name: string; primaryColor: string } | null;
+  property?: { name: string; primaryColor: string; logoUrl?: string | null } | null;
 }
 
 export default function TopNav({ viewingAs, onClearViewAs, user, property }: TopNavProps) {
@@ -32,11 +32,11 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
       <div className="top-nav">
         <div className="top-nav-inner">
 
-          {/* Left: Hostia logo + BY GLAD AI */}
+          {/* Left: property logo (falls back to Hostia) + BY GLAD AI */}
           <Link href={canManage ? '/manager' : '/staff'} className="brand" style={{ textDecoration: 'none' }}>
             <img
-              src="/hostia-logo.png"
-              alt="Hostia"
+              src={property?.logoUrl || '/hostia-logo.png'}
+              alt={property?.logoUrl ? propertyName : 'Hostia'}
               style={{ height: 32, width: 'auto', objectFit: 'contain' }}
             />
             <span className="brand-tag">BY GLAD AI</span>
@@ -54,6 +54,11 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
               gap: 6,
               margin: 0,
               pointerEvents: 'none',
+              // Brand-colored accent: text + tinted background/border derived
+              // from --brand-color (set on the page wrapper; #1B2B4B fallback).
+              color: 'var(--brand-color, #1B2B4B)',
+              background: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 9%, white)',
+              borderColor: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 22%, white)',
             }}
           >
             {propertyName}

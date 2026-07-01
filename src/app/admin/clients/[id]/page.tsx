@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Check, AlertCircle, Save, Plus, Trash2, Loader2,
-  UserPlus, Copy, Mail, X,
+  UserPlus, Copy, Mail, X, Upload,
 } from 'lucide-react'
 import { CURRICULUM, type Phase } from '@/lib/curriculum'
 
@@ -26,6 +26,7 @@ interface Property {
   name: string
   venue_type: string | null
   primary_color: string | null
+  logo_url: string | null
 }
 interface PropertyModule {
   module_id: string
@@ -265,6 +266,7 @@ export default function ClientDetailPage() {
 
   // Per-area status messages.
   const [detailsMsg, setDetailsMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
+  const [logoUploading, setLogoUploading] = useState(false)
   const [moduleBusy, setModuleBusy] = useState<string | null>(null)
   const [overridesSaving, setOverridesSaving] = useState(false)
   const [overridesMsg, setOverridesMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
@@ -471,6 +473,32 @@ export default function ClientDetailPage() {
     }
   }
 
+  // Upload a logo file, then persist its public URL onto the property via the
+  // same PATCH path as the other editable fields.
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file
+    if (!file || !property) return
+    setLogoUploading(true)
+    setDetailsMsg(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('propertyId', property.id)
+      const res = await fetch('/api/admin/upload-logo', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok || !data.url) {
+        setDetailsMsg({ tone: 'err', text: data.error || 'Failed to upload logo' })
+      } else {
+        await patchField('logo_url', data.url)
+      }
+    } catch {
+      setDetailsMsg({ tone: 'err', text: 'Network error' })
+    } finally {
+      setLogoUploading(false)
+    }
+  }
+
   // ── Module assign / unassign ──────────────────────────────────
   async function toggleModule(moduleId: string) {
     const isAssigned = assigned.has(moduleId)
@@ -644,6 +672,60 @@ export default function ClientDetailPage() {
                   onBlur={(e) => patchField('primary_color', e.target.value)}
                   style={{ ...inputStyle, fontFamily: 'monospace', maxWidth: 160 }}
                 />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Logo</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div
+                  style={{
+                    width: 56, height: 56, borderRadius: 12, flexShrink: 0,
+                    border: '1px solid var(--sand-deeper)',
+                    background: property.logo_url ? '#051956' : 'var(--sand-warm)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {property.logo_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={property.logo_url} alt="Logo" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
+                  ) : (
+                    <Upload size={18} color="var(--ink-soft)" />
+                  )}
+                </div>
+                <label
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '10px 16px', borderRadius: 10,
+                    border: '1px solid var(--sand-deeper)', background: 'white',
+                    fontSize: 13.5, fontWeight: 700, color: 'var(--ink)',
+                    cursor: logoUploading ? 'default' : 'pointer',
+                  }}
+                >
+                  {logoUploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                  {logoUploading ? 'Uploading…' : property.logo_url ? 'Replace logo' : 'Upload logo'}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    onChange={handleLogoUpload}
+                    disabled={logoUploading}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                {property.logo_url && (
+                  <button
+                    type="button"
+                    onClick={() => patchField('logo_url', '')}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6,
+                      padding: '10px 12px', borderRadius: 10, border: '1px solid var(--sand-deeper)',
+                      background: 'white', fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
+                    }}
+                  >
+                    <Trash2 size={14} /> Remove
+                  </button>
+                )}
               </div>
             </div>
           </div>

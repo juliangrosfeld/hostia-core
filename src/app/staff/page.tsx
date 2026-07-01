@@ -51,15 +51,17 @@ function StaffPageInner() {
   }
 
   const navUser = user ? { name: user.full_name, email: user.email, initials: user.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase(), role: user.role } : null
-  const navProperty = property ? { name: property.name, primaryColor: property.primary_color } : null
+  const navProperty = property ? { name: property.name, primaryColor: property.primary_color, logoUrl: property.logo_url } : null
+  // Expose the property's brand color to TopNav + hero via --brand-color.
+  const brandColor = property?.primary_color || '#1B2B4B'
 
   return (
-    <>
+    <div style={{ '--brand-color': brandColor } as React.CSSProperties}>
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
       {view === 'home' && <HomeView curriculum={curriculum} onOpenModule={openModule} viewingAs={viewingAs} property={property} />}
       {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} />}
       {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} />}
-    </>
+    </div>
   )
 }
 

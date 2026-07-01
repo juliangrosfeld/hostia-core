@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Check, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Check, AlertCircle, Upload, Loader2 } from 'lucide-react'
 
 const VENUE_TYPES = [
   { value: 'casual-dining', label: 'Casual Dining' },
@@ -39,8 +39,33 @@ export default function NewClientPage() {
   const [name, setName] = useState('')
   const [venueType, setVenueType] = useState('casual-dining')
   const [primaryColor, setPrimaryColor] = useState('#051956')
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file
+    if (!file) return
+    setUploading(true)
+    setError(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/upload-logo', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok || !data.url) {
+        setError(data.error || 'Failed to upload logo')
+      } else {
+        setLogoUrl(data.url)
+      }
+    } catch {
+      setError('Network error — please try again')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -56,6 +81,7 @@ export default function NewClientPage() {
           name: name.trim(),
           venue_type: venueType,
           primary_color: primaryColor,
+          logo_url: logoUrl,
         }),
       })
       const data = await res.json()
@@ -169,6 +195,47 @@ export default function NewClientPage() {
               onChange={(e) => setPrimaryColor(e.target.value)}
               style={{ ...inputStyle, fontFamily: 'monospace', maxWidth: 160 }}
             />
+          </div>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Logo</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div
+              style={{
+                width: 56, height: 56, borderRadius: 12, flexShrink: 0,
+                border: '1px solid var(--sand-deeper)',
+                background: logoUrl ? '#051956' : 'var(--sand-warm)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              {logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt="Logo preview" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
+              ) : (
+                <Upload size={18} color="var(--ink-soft)" />
+              )}
+            </div>
+            <label
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '10px 16px', borderRadius: 10,
+                border: '1px solid var(--sand-deeper)', background: 'white',
+                fontSize: 13.5, fontWeight: 700, color: 'var(--ink)',
+                cursor: uploading ? 'default' : 'pointer',
+              }}
+            >
+              {uploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+              {uploading ? 'Uploading…' : logoUrl ? 'Replace logo' : 'Upload logo'}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                onChange={handleLogoUpload}
+                disabled={uploading}
+                style={{ display: 'none' }}
+              />
+            </label>
           </div>
         </div>
 

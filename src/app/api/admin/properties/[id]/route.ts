@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 // Property columns the admin panel is allowed to edit inline.
-const EDITABLE_FIELDS = ['name', 'venue_type', 'primary_color'] as const
+const EDITABLE_FIELDS = ['name', 'venue_type', 'primary_color', 'logo_url'] as const
 
 // GET — a single property plus its module assignments and overrides.
 export async function GET(

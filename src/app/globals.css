@@ -396,7 +396,12 @@ body {
    STAFF CURRICULUM HOME
    ============================================================ */
 .hero-banner {
-  background: linear-gradient(135deg, #051956 0%, #0A2B7A 100%);
+  /* Brand-colored background from --brand-color (set on the page wrapper).
+     Solid fallback first for browsers without color-mix; #1B2B4B if unset. */
+  background: var(--brand-color, #1B2B4B);
+  background: linear-gradient(135deg,
+    var(--brand-color, #1B2B4B) 0%,
+    color-mix(in srgb, var(--brand-color, #1B2B4B) 62%, #000) 100%);
   border-radius: 28px; padding: 48px; color: var(--sand);
   position: relative; overflow: hidden;
 }
