@@ -7,21 +7,31 @@
 // today does not break the streak as long as yesterday had activity — only a
 // fully missed day breaks it.
 //
-// NOTE: day boundaries are UTC for now. Audit fix 6 moves them to
-// property-local time — in exactly one place: here.
+// Day boundaries are PROPERTY-LOCAL, not UTC. All current clients are in
+// Curaçao (America/Curacao, UTC−4 year-round, no DST), so a fixed offset is
+// exact — without it, anyone training after 20:00 local (00:00 UTC) had that
+// session credited to the next calendar day, silently breaking evening-shift
+// streaks. If clients in other timezones ever onboard, replace this constant
+// with a per-property timezone (properties.timezone) resolved by the callers.
 
 const DAY = 86_400_000;
+const PROPERTY_UTC_OFFSET_MS = -4 * 3_600_000; // America/Curacao (UTC−4)
 
-// Calendar-day bucket for an ISO timestamp.
+// Property-local calendar-day bucket for an epoch-ms timestamp.
+function localDayOf(ms: number): number {
+  return Math.floor((ms + PROPERTY_UTC_OFFSET_MS) / DAY);
+}
+
+// Property-local calendar-day bucket for an ISO timestamp.
 export function activityDayIndex(iso: string): number {
-  return Math.floor(Date.parse(iso) / DAY);
+  return localDayOf(Date.parse(iso));
 }
 
 export function computeStreak(
   activeDays: ReadonlySet<number>,
   now: number = Date.now(),
 ): number {
-  const today = Math.floor(now / DAY);
+  const today = localDayOf(now);
   // Start from today if it has activity; otherwise from yesterday so an
   // as-yet inactive today doesn't zero out an otherwise-live streak.
   const start = activeDays.has(today)
