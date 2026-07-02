@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { BarChart3, GraduationCap, Eye, BookOpen } from 'lucide-react';
-import { PROPERTY } from '@/lib/config';
 import type { StaffMember } from '@/lib/staff-data';
 import UserMenu from '@/components/UserMenu';
 
@@ -23,7 +22,8 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
   // Staff users may only see the Staff tab; manager/admin can preview as staff.
   const canManage = user?.role === 'manager' || user?.role === 'admin';
 
-  const propertyName = property?.name ?? PROPERTY.name;
+  // No placeholder fallback — with no property loaded, the pill is hidden.
+  const propertyName = property?.name ?? null;
   const initials = user?.initials ?? 'OE';
   const userName = user?.name ?? 'Manager';
 
@@ -37,34 +37,36 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
             {property?.logoUrl && (
               <img
                 src={property.logoUrl}
-                alt={propertyName}
+                alt={propertyName ?? 'Property logo'}
                 style={{ height: 32, width: 'auto', objectFit: 'contain' }}
               />
             )}
             <span className="brand-tag">BY GLAD AI</span>
           </Link>
 
-          {/* Center: property pill */}
-          <div
-            className="property-pill"
-            style={{
-              position: 'absolute',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              margin: 0,
-              pointerEvents: 'none',
-              // Brand-colored accent: text + tinted background/border derived
-              // from --brand-color (set on the page wrapper; #1B2B4B fallback).
-              color: 'var(--brand-color, #1B2B4B)',
-              background: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 9%, white)',
-              borderColor: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 22%, white)',
-            }}
-          >
-            {propertyName}
-          </div>
+          {/* Center: property pill (only when a property name is loaded) */}
+          {propertyName && (
+            <div
+              className="property-pill"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                margin: 0,
+                pointerEvents: 'none',
+                // Brand-colored accent: text + tinted background/border derived
+                // from --brand-color (set on the page wrapper; #1B2B4B fallback).
+                color: 'var(--brand-color, #1B2B4B)',
+                background: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 9%, white)',
+                borderColor: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 22%, white)',
+              }}
+            >
+              {propertyName}
+            </div>
+          )}
 
           {/* Right: role switcher + avatar */}
           <div className="nav-right">

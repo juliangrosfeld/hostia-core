@@ -4,9 +4,10 @@
 // real Supabase-backed metrics. Keep this in sync with the demo property's row id.
 export const DEMO_PROPERTY_ID = 'f86752e5-f7f1-46a2-acd3-90764ce1c403';
 
+// NOTE: the old `name`/`fullName` placeholder fields ('[Property Name]') were
+// removed — property names always come from the DB (properties.name / the
+// property_name override). Never reintroduce a display-name fallback here.
 export const PROPERTY = {
-  name: '[Property Name]',
-  fullName: '[Property Name]',
   location: 'Curaçao',
   type: 'hospitality',
   manager: 'Manager',

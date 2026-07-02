@@ -528,7 +528,7 @@ export default function HomeView({
         {/* Gold standard quote — brand-colored background, matching the hero */}
         <div style={{ margin: '32px 0', padding: '20px 28px', background: 'linear-gradient(135deg, var(--brand-color, #1B2B4B) 0%, color-mix(in srgb, var(--brand-color, #1B2B4B) 62%, #000) 100%)', borderRadius: 16 }}>
           <div className="label-mono" style={{ color: 'var(--brand)', marginBottom: 8 }}>
-            {PROPERTY.name} standard
+            {property?.name ? `${property.name} standard` : 'Our standard'}
           </div>
           <p style={{ fontFamily: 'Fraunces, serif', fontSize: 17, color: 'rgba(250,247,242,0.9)', lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
             &ldquo;{PROPERTY.goldStandard}&rdquo;

@@ -15,7 +15,6 @@ import {
   STAFF, SKILL_LABELS, TREND_DATA, RECENT_ACTIVITY,
   type StaffMember,
 } from '@/lib/staff-data';
-import { PROPERTY } from '@/lib/config';
 import { useUser } from '@/lib/useUser';
 
 import KpiCard, { Sparkline } from './KpiCard';
@@ -404,7 +403,8 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const managerFirstName = user?.full_name?.trim()
     ? user.full_name.trim().split(/\s+/)[0]
     : (user?.email ? user.email.split('@')[0] : '');
-  const propertyName = property?.name ?? PROPERTY.name;
+  // Neutral fallback — never surface the "[Property Name]" placeholder.
+  const propertyName = property?.name ?? 'your property';
 
   // Real-data plumbing. status drives which render path we take:
   //  - 'loading' → skeleton
@@ -1007,7 +1007,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
                     <Trash2 size={22} color="var(--coral-deep)" />
                   </div>
                   <h2 className="display" style={{ fontSize: 22, color: 'var(--brand-deep)', margin: '0 0 8px' }}>
-                    Remove {editTarget?.name.split(' ')[0]} from [Property]?
+                    Remove {editTarget?.name.split(' ')[0]} from {propertyName}?
                   </h2>
                   <p style={{ fontSize: 14, color: 'var(--ink-soft)', lineHeight: 1.55, margin: 0 }}>
                     This cannot be undone.

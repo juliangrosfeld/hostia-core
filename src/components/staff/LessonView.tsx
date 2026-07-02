@@ -40,10 +40,11 @@ interface LessonViewProps {
   setPhase: (p: Phase) => void;
   onBack: () => void;
   completedKeys: ReadonlySet<string>;
+  propertyName?: string | null;
 }
 
 export default function LessonView({
-  module, lesson, lessonIndex, phase, setPhase, onBack, completedKeys,
+  module, lesson, lessonIndex, phase, setPhase, onBack, completedKeys, propertyName,
 }: LessonViewProps) {
   // Apply ("Live roleplay") only exists for lessons backed by a scenario.
   // Onboarding lessons have no scenarioId, so they show only Learn & Practice.
@@ -118,7 +119,7 @@ export default function LessonView({
           <PracticePhase lesson={lesson} moduleId={module.id} onAdvance={hasApply ? () => setPhase('apply') : onBack} />
         )}
         {effectivePhase === 'apply' && hasApply && (
-          <ApplyPhase lesson={lesson} moduleId={module.id} onComplete={onBack} />
+          <ApplyPhase lesson={lesson} moduleId={module.id} onComplete={onBack} propertyName={propertyName} />
         )}
       </div>
     </div>

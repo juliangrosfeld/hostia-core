@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense, useEffect } from 'react'
+import { useState, Suspense, useEffect, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import TopNav from '@/components/TopNav'
 import HomeView from '@/components/staff/HomeView'
@@ -13,6 +13,7 @@ import { useCurriculum } from '@/lib/useCurriculum'
 import { useLessonCompletions } from '@/lib/useLessonCompletions'
 import { useHomeProgress } from '@/lib/useHomeProgress'
 import { useStaffXPAndStreak } from '@/lib/useStaffXPAndStreak'
+import { substitutePropertyDeep } from '@/lib/substitute-property'
 
 type StaffView = 'home' | 'module' | 'lesson'
 type Phase = 'learn' | 'practice' | 'apply'
@@ -21,7 +22,20 @@ function StaffPageInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, property, loading } = useUser()
-  const { curriculum, phaseData, loading: curriculumLoading } = useCurriculum()
+  const { curriculum: rawCurriculum, phaseData: rawPhaseData, loading: curriculumLoading } = useCurriculum()
+  // Curriculum content is authored against the "[Property]" placeholder
+  // (lesson intros, quiz questions, do/don't cards…). Substitute the real
+  // property name ONCE at this boundary so no view below ever renders the
+  // literal placeholder.
+  const propertyName = property?.name ?? null
+  const curriculum = useMemo(
+    () => substitutePropertyDeep(rawCurriculum, propertyName),
+    [rawCurriculum, propertyName],
+  )
+  const phaseData = useMemo(
+    () => (rawPhaseData ? substitutePropertyDeep(rawPhaseData, propertyName) : null),
+    [rawPhaseData, propertyName],
+  )
   const asId = searchParams.get('as')
   const viewingAs = asId ? (STAFF.find((s) => s.id === asId) ?? null) : null
   // Real staff → their completed lessons; manager "view as" keeps mock status.
@@ -66,7 +80,7 @@ function StaffPageInner() {
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
       {view === 'home' && <HomeView curriculum={curriculum} phaseData={phaseData} progress={progress} earnedXp={earnedXp} streak={streak} onOpenModule={openModule} viewingAs={viewingAs} property={property} />}
       {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} />}
-      {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} />}
+      {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} propertyName={propertyName} />}
     </div>
   )
 }

@@ -3,27 +3,42 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { SCENARIOS } from '@/lib/scenarios';
+import { substituteProperty } from '@/lib/substitute-property';
 
-// Look up the caller's property `scenario_context` override, if one is
-// configured. This lets the admin panel give every roleplay scenario the
-// client's specific venue context without touching scenario code. Read with
-// the service-role client because property_overrides is RLS-closed.
-async function getScenarioContext(propertyId: string | null): Promise<string | null> {
-  if (!propertyId) return null;
+interface PropertyPromptConfig {
+  scenarioContext: string | null;
+  propertyName: string | null;
+}
+
+// Look up what the caller's property contributes to the prompt: the
+// `scenario_context` override (admin-authored venue context) and the property
+// name used to replace the "[Property]" placeholder in scenario copy. The
+// `property_name` override wins over the canonical properties.name — that key
+// exists precisely to control prompt wording. Read with the service-role
+// client because property_overrides is RLS-closed.
+async function getPropertyPromptConfig(propertyId: string | null): Promise<PropertyPromptConfig> {
+  if (!propertyId) return { scenarioContext: null, propertyName: null };
   try {
     const admin = createAdminClient();
-    const { data: override } = await admin
-      .from('property_overrides')
-      .select('value')
-      .eq('property_id', propertyId)
-      .eq('key', 'scenario_context')
-      .maybeSingle();
+    const [propRes, overrideRes] = await Promise.all([
+      admin.from('properties').select('name').eq('id', propertyId).single(),
+      admin
+        .from('property_overrides')
+        .select('key, value')
+        .eq('property_id', propertyId)
+        .in('key', ['scenario_context', 'property_name']),
+    ]);
 
-    const value = override?.value?.trim();
-    return value ? value : null;
+    const overrides = new Map(
+      (overrideRes.data ?? []).map((o) => [o.key as string, (o.value as string | null)?.trim()])
+    );
+    return {
+      scenarioContext: overrides.get('scenario_context') || null,
+      propertyName: overrides.get('property_name') || propRes.data?.name?.trim() || null,
+    };
   } catch {
-    // Context is an enhancement — never block the roleplay on a lookup failure.
-    return null;
+    // Config is an enhancement — never block the roleplay on a lookup failure.
+    return { scenarioContext: null, propertyName: null };
   }
 }
 
@@ -137,10 +152,17 @@ export async function POST(request: NextRequest) {
     .select('property_id')
     .eq('auth_id', user.id)
     .single();
-  const scenarioContext = await getScenarioContext(profile?.property_id ?? null);
+  const { scenarioContext, propertyName } = await getPropertyPromptConfig(
+    profile?.property_id ?? null
+  );
   if (scenarioContext) {
     systemPrompt = `${systemPrompt}\n\nVENUE CONTEXT (use this for all property-specific details):\n${stripHtml(scenarioContext)}`;
   }
+
+  // Replace the "[Property]" placeholder AFTER assembly so occurrences in the
+  // admin-authored context are covered too. Without this, the model is told
+  // it's at "[Property]" and can echo the literal placeholder back to staff.
+  systemPrompt = substituteProperty(systemPrompt, propertyName);
 
   const conversationText =
     Array.isArray(conversationHistory) && conversationHistory.length > 0

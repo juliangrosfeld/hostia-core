@@ -27,6 +27,7 @@ import {
 import type { StaffMember } from '@/lib/staff-data';
 import { SKILL_LABELS } from '@/lib/staff-data';
 import { getModuleSkillScore, getWarmthLabel } from '@/lib/xp';
+import { substitutePropertyDeep } from '@/lib/substitute-property';
 
 // ─── Schema-shaped types (match roleplay_sessions) ───────────
 
@@ -226,9 +227,10 @@ interface StaffProfileProps {
   staff: StaffMember;
   onBack: () => void;
   onViewAs?: (s: StaffMember) => void;
+  propertyName?: string | null;
 }
 
-export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfileProps) {
+export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName }: StaffProfileProps) {
   const [openSession, setOpenSession] = useState<RoleplaySession | null>(null);
   const [note, setNote] = useState('');
 
@@ -253,7 +255,9 @@ export default function StaffProfile({ staff: s, onBack, onViewAs }: StaffProfil
   const radarData = modules.map((m) => ({ skill: m.name, value: m.warmth, fullMark: 100 }));
 
   // Recent roleplay sessions (last 3, mock).
-  const recentSessions = buildRecentSessions(s);
+  // Mock transcripts are authored against the "[Property]" placeholder —
+  // substitute the real name so the drill-in never shows the literal token.
+  const recentSessions = substitutePropertyDeep(buildRecentSessions(s), propertyName);
 
   return (
     <div className="mgr-page animate-fade-up">

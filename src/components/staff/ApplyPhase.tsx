@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Send, RotateCcw, Loader2, Lightbulb, Heart, Play, Zap, Brain, Trophy } from 'lucide-react';
 import { SCENARIOS } from '@/lib/scenarios';
 import type { Lesson } from '@/lib/curriculum';
 import { calculateRoleplayXP, getWarmthLabel } from '@/lib/xp';
 import { logLessonCompletion, logRoleplaySession } from '@/lib/completions';
+import { substitutePropertyDeep } from '@/lib/substitute-property';
 
 // ─── Constants ────────────────────────────────────────────────
 
@@ -114,10 +115,17 @@ interface ApplyPhaseProps {
   lesson: Lesson;
   moduleId: string;
   onComplete: () => void;
+  propertyName?: string | null;
 }
 
-export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseProps) {
-  const scenario = lesson.scenarioId ? SCENARIOS[lesson.scenarioId] : null;
+export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName }: ApplyPhaseProps) {
+  // Scenario copy (title, description, goal, opening…) is authored against the
+  // "[Property]" placeholder — substitute the real property name once, up
+  // front, so every render site below shows the client's name.
+  const scenario = useMemo(() => {
+    const raw = lesson.scenarioId ? SCENARIOS[lesson.scenarioId] : null;
+    return raw ? substitutePropertyDeep(raw, propertyName) : null;
+  }, [lesson.scenarioId, propertyName]);
   const startingWarmth = scenario?.startingWarmth ?? 5;
 
   const [started, setStarted] = useState(false);
@@ -672,7 +680,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseP
             <div style={{ position: 'relative' }}>
               <textarea
                 className="input-field"
-                placeholder="Respond as the server at [Property]…"
+                placeholder={`Respond as the server${propertyName?.trim() ? ` at ${propertyName.trim()}` : ''}…`}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
