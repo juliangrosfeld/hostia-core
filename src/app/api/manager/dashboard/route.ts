@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { CURRICULUM, resolveCurriculum, type Module } from '@/lib/curriculum';
+import { activityDayIndex, computeStreak } from '@/lib/streak';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -36,7 +37,10 @@ interface StaffSkills {
   greetings: number; serviceFlow: number; language: number; complaints: number;
   floor: number; guestPsychology: number; casualDiningFloor: number;
 }
-interface StaffRow { id: string; full_name: string | null; last_active: string | null; xp: number | null; streak_days: number | null; }
+// NOTE: users.xp / users.streak_days are dead columns (never written). XP and
+// streaks are COMPUTED from roleplay_sessions + lesson_completions below — the
+// same source /api/staff/xp-streak uses, so staff hero and roster always agree.
+interface StaffRow { id: string; full_name: string | null; last_active: string | null; }
 interface SessionRow { staff_id: string; module_id: string; warmth_score: number; xp_earned: number | null; passed: boolean; completed_at: string; }
 interface CompletionRow { staff_id: string; module_id: string; lesson_id: string; phase: string; completed_at: string; }
 
@@ -144,7 +148,7 @@ export async function GET(req: Request) {
   const [staffRes, sessionRes, completionRes, moduleRes, phasesRes, phaseCompletionRes] = await Promise.all([
     supabase
       .from('users')
-      .select('id, full_name, last_active, xp, streak_days')
+      .select('id, full_name, last_active')
       .eq('property_id', propertyId)
       .eq('role', 'staff'),
     supabase
@@ -186,6 +190,22 @@ export async function GET(req: Request) {
   const allSessions: SessionRow[] = (sessionRes.data ?? []) as SessionRow[];
   const allCompletions: CompletionRow[] = (completionRes.data ?? []) as CompletionRow[];
   const modules: Module[] = resolveCurriculum(moduleRes.data);
+
+  // ── Streaks ────────────────────────────────────────────────────────────────
+  // Per-staff activity day-sets (roleplays + lesson completions) → streaks via
+  // the shared lib/streak.ts math (same definition as the staff hero). Built
+  // from the UNfiltered activity so a phase filter never shortens a streak.
+  const activeDaysByStaff = new Map<string, Set<number>>();
+  const addActiveDay = (staffId: string, iso: string | null) => {
+    if (!iso) return;
+    const set = activeDaysByStaff.get(staffId) ?? new Set<number>();
+    set.add(activityDayIndex(iso));
+    activeDaysByStaff.set(staffId, set);
+  };
+  for (const s of allSessions) addActiveDay(s.staff_id, s.completed_at);
+  for (const c of allCompletions) addActiveDay(c.staff_id, c.completed_at);
+  const streakOf = (staffId: string): number =>
+    computeStreak(activeDaysByStaff.get(staffId) ?? new Set<number>());
 
   // ── Phase placement ───────────────────────────────────────────────────────
   // A staff member's CURRENT phase = the lowest-numbered phase they haven't yet
@@ -363,7 +383,7 @@ export async function GET(req: Request) {
         full_name: su.full_name ?? '',
         first_name: firstName(su.full_name),
         badges: applyBadgesByStaff.get(topId) ?? 0,
-        streak: su.streak_days ?? 0,
+        streak: streakOf(topId),
         score: w.length ? round(avg(w)) : 0,
       };
     }
@@ -420,7 +440,8 @@ export async function GET(req: Request) {
       const sessionCount = sessionsCountByStaff.get(s.id) ?? 0;
       const myWarmth = warmthByStaff.get(s.id) ?? [];
       const score = myWarmth.length ? round(avg(myWarmth)) : 0;
-      const xp = s.xp ?? 0;
+      // Computed roleplay XP — the same SUM(xp_earned) the staff hero shows.
+      const xp = xpByStaff.get(s.id) ?? 0;
       const active = Boolean(s.last_active) && ts(s.last_active) >= d7;
       const hasHistory = lessonsDone > 0 || sessionCount > 0;
 
@@ -447,7 +468,7 @@ export async function GET(req: Request) {
         dept: 'Floor',
         level: Math.max(1, Math.floor(xp / 200) + 1),
         xp,
-        streak: s.streak_days ?? 0,
+        streak: streakOf(s.id),
         score,
         lessons: lessonsDone,
         total: totalLessons,
