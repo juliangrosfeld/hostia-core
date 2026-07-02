@@ -249,8 +249,10 @@ export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseP
   useEffect(() => () => { if (thinkRef.current) clearInterval(thinkRef.current); }, []);
 
   // ── API helper: one attempt with a 15 s hard timeout ────────
+  // The server resolves the system prompt from the scenario catalog — the
+  // client sends only the scenario id (never the prompt itself).
   const callRoleplayAPI = async (
-    systemPrompt: string,
+    scenarioId: string,
     history: Message[],
     staffMessage: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -261,7 +263,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseP
       const res = await fetch('/api/roleplay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ systemPrompt, conversationHistory: history, staffMessage }),
+        body: JSON.stringify({ scenarioId, conversationHistory: history, staffMessage }),
         signal: controller.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -272,7 +274,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseP
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading || done || !scenario) return;
+    if (!input.trim() || isLoading || done || !scenario || !lesson.scenarioId) return;
 
     const elapsed = (Date.now() - turnStartRef.current) / 1000;
     const wasQuick = elapsed < timerSeconds * 0.5;
@@ -301,7 +303,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseP
         await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       }
       try {
-        data = await callRoleplayAPI(scenario.systemPrompt, history, savedInput);
+        data = await callRoleplayAPI(lesson.scenarioId, history, savedInput);
         lastErr = null;
         break;
       } catch (err) {

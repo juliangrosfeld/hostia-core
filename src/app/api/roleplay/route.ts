@@ -2,29 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { SCENARIOS } from '@/lib/scenarios';
 
-// Look up the signed-in staff member's property and return its `scenario_context`
-// override, if one is configured. This lets the admin panel give every roleplay
-// scenario the client's specific venue context without touching scenario code.
-// Read with the service-role client because property_overrides is RLS-closed.
-async function getScenarioContext(): Promise<string | null> {
+// Look up the caller's property `scenario_context` override, if one is
+// configured. This lets the admin panel give every roleplay scenario the
+// client's specific venue context without touching scenario code. Read with
+// the service-role client because property_overrides is RLS-closed.
+async function getScenarioContext(propertyId: string | null): Promise<string | null> {
+  if (!propertyId) return null;
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
-
-    const { data: profile } = await supabase
-      .from('users')
-      .select('property_id')
-      .eq('auth_id', user.id)
-      .single();
-    if (!profile?.property_id) return null;
-
     const admin = createAdminClient();
     const { data: override } = await admin
       .from('property_overrides')
       .select('value')
-      .eq('property_id', profile.property_id)
+      .eq('property_id', propertyId)
       .eq('key', 'scenario_context')
       .maybeSingle();
 
@@ -37,6 +28,8 @@ async function getScenarioContext(): Promise<string | null> {
 }
 
 // ── Rate limiter ─────────────────────────────────────────────────────────────
+// Per-instance, in-memory — a cheap first shield, not the security boundary.
+// The security boundary is the auth check below.
 const RATE_LIMIT = 30;
 const WINDOW_MS = 60_000;
 
@@ -71,14 +64,27 @@ function stripHtml(str: string): string {
 }
 
 // ── Route handler ────────────────────────────────────────────────────────────
+// SECURITY MODEL: this route spends Anthropic API credit, so it requires a
+// signed-in user, and the system prompt is resolved SERVER-SIDE from the
+// scenario catalog (the client sends only a scenarioId). Never accept a
+// client-supplied prompt here — that turns the endpoint into a general-purpose
+// LLM proxy on our API key.
 export async function POST(request: NextRequest) {
-  // Rate limit check
+  // Rate limit check — cheap shield before any DB work.
   const ip = getIp(request);
   if (isRateLimited(ip)) {
     return NextResponse.json(
       { error: 'Too many requests. Please wait before trying again.' },
       { status: 429, headers: { 'Retry-After': '60' } }
     );
+  }
+
+  // Auth — must be a signed-in user (any role; staff run roleplays, managers
+  // and admins preview them).
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   // Key guard
@@ -94,46 +100,46 @@ export async function POST(request: NextRequest) {
   const client = new Anthropic({ apiKey });
 
   // Parse body
-  let body: { systemPrompt?: unknown; conversationHistory?: unknown; staffMessage?: unknown };
+  let body: { scenarioId?: unknown; conversationHistory?: unknown; staffMessage?: unknown };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
   }
 
-  // Validate required fields exist and are strings
-  const { systemPrompt, conversationHistory, staffMessage } = body;
+  const { scenarioId, conversationHistory, staffMessage } = body;
 
-  if (typeof systemPrompt !== 'string' || !systemPrompt.trim()) {
-    return NextResponse.json({ error: 'Missing or invalid field: systemPrompt' }, { status: 400 });
+  if (typeof scenarioId !== 'string' || !SCENARIOS[scenarioId]) {
+    return NextResponse.json({ error: 'Missing or unknown field: scenarioId' }, { status: 400 });
   }
   if (typeof staffMessage !== 'string' || !staffMessage.trim()) {
     return NextResponse.json({ error: 'Missing or invalid field: staffMessage' }, { status: 400 });
   }
 
-  // Length checks
+  // Length check
   if (staffMessage.length > 500) {
     return NextResponse.json(
       { error: 'staffMessage exceeds maximum length of 500 characters' },
       { status: 400 }
     );
   }
-  if (systemPrompt.length > 5000) {
-    return NextResponse.json(
-      { error: 'systemPrompt exceeds maximum length of 5000 characters' },
-      { status: 400 }
-    );
-  }
 
-  // Sanitize inputs
+  // Sanitize the user-supplied message
   const cleanStaffMessage = stripHtml(staffMessage);
 
+  // Server-side system prompt: the scenario catalog is the source of truth.
+  let systemPrompt = SCENARIOS[scenarioId].systemPrompt;
+
   // Inject the client's venue context (configured in the GLAD AI admin panel)
-  // into the system prompt so the AI guest behaves as if it's at their property.
-  let cleanSystemPrompt = stripHtml(systemPrompt);
-  const scenarioContext = await getScenarioContext();
+  // so the AI guest behaves as if it's at their property.
+  const { data: profile } = await supabase
+    .from('users')
+    .select('property_id')
+    .eq('auth_id', user.id)
+    .single();
+  const scenarioContext = await getScenarioContext(profile?.property_id ?? null);
   if (scenarioContext) {
-    cleanSystemPrompt = `${cleanSystemPrompt}\n\nVENUE CONTEXT (use this for all property-specific details):\n${stripHtml(scenarioContext)}`;
+    systemPrompt = `${systemPrompt}\n\nVENUE CONTEXT (use this for all property-specific details):\n${stripHtml(scenarioContext)}`;
   }
 
   const conversationText =
@@ -148,7 +154,7 @@ export async function POST(request: NextRequest) {
     const message = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1000,
-      system: cleanSystemPrompt,
+      system: systemPrompt,
       messages: [
         {
           role: 'user',
