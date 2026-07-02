@@ -5,7 +5,7 @@ import { Send, RotateCcw, Loader2, Lightbulb, Heart, Play, Zap, Brain, Trophy } 
 import { SCENARIOS } from '@/lib/scenarios';
 import type { Lesson } from '@/lib/curriculum';
 import { calculateRoleplayXP, getWarmthLabel } from '@/lib/xp';
-import { logLessonCompletion } from '@/lib/completions';
+import { logLessonCompletion, logRoleplaySession } from '@/lib/completions';
 
 // ─── Constants ────────────────────────────────────────────────
 
@@ -153,14 +153,41 @@ export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseP
     }
   }, [messages, isLoading]);
 
-  // Log the Apply completion only on a passed roleplay (failed/capped sessions
-  // don't count as completions). This is SEPARATE from the roleplay_sessions
-  // row (warmth score + transcript) — both fire on a pass. Fire-and-forget.
+  // Persist the finished run. Two separate writes, both fire-and-forget:
+  //  • roleplay_sessions — EVERY finished run, passed or failed (warmth score,
+  //    turns, transcript). Feeds hero XP + all manager warmth metrics.
+  //  • lesson_completions — the Apply completion, on a PASS only
+  //    (failed/capped sessions don't count as completions).
+  // Sessions aren't idempotent (each attempt is its own row), so a ref guards
+  // against logging the same run twice; resetScenario re-arms it for a retry.
+  const sessionLoggedRef = useRef(false);
   useEffect(() => {
-    if (done && passed) {
+    if (!done || sessionLoggedRef.current) return;
+    sessionLoggedRef.current = true;
+
+    if (lesson.scenarioId) {
+      logRoleplaySession({
+        module_id: moduleId,
+        lesson_id: lesson.id,
+        scenario_id: lesson.scenarioId,
+        passed,
+        // API warmth is 1-10; the stored performance signal is 0-100 (×10),
+        // matching the done-screen display and the manager dashboard.
+        warmth_score: warmth * 10,
+        turns: turnCount,
+        transcript: messages
+          .filter((m) => m.role !== 'system')
+          .map((m) => ({
+            role: m.role === 'staff' ? ('user' as const) : ('assistant' as const),
+            content: m.text,
+          })),
+      });
+    }
+
+    if (passed) {
       logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'apply' });
     }
-  }, [done, passed, moduleId, lesson.id]);
+  }, [done, passed, moduleId, lesson.id, lesson.scenarioId, warmth, turnCount, messages]);
 
   const handleTimerExpire = useCallback(() => {
     if (done || isLoading) return;
@@ -172,6 +199,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete }: ApplyPhaseP
   }, [done, isLoading]);
 
   const resetScenario = () => {
+    sessionLoggedRef.current = false; // re-arm session logging for the retry
     setStarted(false);
     setMessages([]);
     setWarmth(startingWarmth);
