@@ -8,10 +8,14 @@ interface InsightCardProps {
   icon: ElementType;
   title: string;
   body: string;
-  cta: string;
+  /** CTA renders only when BOTH label and handler are provided — an insight
+   *  with no action is informational, and a button that does nothing is worse
+   *  than no button. */
+  cta?: string;
+  onCta?: () => void;
 }
 
-export default function InsightCard({ tone, icon: Icon, title, body, cta }: InsightCardProps) {
+export default function InsightCard({ tone, icon: Icon, title, body, cta, onCta }: InsightCardProps) {
   return (
     <div className={`insight-card insight-${tone}`}>
       <div className="insight-icon">
@@ -20,9 +24,11 @@ export default function InsightCard({ tone, icon: Icon, title, body, cta }: Insi
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="insight-title">{title}</div>
         <div className="insight-body">{body}</div>
-        <button className="insight-cta">
-          {cta} <ChevronRight size={12} />
-        </button>
+        {cta && onCta && (
+          <button className="insight-cta" onClick={onCta}>
+            {cta} <ChevronRight size={12} />
+          </button>
+        )}
       </div>
     </div>
   );

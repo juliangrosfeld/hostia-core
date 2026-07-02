@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import {
-  Bell, Activity, Users, GraduationCap, Award,
+  Activity, Users, GraduationCap, Award,
   TrendingUp, TrendingDown, AlertTriangle, Star, AlertCircle,
-  Check, Play, MessageSquare, Plus, Pencil, X, Trash2, Loader2,
+  Check, Play, MessageSquare, Plus, X, Trash2, Loader2,
 } from 'lucide-react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
@@ -37,7 +37,7 @@ interface DashboardData {
   insights: {
     weakestSkill: { module_id: string; module_title: string; score: number; message: string } | null;
     atRiskStaff: { count: number; names: string[]; message: string };
-    topPerformer: { full_name: string; first_name: string; badges: number; streak: number; score: number } | null;
+    topPerformer: { id: string; full_name: string; first_name: string; badges: number; streak: number; score: number } | null;
   };
   roster: StaffMember[];
   phaseDistribution: PhaseDistEntry[];
@@ -714,6 +714,12 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
     ? (tp ? `View ${tp.first_name}` : 'See roster')
     : (stars[0] ? `View ${stars[0].name.split(' ')[0]}` : 'See roster');
 
+  // Star insight CTA target — the top performer's roster entry (real) or the
+  // first mock star (demo). No target → the card renders without a CTA.
+  const starTarget: StaffMember | null = isReal
+    ? (tp ? staffList.find((m) => m.id === tp.id) ?? null : null)
+    : (stars[0] ?? null);
+
   // ── Render ───────────────────────────────────────────────
   if (status === 'loading') return <DashboardSkeleton />;
 
@@ -731,7 +737,8 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
           <div className="mgr-meta">
             <div className="mgr-meta-item"><Users size={14} />{displayStaffCount} staff</div>
             <div className="mgr-meta-item"><Activity size={14} />{displayActive} active this week</div>
-            <button className="btn-brand-sm"><Bell size={13} /> Send team nudge</button>
+            {/* "Send team nudge" removed — the nudge feature doesn't exist yet;
+                restore the button together with the feature, never before. */}
           </div>
         </div>
 
@@ -865,27 +872,30 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
         </div>
 
         {/* ─ Insights ─ */}
+        {/* The weakest-skill and at-risk cards are informational for now — their
+            "Assign to team" / "Send nudge" CTAs were dead buttons and come back
+            only when those features ship. The star card's CTA opens the
+            performer's roster profile. */}
         <div className="insight-row">
           <InsightCard
             tone="warn"
             icon={AlertTriangle}
             title={insightWeakestTitle}
             body={insightWeakestBody}
-            cta="Assign to team"
           />
           <InsightCard
             tone="alert"
             icon={AlertCircle}
             title={`${displayAtRisk} staff at risk`}
             body={insightAtRiskBody}
-            cta="Send nudge"
           />
           <InsightCard
             tone="good"
             icon={Star}
             title={insightStarTitle}
             body={insightStarBody}
-            cta={insightStarCta}
+            cta={starTarget ? insightStarCta : undefined}
+            onCta={starTarget ? () => onOpenStaff(starTarget) : undefined}
           />
         </div>
 
@@ -942,7 +952,11 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
               key={s.id}
               staff={s}
               onClick={() => onOpenStaff(s)}
-              onEdit={() => openEdit(s)}
+              // Edit only mutates local state (name/role/color aren't persisted
+              // anywhere yet), so it's demo-only — on a real property the change
+              // would silently revert on the next refetch. Delete is the
+              // opposite: only real properties have an API-backed delete.
+              onEdit={isReal ? undefined : () => openEdit(s)}
               onDelete={isReal ? () => setDeleteStaffTarget(s) : undefined}
             />
           ))}

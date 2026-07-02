@@ -373,13 +373,14 @@ export async function GET(req: Request) {
     if (xp > topXp) { topXp = xp; topId = sid; }
   }
   let topPerformer: {
-    full_name: string; first_name: string; badges: number; streak: number; score: number;
+    id: string; full_name: string; first_name: string; badges: number; streak: number; score: number;
   } | null = null;
   if (topId && topXp > 0) {
     const su = staff.find((s) => s.id === topId);
     if (su) {
       const w = warmthByStaff.get(topId) ?? [];
       topPerformer = {
+        id: topId, // lets the client's "View {name}" CTA open the right roster profile
         full_name: su.full_name ?? '',
         first_name: firstName(su.full_name),
         badges: applyBadgesByStaff.get(topId) ?? 0,

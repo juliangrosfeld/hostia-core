@@ -12,7 +12,10 @@ const STATUS_LABEL: Record<StaffMember['status'], string> = {
   new: 'New',
 };
 
-export default function StaffRow({ staff: s, onClick, onEdit, onDelete }: { staff: StaffMember; onClick: () => void; onEdit: () => void; onDelete?: () => void }) {
+// onEdit / onDelete are optional — the parent passes only the actions that are
+// real on its data path (edit is demo-only until a persistence endpoint exists;
+// delete is real-property-only). A missing handler hides the button entirely.
+export default function StaffRow({ staff: s, onClick, onEdit, onDelete }: { staff: StaffMember; onClick: () => void; onEdit?: () => void; onDelete?: () => void }) {
   const [hovered, setHovered] = useState(false);
   const pct = (s.lessons / s.total) * 100;
   const scoreColor =
@@ -83,7 +86,7 @@ export default function StaffRow({ staff: s, onClick, onEdit, onDelete }: { staf
 
       {/* Edit + delete + arrow */}
       <div style={{ width: 96, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
-        {hovered && (
+        {hovered && onEdit && (
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
             title="Edit staff member"
