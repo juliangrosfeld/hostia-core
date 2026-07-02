@@ -24,12 +24,13 @@ export default function LoginPage() {
     setError('')
 
     const supabase = createClient()
-    const { data, error } = await supabase.auth.signInWithPassword({
+    // NOTE: never log the sign-in result — `data.session` contains the access
+    // and refresh tokens, and anything in the console is visible to browser
+    // extensions, screen shares, and support screenshots.
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-
-    console.log('Auth result:', { data, error })
 
     if (error) {
       setError(error.message)
