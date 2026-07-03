@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronRight, Check, Trophy, Star } from 'lucide-react';
+import { ChevronRight, Check, Trophy, Star, RotateCcw } from 'lucide-react';
 import type { Lesson } from '@/lib/curriculum';
 import { logLessonCompletion } from '@/lib/completions';
+import { PRACTICE_PASS_RATIO } from '@/lib/config';
 
 interface PracticePhaseProps {
   lesson: Lesson;
@@ -19,13 +20,25 @@ export default function PracticePhase({ lesson, moduleId, onAdvance }: PracticeP
 
   const quiz = lesson.quiz;
 
-  // Log the practice completion once the quiz is finished (all questions
-  // answered — there's no pass threshold, completing counts). Fire-and-forget.
+  // Passing requires PRACTICE_PASS_RATIO of the questions correct (4/5 on the
+  // standard quiz). Advancing — and the practice completion — is gated on it.
+  const passNeeded = Math.ceil(quiz.length * PRACTICE_PASS_RATIO);
+  const passed = score >= passNeeded;
+
+  // Log the practice completion once the quiz is finished AND passed.
+  // Fire-and-forget; a failed run logs nothing so retrying stays required.
   useEffect(() => {
-    if (done) {
+    if (done && passed) {
       logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'practice' });
     }
-  }, [done, moduleId, lesson.id]);
+  }, [done, passed, moduleId, lesson.id]);
+
+  const retryQuiz = () => {
+    setQIdx(0);
+    setSelected(null);
+    setScore(0);
+    setDone(false);
+  };
 
   // If no quiz content for this lesson, advancing past it still completes the
   // practice phase for progress tracking.
@@ -75,30 +88,30 @@ export default function PracticePhase({ lesson, moduleId, onAdvance }: PracticeP
     const pct = Math.round((score / quiz.length) * 100);
     return (
       <div className="card" style={{ padding: 48, textAlign: 'center', animation: 'fadeUp 0.5s ease' }}>
-        <div style={{ width: 72, height: 72, margin: '0 auto 20px', borderRadius: '50%', background: pct >= 80 ? 'var(--sage)' : 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {pct >= 80
+        <div style={{ width: 72, height: 72, margin: '0 auto 20px', borderRadius: '50%', background: passed ? 'var(--sage)' : 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {passed
             ? <Trophy size={32} color="white" />
-            : <Star size={32} color={pct >= 80 ? 'white' : 'var(--brand-deep)'} />
+            : <Star size={32} color="var(--brand-deep)" />
           }
         </div>
-        <div className="label-mono">Practice complete</div>
+        <div className="label-mono">{passed ? 'Practice complete' : 'Not quite there yet'}</div>
         <h2 className="display" style={{ fontSize: 44, color: 'var(--brand-deep)', margin: '8px 0' }}>
           {score}/{quiz.length} correct
         </h2>
         <p style={{ color: 'var(--ink-soft)', fontSize: 15, maxWidth: 420, margin: '0 auto 28px', lineHeight: 1.6 }}>
           {pct === 100
             ? 'Perfect. You know this cold. Let\'s take it live.'
-            : pct >= 80
+            : passed
             ? 'Strong work. One quick review and you\'ll be flawless.'
-            : 'Solid start. Worth reviewing the cultural cues before the roleplay.'}
+            : `You need ${passNeeded}/${quiz.length} to move on. Review the feedback and give it another go — the questions stay the same.`}
         </p>
-        {lesson.scenarioId ? (
+        {passed ? (
           <button className="btn-brand" onClick={onAdvance}>
-            Try a live scenario <ChevronRight size={16} />
+            {lesson.scenarioId ? 'Try a live scenario' : 'Finish lesson'} <ChevronRight size={16} />
           </button>
         ) : (
-          <button className="btn-brand" onClick={onAdvance}>
-            Finish lesson <ChevronRight size={16} />
+          <button className="btn-brand" onClick={retryQuiz}>
+            <RotateCcw size={15} /> Retry quiz
           </button>
         )}
       </div>
