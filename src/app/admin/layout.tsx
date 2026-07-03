@@ -3,14 +3,15 @@
 import { useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Home, UserPlus, Library, Utensils, ChevronLeft } from 'lucide-react'
+import { Home, UserPlus, Utensils, ChevronLeft } from 'lucide-react'
 import { useUser } from '@/lib/useUser'
 import UserMenu from '@/components/UserMenu'
 
+// Module assignment lives on each client's detail page (the old standalone
+// "Module Library" page was hardwired to the demo property and was deleted).
 const NAV = [
   { href: '/admin', label: 'Home', icon: Home },
   { href: '/admin/clients/new', label: 'New Client', icon: UserPlus },
-  { href: '/admin/library', label: 'Module Library', icon: Library },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

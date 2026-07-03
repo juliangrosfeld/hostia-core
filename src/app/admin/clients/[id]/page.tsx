@@ -32,6 +32,11 @@ interface PropertyModule {
   module_id: string
   is_active: boolean
 }
+interface ModulePhaseAssignment {
+  module_id: string
+  phase_id: string
+  order_in_phase: number
+}
 interface Override {
   key: string
   value: string
@@ -260,6 +265,10 @@ export default function ClientDetailPage() {
   const [assigned, setAssigned] = useState<Set<string>>(new Set())
   const [overrides, setOverrides] = useState<Override[]>([])
   const [phases, setPhases] = useState<Phase[]>([])
+  // module→phase mapping from module_phase_assignments — the SAME source
+  // /api/curriculum uses for staff, so admin grouping can never drift from
+  // what staff actually see. (curriculum.ts carries no phase fields anymore.)
+  const [phaseAssignments, setPhaseAssignments] = useState<ModulePhaseAssignment[]>([])
 
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -352,11 +361,15 @@ export default function ClientDetailPage() {
   // grouped by phase. Re-runs whenever the venue type changes.
   useEffect(() => {
     const track = property?.venue_type
-    if (!track) { setPhases([]); return }
+    if (!track) { setPhases([]); setPhaseAssignments([]); return }
     let cancelled = false
     fetch(`/api/phases?track=${encodeURIComponent(track)}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!cancelled && d?.phases) setPhases(d.phases as Phase[]) })
+      .then((d) => {
+        if (cancelled || !d?.phases) return
+        setPhases(d.phases as Phase[])
+        setPhaseAssignments((d.assignments ?? []) as ModulePhaseAssignment[])
+      })
       .catch(() => {})
     return () => { cancelled = true }
   }, [property?.venue_type])
@@ -896,8 +909,12 @@ export default function ClientDetailPage() {
           )}
 
           {(() => {
-            // Group CURRICULUM modules by phase_id. Any module without a phase_id
-            // lands in the "to be categorized" bucket shown last.
+            // Group CURRICULUM modules by their module_phase_assignments row for
+            // THIS property's track. A module with no assignment in this track
+            // lands in the "to be categorized" bucket shown last — it never
+            // disappears (the old hardcoded-phase_id grouping made modules
+            // assigned to another track's phase vanish entirely).
+            const metaByModule = new Map(phaseAssignments.map((a) => [a.module_id, a]))
             const renderModuleButton = (m: typeof CURRICULUM[number]) => {
               const isAssigned = assigned.has(m.id)
               const busy = moduleBusy === m.id
@@ -951,12 +968,18 @@ export default function ClientDetailPage() {
               </div>
             )
 
-            const uncategorized = CURRICULUM.filter((m) => !m.phase_id)
+            const uncategorized = CURRICULUM.filter((m) => !metaByModule.get(m.id))
 
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 {phases.map((ph) => {
-                  const mods = CURRICULUM.filter((m) => m.phase_id === ph.id)
+                  const mods = CURRICULUM
+                    .filter((m) => metaByModule.get(m.id)?.phase_id === ph.id)
+                    .sort(
+                      (a, b) =>
+                        (metaByModule.get(a.id)?.order_in_phase ?? 999) -
+                        (metaByModule.get(b.id)?.order_in_phase ?? 999)
+                    )
                   return (
                     <div key={ph.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {groupHeading(`Phase ${ph.phase_number} — ${ph.title}`, ph.certification_title)}

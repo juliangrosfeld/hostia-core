@@ -328,12 +328,23 @@ export async function GET(req: Request) {
   const assignedModuleIds = new Set(
     (moduleRes.data ?? []).filter((m) => m.is_active).map((m) => m.module_id),
   );
-  // When a phase is selected, skill gaps scope to that phase's modules. Phase 1
-  // also owns the not-yet-categorized ("universal") modules with no phase_id.
+  // When a phase is selected, skill gaps scope to that phase's modules, with
+  // module→phase resolved from module_phase_assignments (the same source
+  // /api/curriculum uses — CURRICULUM carries no phase fields). Phase 1 also
+  // owns the not-yet-categorized ("universal") modules with no assignment.
   const phaseOneId = phaseList[0]?.id;
+  const modulePhaseById = new Map<string, string>();
+  if (selectedPhase && phaseList.length > 0) {
+    const { data: mpaRows } = await admin
+      .from('module_phase_assignments')
+      .select('module_id, phase_id')
+      .in('phase_id', phaseList.map((p) => p.id));
+    for (const r of mpaRows ?? []) modulePhaseById.set(r.module_id, r.phase_id);
+  }
   const inSelectedPhase = (m: Module): boolean => {
     if (!selectedPhase) return true;
-    if (m.phase_id) return m.phase_id === selectedPhase;
+    const phaseId = modulePhaseById.get(m.id);
+    if (phaseId) return phaseId === selectedPhase;
     return selectedPhase === phaseOneId;
   };
   const skillGaps = modules

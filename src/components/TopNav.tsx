@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BarChart3, GraduationCap, Eye, BookOpen } from 'lucide-react';
+import { BarChart3, GraduationCap, Eye } from 'lucide-react';
 import type { StaffMember } from '@/lib/staff-data';
 import UserMenu from '@/components/UserMenu';
 
@@ -17,8 +17,6 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
   const pathname = usePathname();
   const isManager = pathname.startsWith('/manager');
   const isStaff = pathname.startsWith('/staff');
-  const isLibrary = pathname.startsWith('/admin/library');
-  const isAdmin = user?.role === 'admin';
   // Staff users may only see the Staff tab; manager/admin can preview as staff.
   const canManage = user?.role === 'manager' || user?.role === 'admin';
 
@@ -103,16 +101,8 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
                 <GraduationCap size={13} />
                 Staff
               </Link>
-              {isAdmin && (
-                <Link
-                  href="/admin/library"
-                  className={isLibrary ? 'is-active' : ''}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <BookOpen size={13} />
-                  Library
-                </Link>
-              )}
+              {/* Admin tools live in the Admin Panel (UserMenu) — the old
+                  "Library" tab pointed at a deleted demo-only page. */}
             </div>
 
             {user ? (

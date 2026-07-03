@@ -60,9 +60,11 @@ export interface Module {
   available: boolean;
   xpTotal: number;
   lessons: Lesson[];
-  // Phase placement. Optional because the demo property and any not-yet-categorized
-  // ("universal") modules may have no phase assigned yet. Mirrors the DB columns
-  // modules.phase_id / modules.order_in_phase (see add_phases_architecture.sql).
+  // Phase placement — ENRICHMENT-ONLY fields. Never set these in the static
+  // CURRICULUM array: the module_phase_assignments table is the single source
+  // of truth for module→phase mapping (a module can sit in a different phase
+  // per track). /api/curriculum fills these in per property at request time;
+  // hardcoding values here made modules vanish from other tracks' admin views.
   phase_id?: string;
   order_in_phase?: number;
 }
@@ -2591,8 +2593,6 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 120,
     lessons: casualDiningStandardLessons,
-    phase_id: 'casual-dining-phase-1',
-    order_in_phase: 1,
   },
   // Module 8
   {
@@ -2607,8 +2607,6 @@ export const CURRICULUM: Module[] = [
     available: true,
     xpTotal: 200,
     lessons: casualDiningFloorLessons,
-    phase_id: 'casual-dining-phase-1',
-    order_in_phase: 2,
   },
   // Fine Dining Phase 1 — Module 1
   {
