@@ -270,10 +270,22 @@ export async function GET(req: Request) {
   const healthDelta = round(avg(warmth30) - avg(warmthPrev30));
 
   // ── 8–10. Lessons completed this week vs last week ─────────────────────────
-  const lessonsThisWeek = completions.filter((c) => ts(c.completed_at) >= d7).length;
-  const lessonsLastWeek = completions.filter(
-    (c) => ts(c.completed_at) >= d14 && ts(c.completed_at) < d7,
-  ).length;
+  // A lesson counts as completed at its FIRST lesson_completions row (any
+  // phase) — the same definition the staff view and roster use. Counting raw
+  // rows would count learn/practice/apply as three separate "lessons".
+  const firstCompletionAt = new Map<string, number>(); // `${staff}|${module}|${lesson}` → earliest ts
+  for (const c of completions) {
+    const key = `${c.staff_id}|${c.module_id}|${c.lesson_id}`;
+    const t = ts(c.completed_at);
+    const prev = firstCompletionAt.get(key);
+    if (prev === undefined || t < prev) firstCompletionAt.set(key, t);
+  }
+  let lessonsThisWeek = 0;
+  let lessonsLastWeek = 0;
+  for (const t of firstCompletionAt.values()) {
+    if (t >= d7) lessonsThisWeek++;
+    else if (t >= d14) lessonsLastWeek++;
+  }
   let deltaPercent: number | null;
   if (lessonsLastWeek === 0) deltaPercent = lessonsThisWeek > 0 ? null : 0;
   else deltaPercent = round(((lessonsThisWeek - lessonsLastWeek) / lessonsLastWeek) * 100);
