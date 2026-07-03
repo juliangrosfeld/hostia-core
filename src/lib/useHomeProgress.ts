@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { StaffMember } from '@/lib/staff-data'
+import { useProgressVersion } from '@/lib/progress-refresh'
 
 export interface HomeProgress {
   isDemo: boolean
@@ -24,6 +25,10 @@ export function useHomeProgress(viewingAs: StaffMember | null): {
     progress: null,
     loading: true,
   })
+  // Bumped after every completion write → refetch, so the hero progress bar
+  // and "continue" module stay current. The old progress is kept on screen
+  // while the refetch is in flight (loading only gates the FIRST paint).
+  const version = useProgressVersion()
 
   useEffect(() => {
     if (viewingAs) return
@@ -33,7 +38,7 @@ export function useHomeProgress(viewingAs: StaffMember | null): {
       .then((d) => { if (!cancelled) setState({ progress: d ?? null, loading: false }) })
       .catch(() => { if (!cancelled) setState({ progress: null, loading: false }) })
     return () => { cancelled = true }
-  }, [viewingAs])
+  }, [viewingAs, version])
 
   // Manager preview → mock copy, ready immediately (derived, not set in the effect).
   if (viewingAs) return { progress: null, loading: false }

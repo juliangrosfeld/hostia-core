@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { StaffMember } from '@/lib/staff-data';
+import { useProgressVersion } from '@/lib/progress-refresh';
 
 // Demo property hero values. The demo signed-in staff user shows fixed mock
 // numbers rather than live DB data — mirrors the mock StaffMember.xp (720) used
@@ -25,6 +26,10 @@ export interface StaffXPAndStreak {
 //    SAME source as the manager dashboard top-performer card.
 export function useStaffXPAndStreak(viewingAs: StaffMember | null): StaffXPAndStreak {
   const [data, setData] = useState<{ totalXp: number; streak: number } | null>(null);
+  // Bumped after every completion/session write → refetch, so hero XP and
+  // streak update right after finishing a lesson. `data` stays populated
+  // during the refetch, so there's no loading flash — just a value swap.
+  const version = useProgressVersion();
 
   useEffect(() => {
     if (viewingAs) return; // manager preview → use the mock staffer's values
@@ -40,7 +45,7 @@ export function useStaffXPAndStreak(viewingAs: StaffMember | null): StaffXPAndSt
       })
       .catch(() => { if (!cancelled) setData({ totalXp: 0, streak: 0 }); });
     return () => { cancelled = true; };
-  }, [viewingAs]);
+  }, [viewingAs, version]);
 
   // Manager preview → the mock staffer carries its own xp/streak.
   if (viewingAs) {

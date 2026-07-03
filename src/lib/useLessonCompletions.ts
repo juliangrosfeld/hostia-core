@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useProgressVersion } from '@/lib/progress-refresh';
 
 const EMPTY_KEYS: ReadonlySet<string> = new Set();
 
@@ -13,6 +14,9 @@ const EMPTY_KEYS: ReadonlySet<string> = new Set();
 // curriculum carries its own hardcoded lesson.status, so there's nothing to fetch.
 export function useLessonCompletions(enabled: boolean): { completedKeys: ReadonlySet<string> } {
   const [fetched, setFetched] = useState<ReadonlySet<string>>(EMPTY_KEYS);
+  // Bumped after every successful completion write → refetch, so a finished
+  // lesson shows as Completed immediately (no page reload needed).
+  const version = useProgressVersion();
 
   useEffect(() => {
     if (!enabled) return;
@@ -31,7 +35,7 @@ export function useLessonCompletions(enabled: boolean): { completedKeys: Readonl
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [enabled]);
+  }, [enabled, version]);
 
   // When disabled (manager preview) always report empty, ignoring any stale fetch.
   return { completedKeys: enabled ? fetched : EMPTY_KEYS };

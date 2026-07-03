@@ -4,6 +4,12 @@
 //
 // logLessonCompletion's server route is idempotent, so calling it more than
 // once for the same phase is harmless.
+//
+// Both loggers bump the progress version on a successful write so the staff
+// page's data hooks (completions, XP/streak, home progress) refetch and the
+// UI updates without a reload.
+
+import { bumpProgressVersion } from '@/lib/progress-refresh';
 
 export type LessonPhase = 'learn' | 'practice' | 'apply';
 
@@ -19,9 +25,13 @@ export function logLessonCompletion(input: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
-  }).catch(() => {
-    // Swallow — logging is best-effort.
-  });
+  })
+    .then((res) => {
+      if (res.ok) bumpProgressVersion();
+    })
+    .catch(() => {
+      // Swallow — logging is best-effort.
+    });
 }
 
 // One row per completed (passed or failed) Apply-phase roleplay. This is what
@@ -45,7 +55,11 @@ export function logRoleplaySession(input: {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(input),
-  }).catch(() => {
-    // Swallow — logging is best-effort.
-  });
+  })
+    .then((res) => {
+      if (res.ok) bumpProgressVersion();
+    })
+    .catch(() => {
+      // Swallow — logging is best-effort.
+    });
 }
