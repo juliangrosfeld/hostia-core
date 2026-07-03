@@ -101,6 +101,9 @@ function TimerBar({ totalSeconds, running, onExpire, thinkPaused }: TimerBarProp
 interface Message {
   role: 'system' | 'guest' | 'staff';
   text: string;
+  // API warmth (1-10) at the moment of this guest reply — carried into the
+  // stored transcript so the session keeps its per-turn warmth history.
+  warmth?: number;
 }
 
 interface Totals {
@@ -129,6 +132,9 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [warmth, setWarmth] = useState(startingWarmth);
+  // API warmth (1-10) per completed turn, in order. The session's stored
+  // warmth_score is the AVERAGE of these ×10 — not the final turn's value.
+  const [warmthHistory, setWarmthHistory] = useState<number[]>([]);
   const [totals, setTotals] = useState<Totals>({});
   const [turnCount, setTurnCount] = useState(0);
   const [tip, setTip] = useState<string | null>(null);
@@ -171,20 +177,27 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     sessionLoggedRef.current = true;
 
     if (lesson.scenarioId) {
+      // API warmth is 1-10; the stored performance signal is 0-100 (×10).
+      // warmth_score is the session AVERAGE across all turns — the same number
+      // the done screen shows and the manager dashboard aggregates.
+      const avgWarmth = warmthHistory.length
+        ? warmthHistory.reduce((a, b) => a + b, 0) / warmthHistory.length
+        : warmth;
       logRoleplaySession({
         module_id: moduleId,
         lesson_id: lesson.id,
         scenario_id: lesson.scenarioId,
         passed,
-        // API warmth is 1-10; the stored performance signal is 0-100 (×10),
-        // matching the done-screen display and the manager dashboard.
-        warmth_score: warmth * 10,
+        warmth_score: Math.round(avgWarmth * 10),
         turns: turnCount,
         transcript: messages
           .filter((m) => m.role !== 'system')
           .map((m) => ({
             role: m.role === 'staff' ? ('user' as const) : ('assistant' as const),
             content: m.text,
+            // Guest replies carry the turn's warmth so the stored transcript
+            // preserves the full warmth history, not just the average.
+            ...(m.role === 'guest' && m.warmth != null ? { warmth: m.warmth } : {}),
           })),
       });
     }
@@ -192,7 +205,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     if (passed) {
       logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'apply' });
     }
-  }, [done, passed, moduleId, lesson.id, lesson.scenarioId, warmth, turnCount, messages]);
+  }, [done, passed, moduleId, lesson.id, lesson.scenarioId, warmth, warmthHistory, turnCount, messages]);
 
   const handleTimerExpire = useCallback(() => {
     if (done || isLoading) return;
@@ -208,6 +221,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     setStarted(false);
     setMessages([]);
     setWarmth(startingWarmth);
+    setWarmthHistory([]);
     const init: Totals = {};
     scenario?.scoreKeys.forEach((k) => { init[k] = 0; });
     setTotals(init);
@@ -226,6 +240,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
   const startScenario = () => {
     setStarted(true);
     setWarmth(startingWarmth);
+    setWarmthHistory([]);
     setMessages([{ role: 'system', text: scenario!.opening }]);
     const init: Totals = {};
     scenario!.scoreKeys.forEach((k) => { init[k] = 0; });
@@ -336,6 +351,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
 
     const newWarmth: number = data.warmth ?? warmth;
     setWarmth(newWarmth);
+    setWarmthHistory((prev) => [...prev, newWarmth]);
     setTip(data.coach_tip ?? null);
 
     const newTotals = { ...totals };
@@ -351,7 +367,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     const newTurn = turnCount + 1;
     setTurnCount(newTurn);
 
-    setMessages([...updated, { role: 'guest', text: data.guest_reply ?? '…' }]);
+    setMessages([...updated, { role: 'guest', text: data.guest_reply ?? '…', warmth: newWarmth }]);
 
     // ── Pass / fail evaluation ────────────────────────────────
     // A turn = one staff message + one guest reply. Warmth (1-10) maps to a
@@ -458,16 +474,20 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     const maxTotal = maxPerKey * scenario.scoreKeys.length;
     const avgPct = Math.round((totalScore / maxTotal) * 100);
 
-    // Performance signal is 0-100 (API warmth 1-10 × 10). XP is the progress
-    // signal — earned only on a pass, scaled by the final warmth score. No XP
-    // is awarded on a fail; staff must retry and pass to earn it.
-    const finalWarmthScore = warmth * 10;
-    const xpEarned = calculateRoleplayXP(finalWarmthScore, passed);
-    const warmthLabel = getWarmthLabel(finalWarmthScore);
+    // Performance signal is 0-100 (API warmth 1-10 × 10), averaged across all
+    // turns — the same number that gets stored. XP is the progress signal —
+    // earned only on a pass, scaled by that average. No XP is awarded on a
+    // fail; staff must retry and pass to earn it.
+    const avgWarmth = warmthHistory.length
+      ? warmthHistory.reduce((a, b) => a + b, 0) / warmthHistory.length
+      : warmth;
+    const sessionWarmthScore = Math.round(avgWarmth * 10);
+    const xpEarned = calculateRoleplayXP(sessionWarmthScore, passed);
+    const warmthLabel = getWarmthLabel(sessionWarmthScore);
 
-    const warmthPct = ((warmth - 1) / 9) * 100;
+    const warmthPct = ((avgWarmth - 1) / 9) * 100;
     const warmthColor = warmthLabel.color;
-    const warmthDelta = warmth - startingWarmth;
+    const warmthDelta = sessionWarmthScore - startingWarmth * 10;
 
     return (
       <div className="card" style={{ padding: 40, animation: 'fadeUp 0.5s ease' }}>
@@ -497,8 +517,8 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
         {/* Final warmth score bar */}
         <div style={{ padding: '16px 20px', background: 'var(--sand-warm)', borderRadius: 14, marginBottom: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 8 }}>
-            <span style={{ color: 'var(--ink-soft)' }}>Final warmth score</span>
-            <span style={{ fontWeight: 700, color: warmthColor }}>{finalWarmthScore} / 100 · {warmthLabel.label}</span>
+            <span style={{ color: 'var(--ink-soft)' }}>Session warmth score (avg)</span>
+            <span style={{ fontWeight: 700, color: warmthColor }}>{sessionWarmthScore} / 100 · {warmthLabel.label}</span>
           </div>
           <div style={{ height: 10, background: 'rgba(0,0,0,0.06)', borderRadius: 5, overflow: 'hidden' }}>
             <div style={{ height: '100%', width: `${warmthPct}%`, background: warmthColor, transition: 'width 0.6s ease' }} />
@@ -506,7 +526,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--ink-soft)', marginTop: 7 }}>
             <span>Started at {startingWarmth * 10}/100</span>
             <span style={{ color: warmthDelta > 0 ? '#3d6b57' : warmthDelta < 0 ? '#8b4a3a' : 'var(--ink-soft)', fontWeight: warmthDelta !== 0 ? 600 : 400 }}>
-              {warmthDelta > 0 ? `+${warmthDelta * 10} gained` : warmthDelta < 0 ? `${warmthDelta * 10} lost` : 'no change'}
+              {warmthDelta > 0 ? `+${warmthDelta} vs start` : warmthDelta < 0 ? `${warmthDelta} vs start` : 'no change'}
             </span>
           </div>
         </div>
@@ -528,7 +548,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
             <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.5 }}>
               {passed
                 ? scenario.goal
-                : `Your warmth landed at ${warmthLabel.label.toLowerCase()} (${finalWarmthScore}/100). ${tip ?? 'Focus on genuine, specific warmth from the very first reply.'}`}
+                : `Your session averaged ${warmthLabel.label.toLowerCase()} warmth (${sessionWarmthScore}/100). ${tip ?? 'Focus on genuine, specific warmth from the very first reply.'}`}
             </div>
           </div>
         </div>
