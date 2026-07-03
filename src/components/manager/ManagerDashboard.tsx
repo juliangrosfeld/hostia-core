@@ -122,6 +122,51 @@ function DashboardSkeleton() {
   );
 }
 
+// Shown when the dashboard fetch fails. Real properties must never silently
+// fall back to the mock roster — an honest error + retry beats fake data.
+function DashboardError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mgr-page">
+      <div className="container">
+        <div className="mgr-header">
+          <div>
+            <div className="label-mono">Manager dashboard · Last 30 days</div>
+            <h1 className="display mgr-title">Good evening.</h1>
+            <p className="mgr-sub">We couldn&apos;t load your team&apos;s performance.</p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'flex', alignItems: 'center', gap: 14,
+            padding: '18px 20px', borderRadius: 14,
+            background: 'white',
+            border: '1px solid var(--coral-deep)',
+          }}
+        >
+          <AlertCircle size={20} color="var(--coral-deep)" style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>Something went wrong loading the dashboard</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-soft)', marginTop: 2 }}>
+              Your team&apos;s data is safe — this is a connection problem, not a data problem.
+            </div>
+          </div>
+          <button
+            onClick={onRetry}
+            style={{
+              padding: '9px 18px', borderRadius: 999,
+              border: 'none', background: 'var(--ink)', color: 'white',
+              fontSize: 13, fontWeight: 700, fontFamily: 'inherit', cursor: 'pointer',
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── CRUD helpers ────────────────────────────────────────────
 
 const COLOR_PRESETS = [
@@ -410,7 +455,10 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   //  - 'loading' → skeleton
   //  - 'demo'    → existing hardcoded mock (Hostia Demo property only)
   //  - 'real'    → live Supabase metrics for the manager's property
-  const [status, setStatus] = useState<'loading' | 'demo' | 'real'>('loading');
+  //  - 'error'   → fetch failed; retry banner. Never fall back to mock data —
+  //                the demo path is only ever entered on the server's say-so
+  //                (data.isDemo), so a real manager can't be shown fake staff.
+  const [status, setStatus] = useState<'loading' | 'demo' | 'real' | 'error'>('loading');
   const [realData, setRealData] = useState<DashboardData | null>(null);
 
   // Selected phase filter (phase_id) — null = all phases. Drives a scoped refetch.
@@ -420,7 +468,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
     try {
       const url = phase ? `/api/manager/dashboard?phase=${encodeURIComponent(phase)}` : '/api/manager/dashboard';
       const res = await fetch(url);
-      if (!res.ok) { setStatus('demo'); return; } // fail safe → never blank the screen
+      if (!res.ok) { setStatus('error'); return; }
       const data: DashboardResponse = await res.json();
       if (data.isDemo) {
         setStaffList([...STAFF]);
@@ -431,7 +479,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
         setStatus('real');
       }
     } catch {
-      setStatus('demo');
+      setStatus('error');
     }
   }
 
@@ -722,6 +770,16 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
 
   // ── Render ───────────────────────────────────────────────
   if (status === 'loading') return <DashboardSkeleton />;
+  if (status === 'error') {
+    return (
+      <DashboardError
+        onRetry={() => {
+          setStatus('loading');
+          fetchDashboard(selectedPhase);
+        }}
+      />
+    );
+  }
 
   return (
     <div className="mgr-page animate-fade-up">

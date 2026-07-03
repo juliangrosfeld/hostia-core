@@ -7,8 +7,6 @@ import {
   Building2, GraduationCap, MessageSquare, DollarSign,
 } from 'lucide-react'
 
-const DEMO_PROPERTY_ID = 'f86752e5-f7f1-46a2-acd3-90764ce1c403'
-
 // ── Pricing ───────────────────────────────────────────────────────────────────
 // Active staff (signed in within the last 30 days) drives the tier. 250+ is
 // bespoke — shown as "Custom" and excluded from the auto-calculated MRR.

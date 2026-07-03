@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/supabase/requireAdmin'
+import { DEMO_PROPERTY_ID } from '@/lib/config'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -126,6 +127,16 @@ export async function DELETE(
   if (gate.error) return gate.error
 
   const { id } = await params
+
+  // The demo property carries the sales-demo data every prospect sees — it must
+  // never be deletable, even by an admin.
+  if (id === DEMO_PROPERTY_ID) {
+    return NextResponse.json(
+      { error: 'The demo property cannot be deleted' },
+      { status: 403 }
+    )
+  }
+
   const admin = createAdminClient()
 
   // Confirm the property exists (and grab its name for the response) before we
