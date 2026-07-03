@@ -445,7 +445,9 @@ function DeleteStaffModal({
 }
 
 interface ManagerDashboardProps {
-  onOpenStaff: (s: StaffMember) => void;
+  // `live` is true when the roster row is a real staff member (real property),
+  // so the profile view knows to fetch actual data instead of rendering mock.
+  onOpenStaff: (s: StaffMember, live: boolean) => void;
 }
 
 export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps) {
@@ -979,7 +981,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             title={insightStarTitle}
             body={insightStarBody}
             cta={starTarget ? insightStarCta : undefined}
-            onCta={starTarget ? () => onOpenStaff(starTarget) : undefined}
+            onCta={starTarget ? () => onOpenStaff(starTarget, isReal) : undefined}
           />
         </div>
 
@@ -1035,7 +1037,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             <StaffRow
               key={s.id}
               staff={s}
-              onClick={() => onOpenStaff(s)}
+              onClick={() => onOpenStaff(s, isReal)}
               // Edit only mutates local state (name/role/color aren't persisted
               // anywhere yet), so it's demo-only — on a real property the change
               // would silently revert on the next refetch. Delete is the

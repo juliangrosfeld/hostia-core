@@ -13,6 +13,9 @@ export default function ManagerPage() {
   const { user, property, loading } = useUser();
   const [view, setView] = useState<'dashboard' | 'staff-detail'>('dashboard');
   const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
+  // Whether the opened profile is a real staff member (real property) — the
+  // profile then fetches actual module progress/sessions instead of mock.
+  const [selectedLive, setSelectedLive] = useState(false);
 
   // Manager/admin-only area. Unauthenticated users are bounced to /login;
   // staff users are sent back to /staff before any manager UI renders.
@@ -22,8 +25,9 @@ export default function ManagerPage() {
     if (user.role !== 'manager' && user.role !== 'admin') router.replace('/staff');
   }, [user, loading, router]);
 
-  const openStaff = (s: StaffMember) => {
+  const openStaff = (s: StaffMember, live: boolean) => {
     setSelectedStaff(s);
+    setSelectedLive(live);
     setView('staff-detail');
   };
 
@@ -66,7 +70,7 @@ export default function ManagerPage() {
       <TopNav user={navUser} property={navProperty} />
       {view === 'dashboard' && <ManagerDashboard onOpenStaff={openStaff} />}
       {view === 'staff-detail' && selectedStaff && (
-        <StaffProfile staff={selectedStaff} onBack={goBack} onViewAs={viewAsStaff} propertyName={property?.name ?? null} />
+        <StaffProfile key={selectedStaff.id} staff={selectedStaff} onBack={goBack} onViewAs={viewAsStaff} propertyName={property?.name ?? null} live={selectedLive} />
       )}
     </div>
   );

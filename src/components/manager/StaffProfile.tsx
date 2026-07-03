@@ -11,12 +11,14 @@
 //   • Recent roleplay scores  — last 3 sessions + transcript modal.
 //   • Manager notes — textarea + save.
 //
-// All data is MOCK, shaped exactly like the `roleplay_sessions` table
-// (warmth_score, passed, transcript: [{ role, content, warmth? }], …)
-// so wiring up live data later is a straight swap.
+// Data source depends on `live`:
+//   • live=true  (real property) — module progress, skill radar and recent
+//     sessions come from GET /api/manager/staff/[userId]. Header stats come
+//     from the roster row, which is already computed from real data.
+//   • live=false (demo property) — the original mock derivation, unchanged.
 // ─────────────────────────────────────────────────────────────
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ChevronLeft, Check, Lock, MessageSquare, BookOpen, Eye, X,
   Star, Flame, Award,
@@ -42,9 +44,56 @@ interface RoleplaySession {
   variant: string | null;
   warmth_score: number;
   passed: boolean;
-  completed_at: string; // display string for now; TIMESTAMPTZ live
+  completed_at: string; // display string (relative time)
   turns: number;
   transcript: TranscriptEntry[];
+}
+
+// ─── Live payload (GET /api/manager/staff/[userId]) ──────────
+
+interface LiveModuleProgress {
+  module_id: string;
+  title: string;
+  total: number;
+  done: number;
+  warmth: number;
+}
+
+interface LiveSession {
+  scenario_id: string;
+  scenario_title: string;
+  scenario_subtitle: string | null;
+  warmth_score: number;
+  passed: boolean;
+  completed_at: string; // ISO timestamp
+  turns: number;
+  transcript: TranscriptEntry[];
+}
+
+interface LiveDetail {
+  modules: LiveModuleProgress[];
+  recentSessions: LiveSession[];
+}
+
+// One row of the Module progress list / skill radar, whichever source it
+// came from.
+interface ModuleRow {
+  key: string;
+  name: string;
+  total: number;
+  done: number;
+  warmth: number;
+}
+
+function relativeTime(iso: string): string {
+  const diff = Date.now() - Date.parse(iso);
+  if (!Number.isFinite(diff) || diff < 0) return 'Just now';
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 // ─── Module definitions (roleplay modules) ───────────────────
@@ -228,36 +277,76 @@ interface StaffProfileProps {
   onBack: () => void;
   onViewAs?: (s: StaffMember) => void;
   propertyName?: string | null;
+  // True on real properties → fetch this staff member's actual module
+  // progress and sessions. False/omitted → demo mock derivation.
+  live?: boolean;
 }
 
-export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName }: StaffProfileProps) {
+export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName, live = false }: StaffProfileProps) {
   const [openSession, setOpenSession] = useState<RoleplaySession | null>(null);
   const [note, setNote] = useState('');
 
+  // Live per-staff detail. null while loading; liveError shows an inline
+  // message rather than silently falling back to mock data. The parent keys
+  // this component by staff id, so a different staff member remounts it and
+  // this state starts fresh — no in-effect reset needed.
+  const [liveDetail, setLiveDetail] = useState<LiveDetail | null>(null);
+  const [liveError, setLiveError] = useState(false);
+
+  useEffect(() => {
+    if (!live) return;
+    let cancelled = false;
+    fetch(`/api/manager/staff/${s.id}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((d) => { if (!cancelled) setLiveDetail(d); })
+      .catch(() => { if (!cancelled) setLiveError(true); });
+    return () => { cancelled = true; };
+  }, [live, s.id]);
+
+  const liveLoading = live && liveDetail === null && !liveError;
+
   const firstName = s.name.split(' ')[0];
 
-  // Per-module warmth + lesson progress (mock, schema-shaped).
-  // Lessons are distributed across modules sequentially.
-  const modules = MODULES.map((m, i) => {
-    const priorTotal = MODULES.slice(0, i).reduce((sum, mm) => sum + mm.total, 0);
-    const done = Math.max(0, Math.min(m.total, s.lessons - priorTotal));
-    const warmth = getModuleSkillScore(mockSessionsFor(s.skills[m.key]));
-    return {
-      key: m.key,
-      name: SKILL_LABELS[m.key],
-      total: m.total,
-      done,
-      warmth,
-    };
-  });
+  // Module progress rows — real per-module data when live, otherwise the mock
+  // derivation (lessons distributed across modules sequentially).
+  const moduleRows: ModuleRow[] = live
+    ? (liveDetail?.modules ?? []).map((m) => ({
+        key: m.module_id,
+        name: m.title,
+        total: m.total,
+        done: m.done,
+        warmth: m.warmth,
+      }))
+    : MODULES.map((m, i) => {
+        const priorTotal = MODULES.slice(0, i).reduce((sum, mm) => sum + mm.total, 0);
+        const done = Math.max(0, Math.min(m.total, s.lessons - priorTotal));
+        const warmth = getModuleSkillScore(mockSessionsFor(s.skills[m.key]));
+        return {
+          key: m.key,
+          name: SKILL_LABELS[m.key],
+          total: m.total,
+          done,
+          warmth,
+        };
+      });
 
   // Skill profile radar — warmth % per module.
-  const radarData = modules.map((m) => ({ skill: m.name, value: m.warmth, fullMark: 100 }));
+  const radarData = moduleRows.map((m) => ({ skill: m.name, value: m.warmth, fullMark: 100 }));
 
-  // Recent roleplay sessions (last 3, mock).
-  // Mock transcripts are authored against the "[Property]" placeholder —
+  // Recent roleplay sessions (last 3). Live → real sessions with transcripts;
+  // demo → mock transcripts, authored against the "[Property]" placeholder —
   // substitute the real name so the drill-in never shows the literal token.
-  const recentSessions = substitutePropertyDeep(buildRecentSessions(s), propertyName);
+  const recentSessions: RoleplaySession[] = live
+    ? (liveDetail?.recentSessions ?? []).map((r) => ({
+        scenario: r.scenario_title,
+        variant: r.scenario_subtitle,
+        warmth_score: r.warmth_score,
+        passed: r.passed,
+        completed_at: relativeTime(r.completed_at),
+        turns: r.turns,
+        transcript: r.transcript,
+      }))
+    : substitutePropertyDeep(buildRecentSessions(s), propertyName);
 
   return (
     <div className="mgr-page animate-fade-up">
@@ -364,7 +453,18 @@ export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName 
               Where they stand
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {modules.map((m) => {
+              {liveLoading && (
+                <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>Loading module progress…</div>
+              )}
+              {liveError && (
+                <div style={{ fontSize: 13, color: 'var(--coral-deep)' }}>
+                  Couldn&apos;t load module progress — go back and reopen this profile to retry.
+                </div>
+              )}
+              {!liveLoading && !liveError && moduleRows.length === 0 && (
+                <div style={{ fontSize: 13, color: 'var(--ink-soft)' }}>No modules assigned yet.</div>
+              )}
+              {moduleRows.map((m) => {
                 const isDone = m.done === m.total;
                 const locked = m.done === 0;
                 const pct = (m.done / m.total) * 100;
@@ -407,10 +507,18 @@ export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName 
         <div style={{ marginTop: 32 }}>
           <div className="label-mono">Recent roleplay scores</div>
           <h2 className="display" style={{ fontSize: 22, margin: '6px 0 16px', color: 'var(--brand-deep)' }}>
-            Last {recentSessions.length} sessions
+            {liveLoading ? 'Recent sessions' : `Last ${recentSessions.length} sessions`}
           </h2>
 
-          {recentSessions.length === 0 ? (
+          {liveLoading ? (
+            <div className="card" style={{ padding: 24, fontSize: 14, color: 'var(--ink-soft)' }}>
+              Loading sessions…
+            </div>
+          ) : liveError ? (
+            <div className="card" style={{ padding: 24, fontSize: 14, color: 'var(--coral-deep)' }}>
+              Couldn&apos;t load sessions — go back and reopen this profile to retry.
+            </div>
+          ) : recentSessions.length === 0 ? (
             <div className="card" style={{ padding: 24, fontSize: 14, color: 'var(--ink-soft)' }}>
               No roleplay sessions yet.
             </div>
