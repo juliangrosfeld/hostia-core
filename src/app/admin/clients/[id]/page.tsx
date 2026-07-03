@@ -339,30 +339,37 @@ export default function ClientDetailPage() {
   }, [propertyId])
 
   // ── Load managers + pending invites ───────────────────────────
-  const loadManagers = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/admin/properties/${propertyId}/managers`)
-      const data = await res.json()
-      if (res.ok) {
-        setManagers(data.managers ?? [])
-        setPendingInvites(data.pendingInvites ?? [])
-      }
-    } catch {
-      // Non-fatal — the section just shows empty until a retry.
-    } finally {
-      setManagersLoading(false)
-    }
-  }, [propertyId])
+  // Fetched by the effect below; loadManagers() just bumps the version to
+  // trigger a refetch (e.g. after creating an invite).
+  const [managersVersion, setManagersVersion] = useState(0)
+  const loadManagers = useCallback(() => setManagersVersion((v) => v + 1), [])
 
   useEffect(() => {
-    loadManagers()
-  }, [loadManagers])
+    let cancelled = false
+    ;(async () => {
+      try {
+        const res = await fetch(`/api/admin/properties/${propertyId}/managers`)
+        const data = await res.json()
+        if (!cancelled && res.ok) {
+          setManagers(data.managers ?? [])
+          setPendingInvites(data.pendingInvites ?? [])
+        }
+      } catch {
+        // Non-fatal — the section just shows empty until a retry.
+      } finally {
+        if (!cancelled) setManagersLoading(false)
+      }
+    })()
+    return () => { cancelled = true }
+  }, [propertyId, managersVersion])
 
   // Load the phases for this property's track, so the module library can be
   // grouped by phase. Re-runs whenever the venue type changes.
   useEffect(() => {
     const track = property?.venue_type
-    if (!track) { setPhases([]); setPhaseAssignments([]); return }
+    // No track yet = property still loading; phases/assignments are already
+    // empty (their initial state), so there's nothing to reset.
+    if (!track) return
     let cancelled = false
     fetch(`/api/phases?track=${encodeURIComponent(track)}`)
       .then((r) => (r.ok ? r.json() : null))

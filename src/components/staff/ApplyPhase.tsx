@@ -53,19 +53,15 @@ interface TimerBarProps {
   totalSeconds: number;
   running: boolean;
   onExpire: () => void;
-  resetKey: number;
   thinkPaused: boolean;
 }
 
-function TimerBar({ totalSeconds, running, onExpire, resetKey, thinkPaused }: TimerBarProps) {
+// The parent remounts this component (via `key`) to reset the countdown, so
+// `remaining` and `expiredRef` start fresh each turn — no reset effect needed.
+function TimerBar({ totalSeconds, running, onExpire, thinkPaused }: TimerBarProps) {
   const [remaining, setRemaining] = useState(totalSeconds);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const expiredRef = useRef(false);
-
-  useEffect(() => {
-    setRemaining(totalSeconds);
-    expiredRef.current = false;
-  }, [resetKey, totalSeconds]);
 
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
@@ -150,7 +146,8 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
   const [thinkCountdown, setThinkCountdown] = useState(10);
   const thinkRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const turnStartRef = useRef<number>(Date.now());
+  // Set when the scenario starts and on every turn boundary; null until then.
+  const turnStartRef = useRef<number | null>(null);
   const timerSeconds = scenario?.timerSeconds ?? 45;
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -284,7 +281,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
   const handleSend = async () => {
     if (!input.trim() || isLoading || done || !scenario || !lesson.scenarioId) return;
 
-    const elapsed = (Date.now() - turnStartRef.current) / 1000;
+    const elapsed = (Date.now() - (turnStartRef.current ?? Date.now())) / 1000;
     const wasQuick = elapsed < timerSeconds * 0.5;
     setSpeedChip(wasQuick ? 'fast' : null);
 
@@ -590,10 +587,10 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           {/* Timer bar */}
           <TimerBar
+            key={timerKey}
             totalSeconds={timerSeconds}
             running={timerRunning}
             onExpire={handleTimerExpire}
-            resetKey={timerKey}
             thinkPaused={thinkActive}
           />
 

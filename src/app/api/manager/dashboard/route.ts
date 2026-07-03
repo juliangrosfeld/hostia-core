@@ -267,7 +267,6 @@ export async function GET(req: Request) {
     .filter((s) => ts(s.completed_at) >= d60 && ts(s.completed_at) < d30)
     .map((s) => s.warmth_score);
   const healthCurrent = round(avg(warmth30));
-  const healthPrev = round(avg(warmthPrev30));
   const healthDelta = round(avg(warmth30) - avg(warmthPrev30));
 
   // ── 8–10. Lessons completed this week vs last week ─────────────────────────

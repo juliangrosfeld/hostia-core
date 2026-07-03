@@ -53,10 +53,11 @@ function StaffPageInner() {
   // Bump last_active on every staff page load. Done server-side via the
   // heartbeat route (not a direct client write) so it's reliable and consistent
   // with how the manager/admin "active" counts read this column.
+  const userId = user?.id
   useEffect(() => {
-    if (!user) return
+    if (!userId) return
     fetch('/api/heartbeat', { method: 'POST' }).catch(() => {})
-  }, [user?.id])
+  }, [userId])
 
   const goHome = () => { setView('home'); setActiveModule(null); setActiveLesson(null) }
   const openModule = (m: Module) => { setActiveModule(m); setView('module') }
@@ -70,6 +71,11 @@ function StaffPageInner() {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--sand)' }}><div style={{ fontFamily: 'Fraunces, serif', fontSize: 22, color: 'var(--brand-deep)' }}>Loading…</div></div>
   }
 
+  // 1-based position of the open module in the resolved curriculum (null if
+  // it isn't in the list, e.g. opened from a phase layout that outran it).
+  const activeModuleIndex = activeModule ? curriculum.findIndex((m) => m.id === activeModule.id) : -1
+  const activeModuleNumber = activeModuleIndex >= 0 ? activeModuleIndex + 1 : null
+
   const navUser = user ? { name: user.full_name, email: user.email, initials: user.full_name.split(' ').map((n: string) => n[0]).join('').toUpperCase(), role: user.role } : null
   const navProperty = property ? { name: property.name, primaryColor: property.primary_color, logoUrl: property.logo_url } : null
   // Expose the property's brand color to TopNav + hero via --brand-color.
@@ -78,8 +84,8 @@ function StaffPageInner() {
   return (
     <div style={{ '--brand-color': brandColor } as React.CSSProperties}>
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
-      {view === 'home' && <HomeView curriculum={curriculum} phaseData={phaseData} progress={progress} earnedXp={earnedXp} streak={streak} onOpenModule={openModule} viewingAs={viewingAs} property={property} />}
-      {view === 'module' && activeModule && <ModuleView module={activeModule} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} />}
+      {view === 'home' && <HomeView curriculum={curriculum} phaseData={phaseData} progress={progress} earnedXp={earnedXp} streak={streak} onOpenModule={openModule} viewingAs={viewingAs} property={property} userName={user?.full_name ?? null} />}
+      {view === 'module' && activeModule && <ModuleView module={activeModule} moduleNumber={activeModuleNumber} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} />}
       {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} propertyName={propertyName} />}
     </div>
   )

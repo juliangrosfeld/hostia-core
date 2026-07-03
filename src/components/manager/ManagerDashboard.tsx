@@ -84,7 +84,7 @@ function DashboardSkeleton() {
           <div>
             <div className="label-mono">Manager dashboard · Last 30 days</div>
             <h1 className="display mgr-title">Good evening.</h1>
-            <p className="mgr-sub">Loading your team's performance…</p>
+            <p className="mgr-sub">Loading your team&apos;s performance…</p>
           </div>
         </div>
 
@@ -464,32 +464,42 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   // Selected phase filter (phase_id) — null = all phases. Drives a scoped refetch.
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
 
-  async function fetchDashboard(phase: string | null = null) {
-    try {
-      const url = phase ? `/api/manager/dashboard?phase=${encodeURIComponent(phase)}` : '/api/manager/dashboard';
-      const res = await fetch(url);
-      if (!res.ok) { setStatus('error'); return; }
-      const data: DashboardResponse = await res.json();
-      if (data.isDemo) {
-        setStaffList([...STAFF]);
-        setStatus('demo');
-      } else {
-        setRealData(data);
-        setStaffList(data.roster);
-        setStatus('real');
+  // Bumped by the error screen's Retry button to refetch without changing the
+  // phase filter.
+  const [fetchNonce, setFetchNonce] = useState(0);
+
+  // The dashboard (re)loads on mount and whenever the phase filter or the
+  // retry nonce changes.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const url = selectedPhase
+          ? `/api/manager/dashboard?phase=${encodeURIComponent(selectedPhase)}`
+          : '/api/manager/dashboard';
+        const res = await fetch(url);
+        if (cancelled) return;
+        if (!res.ok) { setStatus('error'); return; }
+        const data: DashboardResponse = await res.json();
+        if (cancelled) return;
+        if (data.isDemo) {
+          setStaffList([...STAFF]);
+          setStatus('demo');
+        } else {
+          setRealData(data);
+          setStaffList(data.roster);
+          setStatus('real');
+        }
+      } catch {
+        if (!cancelled) setStatus('error');
       }
-    } catch {
-      setStatus('error');
-    }
-  }
+    })();
+    return () => { cancelled = true; };
+  }, [selectedPhase, fetchNonce]);
 
-  useEffect(() => { fetchDashboard(); }, []);
-
-  // Selecting a phase re-pulls the dashboard scoped to that phase's staff.
-  const selectPhase = (phaseId: string | null) => {
-    setSelectedPhase(phaseId);
-    fetchDashboard(phaseId);
-  };
+  // Selecting a phase re-pulls the dashboard scoped to that phase's staff
+  // (via the effect above).
+  const selectPhase = (phaseId: string | null) => setSelectedPhase(phaseId);
 
   const isReal = status === 'real' && realData != null;
 
@@ -599,7 +609,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
       if (isReal) {
         // Real property → re-pull the dashboard so the new hire appears with
         // their actual id and (zeroed) real metrics rather than a local stub.
-        fetchDashboard();
+        setFetchNonce((n) => n + 1);
       } else {
         const member: StaffMember = {
           id: makeId(),
@@ -622,7 +632,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
         };
         setStaffList((prev) => [...prev, member]);
       }
-    } catch (err) {
+    } catch {
       setSubmitError('Network error — please try again');
       setSubmitting(false);
     }
@@ -775,7 +785,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
       <DashboardError
         onRetry={() => {
           setStatus('loading');
-          fetchDashboard(selectedPhase);
+          setFetchNonce((n) => n + 1);
         }}
       />
     );
@@ -790,7 +800,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
           <div>
             <div className="label-mono">Manager dashboard · Last 30 days</div>
             <h1 className="display mgr-title">Good evening{managerFirstName ? `, ${managerFirstName}` : ''}.</h1>
-            <p className="mgr-sub">Here's how {propertyName} is performing.</p>
+            <p className="mgr-sub">Here&apos;s how {propertyName} is performing.</p>
           </div>
           <div className="mgr-meta">
             <div className="mgr-meta-item"><Users size={14} />{displayStaffCount} staff</div>
@@ -1033,7 +1043,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
           <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
             {isReal ? (
               <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14 }}>
-                No activity yet. As your team completes lessons and roleplays, it'll show up here.
+                No activity yet. As your team completes lessons and roleplays, it&apos;ll show up here.
               </div>
             ) : (
               RECENT_ACTIVITY.map((a, i) => (

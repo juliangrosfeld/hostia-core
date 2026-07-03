@@ -2178,9 +2178,10 @@ const fineDiningTableSetupLessons: Lesson[] = [
 // ─── RESERVED FOR FINE DINING PHASE 2 — ANTICIPATORY SERVICE ──
 // These lessons (and their scenarios in scenarios.ts) are written and kept here
 // for a future Fine Dining Phase 2 module. They are intentionally NOT referenced
-// by any module in the CURRICULUM array below — do not delete them.
+// by any module in the CURRICULUM array below — do not delete them. (Exported
+// so the linter doesn't count deliberately-parked content as dead code.)
 
-const fineDiningAnticipatoryLessons: Lesson[] = [
+export const fineDiningAnticipatoryLessons: Lesson[] = [
   {
     id: 'fda-reading-table',
     title: 'Reading the Table',

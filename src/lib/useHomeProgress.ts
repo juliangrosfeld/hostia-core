@@ -8,6 +8,7 @@ export interface HomeProgress {
   started: boolean
   percent: number
   moduleTitle: string | null
+  moduleId?: string | null
   firstModuleTitle?: string | null
 }
 
@@ -19,19 +20,22 @@ export function useHomeProgress(viewingAs: StaffMember | null): {
   progress: HomeProgress | null
   loading: boolean
 } {
-  const [progress, setProgress] = useState<HomeProgress | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [state, setState] = useState<{ progress: HomeProgress | null; loading: boolean }>({
+    progress: null,
+    loading: true,
+  })
 
   useEffect(() => {
-    if (viewingAs) { setProgress(null); setLoading(false); return } // manager preview → mock copy
+    if (viewingAs) return
     let cancelled = false
-    setLoading(true)
     fetch('/api/staff/home-progress')
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (!cancelled) { setProgress(d ?? null); setLoading(false) } })
-      .catch(() => { if (!cancelled) { setProgress(null); setLoading(false) } })
+      .then((d) => { if (!cancelled) setState({ progress: d ?? null, loading: false }) })
+      .catch(() => { if (!cancelled) setState({ progress: null, loading: false }) })
     return () => { cancelled = true }
   }, [viewingAs])
 
-  return { progress, loading }
+  // Manager preview → mock copy, ready immediately (derived, not set in the effect).
+  if (viewingAs) return { progress: null, loading: false }
+  return state
 }

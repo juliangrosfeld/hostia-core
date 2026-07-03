@@ -1,23 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function LoginPage() {
+function LoginPageInner() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [welcome, setWelcome] = useState(false)
   const router = useRouter()
 
   // Managers who just accepted an invite land here with ?welcome=manager.
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('welcome') === 'manager') {
-      setWelcome(true)
-    }
-  }, [])
+  const welcome = useSearchParams().get('welcome') === 'manager'
 
   async function handleLogin() {
     setLoading(true)
@@ -88,8 +83,17 @@ export default function LoginPage() {
             </button>
           </div>
         </div>
-        <p className="text-center text-[#444] text-xs mt-6">Don't have an account? Contact your manager.</p>
+        <p className="text-center text-[#444] text-xs mt-6">Don&apos;t have an account? Contact your manager.</p>
       </div>
     </div>
+  )
+}
+
+// useSearchParams requires a Suspense boundary when the page is prerendered.
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Check, AlertCircle, Loader2, Lock } from 'lucide-react'
 
 interface InviteDetails {
@@ -31,46 +31,47 @@ const inputStyle: React.CSSProperties = {
   background: 'white',
 }
 
-export default function AcceptInvitePage() {
+function AcceptInvitePageInner() {
   const router = useRouter()
+  const token = useSearchParams().get('token')
 
-  const [token, setToken] = useState<string | null>(null)
-  const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>('loading')
+  const [fetchStatus, setFetchStatus] = useState<'loading' | 'valid' | 'invalid'>('loading')
   const [invite, setInvite] = useState<InviteDetails | null>(null)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [fetchError, setFetchError] = useState<string | null>(null)
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
-  // Read the token from the URL on mount (avoids a Suspense boundary for
-  // useSearchParams) and validate it against the public API.
+  // Validate the token against the public API. The missing-token case is
+  // derived at render time below, not set as state.
   useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get('token')
-    if (!t) {
-      setStatus('invalid')
-      setLoadError('No invite token was provided.')
-      return
-    }
-    setToken(t)
+    if (!token) return
+    let cancelled = false
     ;(async () => {
       try {
-        const res = await fetch(`/api/accept-invite?token=${encodeURIComponent(t)}`)
+        const res = await fetch(`/api/accept-invite?token=${encodeURIComponent(token)}`)
         const data = await res.json()
+        if (cancelled) return
         if (!res.ok || !data.valid) {
-          setStatus('invalid')
-          setLoadError(data.error || 'This invite is no longer valid.')
+          setFetchStatus('invalid')
+          setFetchError(data.error || 'This invite is no longer valid.')
           return
         }
         setInvite(data.invite)
-        setStatus('valid')
+        setFetchStatus('valid')
       } catch {
-        setStatus('invalid')
-        setLoadError('Network error — please try again.')
+        if (cancelled) return
+        setFetchStatus('invalid')
+        setFetchError('Network error — please try again.')
       }
     })()
-  }, [])
+    return () => { cancelled = true }
+  }, [token])
+
+  const status = token ? fetchStatus : 'invalid'
+  const loadError = token ? fetchError : 'No invite token was provided.'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -256,5 +257,14 @@ export default function AcceptInvitePage() {
         </p>
       </div>
     </div>
+  )
+}
+
+// useSearchParams requires a Suspense boundary when the page is prerendered.
+export default function AcceptInvitePage() {
+  return (
+    <Suspense fallback={null}>
+      <AcceptInvitePageInner />
+    </Suspense>
   )
 }

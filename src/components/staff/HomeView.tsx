@@ -418,12 +418,14 @@ interface HomeViewProps {
   onOpenModule: (m: Module) => void;
   viewingAs: StaffMember | null;
   property?: PropertyProfile | null;
+  userName?: string | null;
 }
 
 export default function HomeView({
-  curriculum, phaseData, progress, earnedXp, streak, onOpenModule, viewingAs, property,
+  curriculum, phaseData, progress, earnedXp, streak, onOpenModule, viewingAs, property, userName,
 }: HomeViewProps) {
-  const firstName = viewingAs ? viewingAs.name.split(' ')[0] : 'there';
+  const ownFirstName = userName?.trim() ? userName.trim().split(/\s+/)[0] : 'there';
+  const firstName = viewingAs ? viewingAs.name.split(' ')[0] : ownFirstName;
   const progressPct = viewingAs ? Math.round((viewingAs.lessons / viewingAs.total) * 100) : 50;
 
   // phaseData, progress and earnedXp/streak arrive as already-resolved props —
@@ -445,7 +447,19 @@ export default function HomeView({
   // Real (non-demo) staff get live progress text; everyone else keeps mock copy.
   const useRealBanner = !viewingAs && progress != null && progress.isDemo === false;
 
-  const totalXp = curriculum.reduce((a, m) => a + m.xpTotal, 0);
+  // Real staff: the Continue CTA targets the module the progress API identified
+  // (the mock-field pick above is only for demo / view-as). Falls back to the
+  // mock pick if the id isn't in the resolved curriculum.
+  const realCtaModule = useRealBanner && progress!.moduleId
+    ? curriculum.find((m) => m.id === progress!.moduleId) ?? null
+    : null;
+  const ctaModule = realCtaModule ?? currentModule;
+  const ctaLabel = realCtaModule
+    ? `${progress!.started ? 'Continue' : 'Start'}: ${realCtaModule.title}`
+    : currentLesson
+      ? `Continue: ${currentLesson.title}`
+      : `Start: ${currentModule?.title}`;
+
   const totalLessons = curriculum.reduce((a, m) => a + m.totalLessons, 0);
   const totalTime = formatCurriculumTime(curriculum);
 
@@ -466,7 +480,7 @@ export default function HomeView({
               {useRealBanner ? (
                 progress!.started ? (
                   <>
-                    You're <b style={{ color: 'white' }}>{progress!.percent}%</b> through{' '}
+                    You&apos;re <b style={{ color: 'white' }}>{progress!.percent}%</b> through{' '}
                     {progress!.moduleTitle ?? 'your first module'}. Keep your streak alive.
                   </>
                 ) : (
@@ -477,17 +491,17 @@ export default function HomeView({
                 )
               ) : (
                 <>
-                  You're <b style={{ color: 'white' }}>{progressPct}%</b> through{' '}
+                  You&apos;re <b style={{ color: 'white' }}>{progressPct}%</b> through{' '}
                   {currentModule?.title ?? 'your first module'}. Keep your streak alive.
                 </>
               )}
             </p>
             {/* Continue button, bottom-anchored in the left column. */}
             <div style={{ marginTop: 'auto' }}>
-              {currentModule && (
-                <button className="btn-brand" onClick={() => onOpenModule(currentModule)}>
+              {ctaModule && (
+                <button className="btn-brand" onClick={() => onOpenModule(ctaModule)}>
                   <Play size={14} />
-                  {currentLesson ? `Continue: ${currentLesson.title}` : `Start: ${currentModule.title}`}
+                  {ctaLabel}
                 </button>
               )}
             </div>

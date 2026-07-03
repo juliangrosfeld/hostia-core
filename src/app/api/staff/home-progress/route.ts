@@ -24,7 +24,7 @@ export async function GET() {
 
   if (!profile?.property_id) {
     // No property → let the client fall back to its default copy.
-    return NextResponse.json({ isDemo: false, started: false, percent: 0, moduleTitle: null });
+    return NextResponse.json({ isDemo: false, started: false, percent: 0, moduleTitle: null, moduleId: null });
   }
 
   if (profile.property_id === DEMO_PROPERTY_ID) {
@@ -64,7 +64,7 @@ export async function GET() {
     learnable.find((m) => (doneByModule.get(m.id)?.size ?? 0) < m.totalLessons) ?? learnable[0] ?? null;
 
   if (!current) {
-    return NextResponse.json({ isDemo: false, started: false, percent: 0, moduleTitle: null });
+    return NextResponse.json({ isDemo: false, started: false, percent: 0, moduleTitle: null, moduleId: null });
   }
 
   const done = doneByModule.get(current.id)?.size ?? 0;
@@ -75,6 +75,8 @@ export async function GET() {
     started: totalCompletions > 0,
     percent,
     moduleTitle: current.title,
+    // The id lets the hero's Continue button open this exact module.
+    moduleId: current.id,
     firstModuleTitle: learnable[0]?.title ?? current.title,
   });
 }

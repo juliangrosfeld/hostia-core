@@ -64,13 +64,21 @@ function LessonRow({
 
 interface ModuleViewProps {
   module: Module;
+  // 1-based position in the resolved curriculum; null hides the "Module N" label.
+  moduleNumber: number | null;
   onBack: () => void;
   onOpenLesson: (lesson: Lesson, index: number) => void;
   completedKeys: ReadonlySet<string>;
 }
 
-export default function ModuleView({ module, onBack, onOpenLesson, completedKeys }: ModuleViewProps) {
+export default function ModuleView({ module, moduleNumber, onBack, onOpenLesson, completedKeys }: ModuleViewProps) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
+
+  // Hero stats derived from the same completion source as the lesson rows
+  // below (mock `status` or live completions) — never the hardcoded
+  // `module.progress`, which is 0 for every real-data module.
+  const doneCount = module.lessons.filter((l) => isLessonComplete(module.id, l, completedKeys)).length;
+  const progressPct = module.lessons.length > 0 ? Math.round((doneCount / module.lessons.length) * 100) : 0;
 
   return (
     <div className="page animate-fade-up">
@@ -92,9 +100,9 @@ export default function ModuleView({ module, onBack, onOpenLesson, completedKeys
               <Icon size={30} color="white" />
             </div>
             <div>
-              <div className="label-mono">
-                Module {['greetings','service-flow','language','complaints','floor','guest-psychology'].indexOf(module.id) + 1}
-              </div>
+              {moduleNumber != null && (
+                <div className="label-mono">Module {moduleNumber}</div>
+              )}
               <h1 className="display" style={{ fontSize: 36, color: 'var(--brand-deep)', margin: '6px 0 10px', lineHeight: 1.1 }}>
                 {module.title}
               </h1>
@@ -107,12 +115,12 @@ export default function ModuleView({ module, onBack, onOpenLesson, completedKeys
           <div className="module-stats">
             <div>
               <div className="label-mono">Progress</div>
-              <div className="stat-big">{Math.round(module.progress * 100)}%</div>
+              <div className="stat-big">{progressPct}%</div>
             </div>
             <div className="div-vert" />
             <div>
               <div className="label-mono">Lessons</div>
-              <div className="stat-big">{module.completedLessons}/{module.totalLessons}</div>
+              <div className="stat-big">{doneCount}/{module.lessons.length}</div>
             </div>
             <div className="div-vert" />
             <div>

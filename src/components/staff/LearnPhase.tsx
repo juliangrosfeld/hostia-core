@@ -103,7 +103,7 @@ function SectionLangGrid({ items }: { items: LangCard[] }) {
               <span className="lang-flag">{g.flag}</span>
               <span className="display lang-name">{g.lang}</span>
             </div>
-            <div className="lang-phrase">"{tone === 'formal' ? g.formal : g.casual}"</div>
+            <div className="lang-phrase">&ldquo;{tone === 'formal' ? g.formal : g.casual}&rdquo;</div>
             <div className="lang-tip">
               <Lightbulb size={12} style={{ flexShrink: 0, marginTop: 2, color: 'var(--gold)' }} />
               {g.tip}
