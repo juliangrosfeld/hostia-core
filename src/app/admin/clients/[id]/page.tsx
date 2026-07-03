@@ -260,6 +260,7 @@ export default function ClientDetailPage() {
   // Delete flows.
   const [deletePropertyOpen, setDeletePropertyOpen] = useState(false)
   const [deleteManagerTarget, setDeleteManagerTarget] = useState<Manager | null>(null)
+  const [cancelInviteTarget, setCancelInviteTarget] = useState<PendingInvite | null>(null)
 
   const [property, setProperty] = useState<Property | null>(null)
   const [assigned, setAssigned] = useState<Set<string>>(new Set())
@@ -450,20 +451,35 @@ export default function ClientDetailPage() {
     }
   }
 
-  async function cancelInvite(inv: PendingInvite) {
-    if (!window.confirm(`Cancel the invite for ${inv.full_name}? This can't be undone.`)) return
+  async function confirmCancelInvite(): Promise<boolean> {
+    const inv = cancelInviteTarget
+    if (!inv) return false
     try {
       const res = await fetch(`/api/admin/properties/${propertyId}/invites/${inv.id}`, { method: 'DELETE' })
       const data = await res.json()
       if (!res.ok) {
         showToast('err', data.error || 'Failed to cancel invite')
-        return
+        return false
       }
       setPendingInvites((prev) => prev.filter((i) => i.id !== inv.id))
       showToast('ok', 'Invite cancelled')
+      setCancelInviteTarget(null)
+      return true
     } catch {
       showToast('err', 'Network error — please try again')
+      return false
     }
+  }
+
+  // The hex text input feeds --brand-color on every staff page — never persist
+  // anything that isn't a real 6-digit hex color (empty clears it).
+  function patchPrimaryColor(value: string) {
+    const v = value.trim()
+    if (v !== '' && !/^#[0-9a-fA-F]{6}$/.test(v)) {
+      setDetailsMsg({ tone: 'err', text: 'Enter a hex color like #1A2B3C' })
+      return
+    }
+    patchField('primary_color', v)
   }
 
   // ── Property field PATCH ──────────────────────────────────────
@@ -682,7 +698,7 @@ export default function ClientDetailPage() {
                   type="text"
                   value={property.primary_color || ''}
                   onChange={(e) => setProperty({ ...property, primary_color: e.target.value })}
-                  onBlur={(e) => patchField('primary_color', e.target.value)}
+                  onBlur={(e) => patchPrimaryColor(e.target.value)}
                   style={{ ...inputStyle, fontFamily: 'monospace', maxWidth: 160 }}
                 />
               </div>
@@ -720,7 +736,7 @@ export default function ClientDetailPage() {
                   {logoUploading ? 'Uploading…' : property.logo_url ? 'Replace logo' : 'Upload logo'}
                   <input
                     type="file"
-                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    accept="image/png,image/jpeg,image/webp"
                     onChange={handleLogoUpload}
                     disabled={logoUploading}
                     style={{ display: 'none' }}
@@ -871,7 +887,7 @@ export default function ClientDetailPage() {
                     )}
                   </button>
                   <button
-                    onClick={() => cancelInvite(inv)}
+                    onClick={() => setCancelInviteTarget(inv)}
                     style={{
                       flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
                       padding: '8px 11px', borderRadius: 9,
@@ -1184,6 +1200,26 @@ export default function ClientDetailPage() {
           confirmLabel="Remove Manager"
           onCancel={() => setDeleteManagerTarget(null)}
           onConfirm={confirmDeleteManager}
+        />
+      )}
+
+      {/* ── Cancel Invite modal ── */}
+      {cancelInviteTarget && (
+        <ConfirmDeleteModal
+          title={`Cancel ${cancelInviteTarget.full_name}'s invite?`}
+          warning={
+            <>
+              This invalidates the invite link sent to{' '}
+              <strong>{cancelInviteTarget.email}</strong>. You can always send a new invite later.
+            </>
+          }
+          inputLabel="Type the invitee's email to confirm:"
+          placeholder={cancelInviteTarget.email}
+          expected={cancelInviteTarget.email}
+          caseInsensitive
+          confirmLabel="Cancel Invite"
+          onCancel={() => setCancelInviteTarget(null)}
+          onConfirm={confirmCancelInvite}
         />
       )}
 

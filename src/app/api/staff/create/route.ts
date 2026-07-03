@@ -27,8 +27,15 @@ export async function POST(request: Request) {
   }
 
   // 3. Parse and validate input
-  const body = await request.json()
-  const { full_name, email, password, role } = body
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+  }
+  const { full_name, email, password, role } = body as {
+    full_name?: string; email?: string; password?: string; role?: string
+  }
 
   if (!full_name || !email || !password || !role) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })

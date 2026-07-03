@@ -7,12 +7,41 @@ export const dynamic = 'force-dynamic'
 
 const BUCKET = 'property-logos'
 const MAX_BYTES = 2 * 1024 * 1024 // 2 MB
+
+// SVG is deliberately excluded — it can carry scripts, and the bucket serves
+// files verbatim. Raster formats only.
 const ALLOWED_TYPES = new Set([
   'image/png',
   'image/jpeg',
   'image/webp',
-  'image/svg+xml',
 ])
+
+const EXT_BY_TYPE: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+// The content-type header is client-asserted; the file's leading bytes are the
+// authority on what it actually is.
+function sniffImageType(bytes: Uint8Array): string | null {
+  if (bytes.length >= 4 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+    return 'image/png'
+  }
+  if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return 'image/jpeg'
+  }
+  if (
+    bytes.length >= 12 &&
+    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && // RIFF
+    bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50 // WEBP
+  ) {
+    return 'image/webp'
+  }
+  return null
+}
 
 // POST — upload a property logo and return its public URL.
 //
@@ -40,17 +69,34 @@ export async function POST(request: NextRequest) {
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ error: 'File too large (max 2 MB)' }, { status: 400 })
   }
-  if (file.type && !ALLOWED_TYPES.has(file.type)) {
+  if (!ALLOWED_TYPES.has(file.type)) {
     return NextResponse.json(
-      { error: 'Unsupported file type (use PNG, JPEG, WebP, or SVG)' },
+      { error: 'Unsupported file type (use PNG, JPEG, or WebP)' },
+      { status: 400 }
+    )
+  }
+
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  const sniffedType = sniffImageType(bytes)
+  if (sniffedType !== file.type) {
+    return NextResponse.json(
+      { error: 'File content does not match its declared type' },
       { status: 400 }
     )
   }
 
   const propertyId = form.get('propertyId')
-  const folder = typeof propertyId === 'string' && propertyId.trim() ? propertyId.trim() : 'unassigned'
-  const ext = (file.name.split('.').pop() || 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png'
-  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+  let folder = 'unassigned'
+  if (typeof propertyId === 'string' && propertyId.trim()) {
+    if (!UUID_RE.test(propertyId.trim())) {
+      return NextResponse.json({ error: 'Invalid propertyId' }, { status: 400 })
+    }
+    folder = propertyId.trim().toLowerCase()
+  }
+
+  // Extension follows the verified MIME type — the client's filename is never
+  // trusted for anything.
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${EXT_BY_TYPE[file.type]}`
 
   const admin = createAdminClient()
 
@@ -64,9 +110,8 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer())
   const { error: uploadErr } = await admin.storage.from(BUCKET).upload(path, bytes, {
-    contentType: file.type || 'application/octet-stream',
+    contentType: file.type,
     upsert: false,
   })
   if (uploadErr) {

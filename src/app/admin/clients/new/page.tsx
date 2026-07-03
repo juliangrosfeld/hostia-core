@@ -230,7 +230,7 @@ export default function NewClientPage() {
               {uploading ? 'Uploading…' : logoUrl ? 'Replace logo' : 'Upload logo'}
               <input
                 type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                accept="image/png,image/jpeg,image/webp"
                 onChange={handleLogoUpload}
                 disabled={uploading}
                 style={{ display: 'none' }}
