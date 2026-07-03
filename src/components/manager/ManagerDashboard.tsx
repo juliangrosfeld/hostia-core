@@ -23,8 +23,10 @@ import StaffRow from './StaffRow';
 
 // ─── Real-data dashboard payload (see /api/manager/dashboard) ─────────────────
 
-interface DashboardData {
-  isDemo: false;
+// One metrics block per scope ('all' or a phase_id). The server precomputes
+// every block in a single response, so switching the phase filter is a pure
+// client-side lookup — no refetch.
+interface PhaseMetrics {
   totalStaff: number;
   activeStaff: number;
   atRisk: number;
@@ -39,9 +41,17 @@ interface DashboardData {
     atRiskStaff: { count: number; names: string[]; message: string };
     topPerformer: { id: string; full_name: string; first_name: string; badges: number; streak: number; score: number } | null;
   };
-  roster: StaffMember[];
+}
+
+// Real roster rows carry the staff member's current phase so the roster table
+// can be filtered locally; the mock demo roster simply omits it.
+type RosterMember = StaffMember & { currentPhaseId?: string | null };
+
+interface DashboardData {
+  isDemo: false;
+  byPhase: Record<string, PhaseMetrics>;
+  roster: RosterMember[];
   phaseDistribution: PhaseDistEntry[];
-  selectedPhase: string | null;
 }
 
 interface PhaseDistEntry {
@@ -440,7 +450,7 @@ interface ManagerDashboardProps {
 
 export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps) {
   const [filter, setFilter] = useState<string>('all');
-  const [staffList, setStaffList] = useState<StaffMember[]>([...STAFF]);
+  const [staffList, setStaffList] = useState<RosterMember[]>([...STAFF]);
 
   // Logged-in manager + their property. Drives the greeting + property name on
   // BOTH the demo and real paths (so the demo screen now shows real names too).
@@ -461,23 +471,21 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const [status, setStatus] = useState<'loading' | 'demo' | 'real' | 'error'>('loading');
   const [realData, setRealData] = useState<DashboardData | null>(null);
 
-  // Selected phase filter (phase_id) — null = all phases. Drives a scoped refetch.
+  // Selected phase filter (phase_id) — null = all phases. Pure client state:
+  // the response already carries every phase's metrics block, so switching is
+  // an instant local lookup, not a refetch.
   const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
 
-  // Bumped by the error screen's Retry button to refetch without changing the
-  // phase filter.
+  // Bumped by the error screen's Retry button (and after adding staff) to
+  // refetch the whole dashboard.
   const [fetchNonce, setFetchNonce] = useState(0);
 
-  // The dashboard (re)loads on mount and whenever the phase filter or the
-  // retry nonce changes.
+  // The dashboard (re)loads on mount and on a retry-nonce bump only.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const url = selectedPhase
-          ? `/api/manager/dashboard?phase=${encodeURIComponent(selectedPhase)}`
-          : '/api/manager/dashboard';
-        const res = await fetch(url);
+        const res = await fetch('/api/manager/dashboard');
         if (cancelled) return;
         if (!res.ok) { setStatus('error'); return; }
         const data: DashboardResponse = await res.json();
@@ -495,13 +503,17 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
       }
     })();
     return () => { cancelled = true; };
-  }, [selectedPhase, fetchNonce]);
+  }, [fetchNonce]);
 
-  // Selecting a phase re-pulls the dashboard scoped to that phase's staff
-  // (via the effect above).
   const selectPhase = (phaseId: string | null) => setSelectedPhase(phaseId);
 
   const isReal = status === 'real' && realData != null;
+
+  // The active metrics block. An unknown phase id (shouldn't happen — tiles
+  // come from the same payload) falls back to the all-phases block.
+  const metrics: PhaseMetrics | null = isReal
+    ? (selectedPhase ? realData!.byPhase[selectedPhase] ?? realData!.byPhase.all : realData!.byPhase.all)
+    : null;
 
   // Metadata for the "Viewing: Phase X" indicator when a phase filter is active.
   const activePhase = isReal && selectedPhase
@@ -679,37 +691,41 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
 
   const weakest = skillAverages[0];
 
-  // Filtered roster
+  // Filtered roster — the phase filter narrows first (real roster rows carry
+  // currentPhaseId, filtered locally), then the dept/status chips on top.
+  const phaseScoped = isReal && selectedPhase
+    ? staffList.filter((s) => s.currentPhaseId === selectedPhase)
+    : staffList;
   const depts = ['all', ...Array.from(new Set(staffList.map((s) => s.dept)))];
-  let filtered: StaffMember[];
-  if (filter === 'at-risk')    filtered = staffList.filter((s) => s.status === 'at-risk');
-  else if (filter === 'star')  filtered = staffList.filter((s) => s.status === 'star');
-  else if (filter === 'all')   filtered = staffList;
-  else                         filtered = staffList.filter((s) => s.dept === filter);
+  let filtered: RosterMember[];
+  if (filter === 'at-risk')    filtered = phaseScoped.filter((s) => s.status === 'at-risk');
+  else if (filter === 'star')  filtered = phaseScoped.filter((s) => s.status === 'star');
+  else if (filter === 'all')   filtered = phaseScoped;
+  else                         filtered = phaseScoped.filter((s) => s.dept === filter);
   filtered = [...filtered].sort((a, b) => b.score - a.score);
 
   // ── Display values ───────────────────────────────────────
   // Every metric is sourced from real data when isReal, otherwise from the mock
   // computations above. The JSX below is a single tree bound to these so the
   // demo render stays byte-for-byte identical to before.
-  const displayStaffCount = isReal ? realData!.totalStaff : n;
-  const displayActive     = isReal ? realData!.activeStaff : activeStaff;
-  const displayAtRisk     = isReal ? realData!.atRisk : atRisk;
+  const displayStaffCount = isReal ? metrics!.totalStaff : n;
+  const displayActive     = isReal ? metrics!.activeStaff : activeStaff;
+  const displayAtRisk     = isReal ? metrics!.atRisk : atRisk;
 
   // Team health
-  const healthValue     = isReal ? realData!.teamHealth.current : teamAvg;
-  const healthDelta     = isReal ? realData!.teamHealth.delta : 15;
+  const healthValue     = isReal ? metrics!.teamHealth.current : teamAvg;
+  const healthDelta     = isReal ? metrics!.teamHealth.delta : 15;
   const healthDeltaText = isReal ? formatPtsDelta(healthDelta) : '+15 pts in 30 days';
   const healthTrend: 'up' | 'warn' | 'flat' =
     isReal ? (healthDelta > 0 ? 'up' : healthDelta < 0 ? 'warn' : 'flat') : 'up';
-  const healthSpark = isReal ? realData!.trendChart.map((d) => d.score) : TREND_DATA.map((d) => d.score);
+  const healthSpark = isReal ? metrics!.trendChart.map((d) => d.score) : TREND_DATA.map((d) => d.score);
 
   // Lessons
-  const lessonsDelta = isReal ? realData!.lessons.deltaPercent : null;
-  const lessonsValue = isReal ? String(realData!.lessons.thisWeek) : '38';
+  const lessonsDelta = isReal ? metrics!.lessons.deltaPercent : null;
+  const lessonsValue = isReal ? String(metrics!.lessons.thisWeek) : '38';
   // Both this week and last week are zero when there's no lesson activity at all.
   // deltaPercent is only 0 here when last week was also 0 (else thisWeek=0 → -100%).
-  const lessonsBothZero = isReal && realData!.lessons.thisWeek === 0 && lessonsDelta === 0;
+  const lessonsBothZero = isReal && metrics!.lessons.thisWeek === 0 && lessonsDelta === 0;
   const lessonsDeltaText = isReal
     ? (lessonsBothZero
         ? 'no lessons yet'
@@ -720,18 +736,18 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   const lessonsTrend: 'up' | 'warn' | 'flat' = isReal
     ? (lessonsDelta === null || lessonsDelta > 0 ? 'up' : lessonsDelta < 0 ? 'warn' : 'flat')
     : 'up';
-  const lessonBars = isReal && realData!.lessons.thisWeek === 0 ? [2, 2, 2, 2, 2, 2, 2] : [4, 6, 5, 8, 7, 6, 5];
+  const lessonBars = isReal && metrics!.lessons.thisWeek === 0 ? [2, 2, 2, 2, 2, 2, 2] : [4, 6, 5, 8, 7, 6, 5];
 
   // Certified
-  const certifiedValue = isReal ? `${realData!.certified.count}/${realData!.certified.total}` : `${certified}/${n}`;
-  const certifiedDeltaText = isReal ? `${realData!.certified.closeToCount} close to certification` : '2 close to certification';
+  const certifiedValue = isReal ? `${metrics!.certified.count}/${metrics!.certified.total}` : `${certified}/${n}`;
+  const certifiedDeltaText = isReal ? `${metrics!.certified.closeToCount} close to certification` : '2 close to certification';
   const certPct = isReal
-    ? (realData!.certified.total > 0 ? (realData!.certified.count / realData!.certified.total) * 100 : 0)
+    ? (metrics!.certified.total > 0 ? (metrics!.certified.count / metrics!.certified.total) * 100 : 0)
     : (n > 0 ? (certified / n) * 100 : 0);
 
   // Trend chart
   const chartData: { day: string; score: number }[] = isReal
-    ? realData!.trendChart.map((d) => ({ day: d.date.slice(5), score: d.score }))
+    ? metrics!.trendChart.map((d) => ({ day: d.date.slice(5), score: d.score }))
     : TREND_DATA.map((d) => ({ day: String(d.day), score: d.score }));
   const chartDomain: [number, number] = isReal ? [0, 100] : [50, 100];
   const chartTrendUp = isReal ? healthDelta >= 0 : true;
@@ -739,7 +755,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
 
   // Skill gaps (weakest first)
   const skillRows = isReal
-    ? realData!.skillGaps.map((g) => ({ key: g.module_id, skill: g.module_title, avg: g.score }))
+    ? metrics!.skillGaps.map((g) => ({ key: g.module_id, skill: g.module_title, avg: g.score }))
     : skillAverages;
   // Only flag a "WEAKEST" skill once there's real signal to compare. On the real
   // path with all-zero scores, the label is meaningless — hide it. Demo: always on.
@@ -747,17 +763,17 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
 
   // Insight cards
   const insightWeakestTitle = isReal
-    ? (realData!.insights.weakestSkill ? `${realData!.insights.weakestSkill.module_title} needs attention` : 'No skill data yet')
+    ? (metrics!.insights.weakestSkill ? `${metrics!.insights.weakestSkill.module_title} needs attention` : 'No skill data yet')
     : `${weakest.skill} needs attention`;
   const insightWeakestBody = isReal
-    ? (realData!.insights.weakestSkill?.message ?? 'Once your team starts roleplays, skill gaps will surface here.')
+    ? (metrics!.insights.weakestSkill?.message ?? 'Once your team starts roleplays, skill gaps will surface here.')
     : `Team averages ${weakest.avg}% on this skill. Consider making it the focus module this week.`;
 
   const insightAtRiskBody = isReal
-    ? realData!.insights.atRiskStaff.message
+    ? metrics!.insights.atRiskStaff.message
     : "Diego and Robbie haven't engaged in over a week. A nudge or quick 1:1 could re-engage them now.";
 
-  const tp = isReal ? realData!.insights.topPerformer : null;
+  const tp = isReal ? metrics!.insights.topPerformer : null;
   const insightStarTitle = isReal
     ? (tp ? `${tp.first_name} is leading the team` : 'No star performers yet')
     : (stars[0] ? `${stars[0].name.split(' ')[0]} is leading the team` : 'No star performers yet');
@@ -843,11 +859,11 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             <div className="avatar-stack">
               {isReal ? (
                 <>
-                  {realData!.activeAvatars.map((a, i) => (
+                  {metrics!.activeAvatars.map((a, i) => (
                     <div key={i} className="mini-avatar" style={{ background: a.color }}>{a.initials}</div>
                   ))}
-                  {realData!.activeStaff > 6 && <div className="mini-avatar mini-avatar-more">+{realData!.activeStaff - 6}</div>}
-                  {realData!.activeAvatars.length === 0 && (
+                  {metrics!.activeStaff > 6 && <div className="mini-avatar mini-avatar-more">+{metrics!.activeStaff - 6}</div>}
+                  {metrics!.activeAvatars.length === 0 && (
                     <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>No active staff yet</span>
                   )}
                 </>

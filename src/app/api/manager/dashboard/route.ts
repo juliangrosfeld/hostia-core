@@ -92,8 +92,7 @@ function joinNames(names: string[]): string {
 }
 
 // ── Route ────────────────────────────────────────────────────────────────────
-export async function GET(req: Request) {
-  const phaseParam = new URL(req.url).searchParams.get('phase'); // optional phase_id filter
+export async function GET() {
   const supabase = await createClient();
 
   // 1. Auth — must be a signed-in manager or admin.
@@ -235,13 +234,25 @@ export async function GET(req: Request) {
     count: allStaff.filter((s) => currentPhaseByStaff.get(s.id) === ph.id).length,
   }));
 
-  // ── Apply the optional phase filter ───────────────────────────────────────
-  // Everything below this point operates on the scoped staff/sessions/completions,
-  // so every metric recomputes for only the staff currently on the chosen phase.
-  const selectedPhase = phaseParam && phaseList.some((p) => p.id === phaseParam) ? phaseParam : null;
-  const staff: StaffRow[] = selectedPhase
-    ? allStaff.filter((s) => currentPhaseByStaff.get(s.id) === selectedPhase)
-    : allStaff;
+  // Module→phase assignments (the same source /api/curriculum uses — CURRICULUM
+  // carries no phase fields), needed to scope skill gaps per phase. Phase 1 also
+  // owns the not-yet-categorized ("universal") modules with no assignment.
+  const phaseOneId = phaseList[0]?.id;
+  const modulePhaseById = new Map<string, string>();
+  if (phaseList.length > 0) {
+    const { data: mpaRows } = await admin
+      .from('module_phase_assignments')
+      .select('module_id, phase_id')
+      .in('phase_id', phaseList.map((p) => p.id));
+    for (const r of mpaRows ?? []) modulePhaseById.set(r.module_id, r.phase_id);
+  }
+
+  // ── Per-scope metrics ──────────────────────────────────────────────────────
+  // All KPI/chart/insight math for one staff scope (all staff, or one phase's
+  // staff). The data is already in memory, so computing every phase's block up
+  // front is cheap — and it lets the client switch phase filters instantly,
+  // with no refetch. Purely synchronous; every DB read happens above.
+  function metricsFor(staff: StaffRow[], selectedPhase: string | null) {
   const staffIds = new Set(staff.map((s) => s.id));
   const sessions: SessionRow[] = allSessions.filter((s) => staffIds.has(s.staff_id));
   const completions: CompletionRow[] = allCompletions.filter((c) => staffIds.has(c.staff_id));
@@ -339,19 +350,8 @@ export async function GET(req: Request) {
   const assignedModuleIds = new Set(
     (moduleRes.data ?? []).filter((m) => m.is_active).map((m) => m.module_id),
   );
-  // When a phase is selected, skill gaps scope to that phase's modules, with
-  // module→phase resolved from module_phase_assignments (the same source
-  // /api/curriculum uses — CURRICULUM carries no phase fields). Phase 1 also
-  // owns the not-yet-categorized ("universal") modules with no assignment.
-  const phaseOneId = phaseList[0]?.id;
-  const modulePhaseById = new Map<string, string>();
-  if (selectedPhase && phaseList.length > 0) {
-    const { data: mpaRows } = await admin
-      .from('module_phase_assignments')
-      .select('module_id, phase_id')
-      .in('phase_id', phaseList.map((p) => p.id));
-    for (const r of mpaRows ?? []) modulePhaseById.set(r.module_id, r.phase_id);
-  }
+  // When a phase is selected, skill gaps scope to that phase's modules (via the
+  // hoisted module→phase map).
   const inSelectedPhase = (m: Module): boolean => {
     if (!selectedPhase) return true;
     const phaseId = modulePhaseById.get(m.id);
@@ -436,28 +436,53 @@ export async function GET(req: Request) {
         : `${joinNames(atRiskNames)} ${atRisk === 1 ? "hasn't" : "haven't"} engaged in over a week. A nudge or quick 1:1 could re-engage them now.`,
   };
 
-  // ── Roster — real staff, computed metrics, drill-in compatible shape ───────
+  return {
+    totalStaff,
+    activeStaff,
+    atRisk,
+    activeAvatars,
+    teamHealth: { current: healthCurrent, delta: healthDelta },
+    lessons: { thisWeek: lessonsThisWeek, deltaPercent },
+    certified: { count: certifiedStaff.size, total: totalStaff, closeToCount },
+    trendChart,
+    skillGaps,
+    insights: { weakestSkill, atRiskStaff, topPerformer },
+  };
+  }
+
+  // ── Roster — ALL staff, computed metrics, drill-in compatible shape ────────
+  // Per-staff metrics are identical whatever phase filter is active (activity
+  // is per staff member), so the roster is built once from the full data and
+  // each entry carries currentPhaseId — the client filters it locally.
   const lessonsDoneByStaff = new Map<string, Set<string>>();
   const sessionsCountByStaff = new Map<string, number>();
   const staffModuleWarmth = new Map<string, number[]>(); // key `${staffId}|${moduleId}`
-  for (const c of completions) {
+  const xpByStaff = new Map<string, number>();
+  const warmthByStaff = new Map<string, number[]>();
+  const applyBadgesByStaff = new Map<string, number>();
+  for (const c of allCompletions) {
     const set = lessonsDoneByStaff.get(c.staff_id) ?? new Set<string>();
     set.add(c.lesson_id);
     lessonsDoneByStaff.set(c.staff_id, set);
+    if (c.phase === 'apply') applyBadgesByStaff.set(c.staff_id, (applyBadgesByStaff.get(c.staff_id) ?? 0) + 1);
   }
-  for (const s of sessions) {
+  for (const s of allSessions) {
     sessionsCountByStaff.set(s.staff_id, (sessionsCountByStaff.get(s.staff_id) ?? 0) + 1);
     const key = `${s.staff_id}|${s.module_id}`;
     const bucket = staffModuleWarmth.get(key) ?? [];
     bucket.push(s.warmth_score);
     staffModuleWarmth.set(key, bucket);
+    xpByStaff.set(s.staff_id, (xpByStaff.get(s.staff_id) ?? 0) + (s.xp_earned ?? 0));
+    const wBucket = warmthByStaff.get(s.staff_id) ?? [];
+    wBucket.push(s.warmth_score);
+    warmthByStaff.set(s.staff_id, wBucket);
   }
 
   const totalLessons = modules
     .filter((m) => m.id !== 'phase-1-certification')
     .reduce((sum, m) => sum + m.totalLessons, 0);
 
-  const roster = staff
+  const roster = allStaff
     .map((s) => {
       const lessonsDone = lessonsDoneByStaff.get(s.id)?.size ?? 0;
       const sessionCount = sessionsCountByStaff.get(s.id) ?? 0;
@@ -485,6 +510,7 @@ export async function GET(req: Request) {
 
       return {
         id: s.id,
+        currentPhaseId: currentPhaseByStaff.get(s.id) ?? null,
         name: s.full_name ?? 'Unnamed',
         initials: initialsFor(s.full_name),
         role: 'Team member',
@@ -505,20 +531,22 @@ export async function GET(req: Request) {
     })
     .sort((a, b) => b.score - a.score);
 
+  // One metrics block per scope: 'all' plus every phase. The client picks a
+  // block on tile click — no round trip.
+  const byPhase: Record<string, ReturnType<typeof metricsFor>> = {
+    all: metricsFor(allStaff, null),
+  };
+  for (const ph of phaseList) {
+    byPhase[ph.id] = metricsFor(
+      allStaff.filter((s) => currentPhaseByStaff.get(s.id) === ph.id),
+      ph.id,
+    );
+  }
+
   return NextResponse.json({
     isDemo: false,
-    totalStaff,
-    activeStaff,
-    atRisk,
-    activeAvatars,
-    teamHealth: { current: healthCurrent, delta: healthDelta },
-    lessons: { thisWeek: lessonsThisWeek, deltaPercent },
-    certified: { count: certifiedStaff.size, total: totalStaff, closeToCount },
-    trendChart,
-    skillGaps,
-    insights: { weakestSkill, atRiskStaff, topPerformer },
+    byPhase,
     roster,
     phaseDistribution,
-    selectedPhase,
   });
 }
