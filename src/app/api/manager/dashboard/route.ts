@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { CURRICULUM, resolveCurriculum, type Module } from '@/lib/curriculum';
 import { activityDayIndex, computeStreak } from '@/lib/streak';
+import { computeTotalXp, type CompletionPhaseRow, type SessionXpRow } from '@/lib/progress-model';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -41,8 +42,8 @@ interface StaffSkills {
 // streaks are COMPUTED from roleplay_sessions + lesson_completions below — the
 // same source /api/staff/xp-streak uses, so staff hero and roster always agree.
 interface StaffRow { id: string; full_name: string | null; last_active: string | null; }
-interface SessionRow { staff_id: string; module_id: string; warmth_score: number; xp_earned: number | null; passed: boolean; completed_at: string; }
-interface CompletionRow { staff_id: string; module_id: string; lesson_id: string; phase: string; completed_at: string; }
+interface SessionRow extends SessionXpRow { staff_id: string; warmth_score: number; completed_at: string; }
+interface CompletionRow extends CompletionPhaseRow { staff_id: string; completed_at: string; }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const ts = (iso: string | null): number => (iso ? Date.parse(iso) : 0);
@@ -152,7 +153,7 @@ export async function GET() {
       .eq('role', 'staff'),
     supabase
       .from('roleplay_sessions')
-      .select('staff_id, module_id, warmth_score, xp_earned, passed, completed_at')
+      .select('staff_id, module_id, lesson_id, warmth_score, xp_earned, passed, completed_at')
       .eq('property_id', propertyId)
       .order('completed_at', { ascending: true })
       .limit(10_000),
@@ -186,9 +187,46 @@ export async function GET() {
   if (moduleRes.error) console.error('[dashboard] property_modules query error:', moduleRes.error);
 
   const allStaff: StaffRow[] = staffRes.data ?? [];
-  const allSessions: SessionRow[] = (sessionRes.data ?? []) as SessionRow[];
-  const allCompletions: CompletionRow[] = (completionRes.data ?? []) as CompletionRow[];
   const modules: Module[] = resolveCurriculum(moduleRes.data);
+
+  // This dashboard reports on STAFF only. The property-scoped activity queries
+  // also return the manager's own learning rows (managers can browse modules
+  // and earn personal XP/streak, shown by the /api/staff/* endpoints) — drop
+  // them here, at the source, so no roster entry, KPI, average or insight can
+  // ever mix manager activity into the staff pool.
+  const staffIdSet = new Set(allStaff.map((s) => s.id));
+  const allSessions: SessionRow[] = ((sessionRes.data ?? []) as SessionRow[])
+    .filter((s) => staffIdSet.has(s.staff_id));
+  const allCompletions: CompletionRow[] = ((completionRes.data ?? []) as CompletionRow[])
+    .filter((c) => staffIdSet.has(c.staff_id));
+
+  // ── XP ─────────────────────────────────────────────────────────────────────
+  // Total XP per staff via the shared lib/progress-model.ts derivation
+  // (roleplay XP + lesson XP on FULL completion + warmth bonus), identical to
+  // /api/staff/xp-streak, so the roster can never disagree with the staff
+  // hero. Computed once over the full data; phase-scoped views reuse it (XP
+  // is per staff member and doesn't change with the phase filter).
+  const sessionsByStaff = new Map<string, SessionRow[]>();
+  for (const s of allSessions) {
+    const list = sessionsByStaff.get(s.staff_id) ?? [];
+    list.push(s);
+    sessionsByStaff.set(s.staff_id, list);
+  }
+  const completionsByStaff = new Map<string, CompletionRow[]>();
+  for (const c of allCompletions) {
+    const list = completionsByStaff.get(c.staff_id) ?? [];
+    list.push(c);
+    completionsByStaff.set(c.staff_id, list);
+  }
+  const totalXpByStaff = new Map<string, number>();
+  for (const s of allStaff) {
+    const { totalXp } = computeTotalXp({
+      sessions: sessionsByStaff.get(s.id) ?? [],
+      completions: completionsByStaff.get(s.id) ?? [],
+      modules,
+    });
+    totalXpByStaff.set(s.id, totalXp);
+  }
 
   // ── Streaks ────────────────────────────────────────────────────────────────
   // Per-staff activity day-sets (roleplays + lesson completions) → streaks via
@@ -375,12 +413,10 @@ export async function GET() {
     })
     .sort((a, b) => a.score - b.score);
 
-  // ── 15c. Top performer — most roleplay XP, with badges/streak/avg warmth ───
-  const xpByStaff = new Map<string, number>();
+  // ── 15c. Top performer — most TOTAL XP (shared model), badges/streak/warmth ─
   const warmthByStaff = new Map<string, number[]>();
   for (const s of sessions) {
     if (!staffIds.has(s.staff_id)) continue;
-    xpByStaff.set(s.staff_id, (xpByStaff.get(s.staff_id) ?? 0) + (s.xp_earned ?? 0));
     const bucket = warmthByStaff.get(s.staff_id) ?? [];
     bucket.push(s.warmth_score);
     warmthByStaff.set(s.staff_id, bucket);
@@ -391,8 +427,9 @@ export async function GET() {
   }
   let topId: string | null = null;
   let topXp = 0;
-  for (const [sid, xp] of xpByStaff) {
-    if (xp > topXp) { topXp = xp; topId = sid; }
+  for (const s of staff) {
+    const xp = totalXpByStaff.get(s.id) ?? 0;
+    if (xp > topXp) { topXp = xp; topId = s.id; }
   }
   let topPerformer: {
     id: string; full_name: string; first_name: string; badges: number; streak: number; score: number;
@@ -457,7 +494,6 @@ export async function GET() {
   const lessonsDoneByStaff = new Map<string, Set<string>>();
   const sessionsCountByStaff = new Map<string, number>();
   const staffModuleWarmth = new Map<string, number[]>(); // key `${staffId}|${moduleId}`
-  const xpByStaff = new Map<string, number>();
   const warmthByStaff = new Map<string, number[]>();
   const applyBadgesByStaff = new Map<string, number>();
   for (const c of allCompletions) {
@@ -472,7 +508,6 @@ export async function GET() {
     const bucket = staffModuleWarmth.get(key) ?? [];
     bucket.push(s.warmth_score);
     staffModuleWarmth.set(key, bucket);
-    xpByStaff.set(s.staff_id, (xpByStaff.get(s.staff_id) ?? 0) + (s.xp_earned ?? 0));
     const wBucket = warmthByStaff.get(s.staff_id) ?? [];
     wBucket.push(s.warmth_score);
     warmthByStaff.set(s.staff_id, wBucket);
@@ -488,8 +523,8 @@ export async function GET() {
       const sessionCount = sessionsCountByStaff.get(s.id) ?? 0;
       const myWarmth = warmthByStaff.get(s.id) ?? [];
       const score = myWarmth.length ? round(avg(myWarmth)) : 0;
-      // Computed roleplay XP — the same SUM(xp_earned) the staff hero shows.
-      const xp = xpByStaff.get(s.id) ?? 0;
+      // Total XP (roleplay + lesson) — the same number the staff hero shows.
+      const xp = totalXpByStaff.get(s.id) ?? 0;
       const active = Boolean(s.last_active) && ts(s.last_active) >= d7;
       const hasHistory = lessonsDone > 0 || sessionCount > 0;
 

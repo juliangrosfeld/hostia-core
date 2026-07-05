@@ -22,8 +22,9 @@ export interface StaffXPAndStreak {
 //  • Demo property                             → fixed mock values (route returns
 //                                                 isDemo, no live query).
 //  • Real signed-in staff                      → live from /api/staff/xp-streak,
-//    where totalXp = SUM(roleplay_sessions.xp_earned) over passed sessions — the
-//    SAME source as the manager dashboard top-performer card.
+//    where totalXp = roleplay XP + full-completion lesson XP + warmth bonus
+//    (lib/progress-model.ts) — the SAME derivation as the manager dashboard
+//    roster and top-performer card.
 export function useStaffXPAndStreak(viewingAs: StaffMember | null): StaffXPAndStreak {
   const [data, setData] = useState<{ totalXp: number; streak: number } | null>(null);
   // Bumped after every completion/session write → refetch, so hero XP and

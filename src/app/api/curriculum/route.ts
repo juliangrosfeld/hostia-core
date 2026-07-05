@@ -4,6 +4,10 @@ import { cookies } from 'next/headers';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { resolveCurriculum, type Module, type Phase } from '@/lib/curriculum';
+import {
+  distinctDoneByModule, completedCount, isModuleComplete,
+  orderedCurrentPhaseModules, deriveCurrentModule,
+} from '@/lib/progress-model';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -113,17 +117,9 @@ export async function GET() {
       : Promise.resolve({ data: [] as Phase[] }),
   ]);
 
-  // Distinct completed lesson ids per module → real completedLessons count.
-  const doneByModule = new Map<string, Set<string>>();
-  for (const c of completionRes.data ?? []) {
-    const set = doneByModule.get(c.module_id) ?? new Set<string>();
-    set.add(c.lesson_id);
-    doneByModule.set(c.module_id, set);
-  }
-  const completedCount = (m: Module): number =>
-    Math.min(m.totalLessons, doneByModule.get(m.id)?.size ?? 0);
-  const isComplete = (m: Module): boolean =>
-    m.totalLessons > 0 && completedCount(m) >= m.totalLessons;
+  // Distinct completed lesson ids per module → real completedLessons count
+  // (shared model — the same math every other progress reader uses).
+  const doneByModule = distinctDoneByModule(completionRes.data ?? []);
 
   const completedPhaseIds = (phaseCompletionRes.data ?? []).map((r) => r.phase_id);
   const phases = (phasesRes.data ?? []) as Phase[];
@@ -161,12 +157,12 @@ export async function GET() {
     let priorComplete = true;
     const enriched: ResolvedModule[] = inPhase.map((m) => {
       const locked = !priorComplete;
-      if (!isComplete(m)) priorComplete = false;
+      if (!isModuleComplete(m, doneByModule)) priorComplete = false;
       return {
         ...m,
         phase_id: moduleMetaMap.get(m.id)?.phase_id,
         order_in_phase: moduleMetaMap.get(m.id)?.order_in_phase,
-        completedLessons: completedCount(m),
+        completedLessons: completedCount(m, doneByModule),
         locked,
       };
     });
@@ -178,10 +174,23 @@ export async function GET() {
   // but flagged so they read as "to be categorized". Never gated.
   const unassigned: ResolvedModule[] = unassignedModules.map((m) => ({
     ...m,
-    completedLessons: completedCount(m),
+    completedLessons: completedCount(m, doneByModule),
     locked: false,
     toBeCategorized: true,
   }));
+
+  // The staff member's CURRENT module — first incomplete module in the exact
+  // display order above (phase-aware, order_in_phase). This is what the hero
+  // "Continue" CTA must target; /api/staff/home-progress derives it through
+  // the same shared functions, so CTA and grid cannot disagree.
+  const ordered = orderedCurrentPhaseModules({
+    modules,
+    phases,
+    assignments: (mpaRows ?? []).map((r) => ({ ...r, order_in_phase: r.order_in_phase ?? null })),
+    completedPhaseIds,
+  });
+  const current = deriveCurrentModule(ordered, doneByModule);
+  const started = (completionRes.data ?? []).length > 0;
 
   return NextResponse.json({
     propertyModules: propertyModules ?? [],
@@ -190,5 +199,14 @@ export async function GET() {
     phases: phaseGroups,
     unassigned,
     completedPhaseIds,
+    started,
+    currentModule: current
+      ? {
+          id: current.module.id,
+          title: current.module.title,
+          done: current.done,
+          percent: current.percent,
+        }
+      : null,
   });
 }
