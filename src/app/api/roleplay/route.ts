@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { SCENARIOS } from '@/lib/scenarios';
 import { substituteProperty } from '@/lib/substitute-property';
+import { signTurnProof } from '@/lib/roleplay-proof';
 
 interface PropertyPromptConfig {
   scenarioContext: string | null;
@@ -115,20 +116,24 @@ export async function POST(request: NextRequest) {
   const client = new Anthropic({ apiKey });
 
   // Parse body
-  let body: { scenarioId?: unknown; conversationHistory?: unknown; staffMessage?: unknown };
+  let body: { scenarioId?: unknown; conversationHistory?: unknown; staffMessage?: unknown; prevProof?: unknown };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
   }
 
-  const { scenarioId, conversationHistory, staffMessage } = body;
+  const { scenarioId, conversationHistory, staffMessage, prevProof } = body;
 
   if (typeof scenarioId !== 'string' || !SCENARIOS[scenarioId]) {
     return NextResponse.json({ error: 'Missing or unknown field: scenarioId' }, { status: 400 });
   }
   if (typeof staffMessage !== 'string' || !staffMessage.trim()) {
     return NextResponse.json({ error: 'Missing or invalid field: staffMessage' }, { status: 400 });
+  }
+  // prevProof chains this turn to the run so far (absent on the first turn).
+  if (prevProof !== undefined && prevProof !== null && typeof prevProof !== 'string') {
+    return NextResponse.json({ error: 'Invalid field: prevProof' }, { status: 400 });
   }
 
   // Length check
@@ -206,6 +211,33 @@ export async function POST(request: NextRequest) {
     }
 
     const parsed = JSON.parse(match[0]);
+
+    // Normalize warmth SERVER-SIDE (integer, clamped 1-10) and overwrite it in
+    // the response, so the value the client displays and the value signed into
+    // the proof are guaranteed identical. A response without usable warmth is
+    // an error — the client's retry loop handles it like any other failure.
+    const rawWarmth = Number(parsed.warmth);
+    if (!Number.isFinite(rawWarmth)) {
+      console.error('[roleplay] Model returned no usable warmth:', String(parsed.warmth));
+      return NextResponse.json({ error: 'Model returned no usable warmth' }, { status: 500 });
+    }
+    const warmth = Math.min(10, Math.max(1, Math.round(rawWarmth)));
+    parsed.warmth = warmth;
+
+    // Sign this turn's warmth into the proof chain. A missing secret returns
+    // null → respond without a proof (session will be stored unverified); an
+    // invalid prevProof is client tampering → reject.
+    const signed = signTurnProof({
+      authId: user.id,
+      scenarioId,
+      warmth,
+      prevProof: typeof prevProof === 'string' ? prevProof : null,
+    });
+    if (signed && 'error' in signed) {
+      return NextResponse.json({ error: signed.error }, { status: 400 });
+    }
+    if (signed) parsed.proof = signed.proof;
+
     return NextResponse.json(parsed);
 
   } catch (error: unknown) {

@@ -36,8 +36,9 @@ export function logLessonCompletion(input: {
 
 // One row per completed (passed or failed) Apply-phase roleplay. This is what
 // feeds the staff hero XP, the manager dashboard's warmth metrics, and the
-// admin activity counts. xp_earned is computed server-side from
-// warmth_score + passed — it is intentionally NOT part of this payload.
+// admin activity counts. When `proofs` (the HMAC turn-proof chain from
+// /api/roleplay) is present, the server verifies it and derives
+// passed/warmth_score/turns/xp itself — the values sent here are advisory.
 // Sessions are not idempotent (each attempt is its own row), so the caller
 // must guard against firing twice for the same run.
 export function logRoleplaySession(input: {
@@ -48,6 +49,7 @@ export function logRoleplaySession(input: {
   warmth_score: number;
   turns: number;
   transcript: { role: 'user' | 'assistant'; content: string; warmth?: number }[];
+  proofs?: string[];
 }): void {
   if (!input.module_id || !input.lesson_id || !input.scenario_id) return;
 

@@ -7,17 +7,12 @@ import type { Lesson } from '@/lib/curriculum';
 import { calculateRoleplayXP, getWarmthLabel } from '@/lib/xp';
 import { logLessonCompletion, logRoleplaySession } from '@/lib/completions';
 import { substitutePropertyDeep } from '@/lib/substitute-property';
-
-// ─── Constants ────────────────────────────────────────────────
-
-const MAX_TURNS = 7;
-// Pass/fail model. Warmth from the API is 1-10; the performance model works on
-// a 0-100 warmth score (warmth × 10). To pass, the guest's warmth score must
-// stay at PASS_WARMTH_SCORE+ for CONSECUTIVE_PASSES_REQUIRED turns in a row,
-// and the session must run at least MIN_TURNS turns.
-const MIN_TURNS = 3;
-const PASS_WARMTH_SCORE = 55;
-const CONSECUTIVE_PASSES_REQUIRED = 2;
+// Pass/fail model lives in the shared grading lib — the SAME constants and
+// math /api/roleplay-sessions uses to re-derive the grade server-side, so the
+// live UX here can never disagree with the stored record.
+import {
+  MAX_TURNS, MIN_TURNS, PASS_WARMTH_SCORE, CONSECUTIVE_PASSES_REQUIRED,
+} from '@/lib/roleplay-grading';
 
 // ─── Sub-components ──────────────────────────────────────────
 
@@ -135,6 +130,10 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
   // API warmth (1-10) per completed turn, in order. The session's stored
   // warmth_score is the AVERAGE of these ×10 — not the final turn's value.
   const [warmthHistory, setWarmthHistory] = useState<number[]>([]);
+  // HMAC turn proofs from /api/roleplay, one per completed turn. Carried
+  // opaquely and handed to /api/roleplay-sessions so the server can verify
+  // the warmth history and derive the grade itself.
+  const [proofs, setProofs] = useState<string[]>([]);
   const [totals, setTotals] = useState<Totals>({});
   const [turnCount, setTurnCount] = useState(0);
   const [tip, setTip] = useState<string | null>(null);
@@ -190,6 +189,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
         passed,
         warmth_score: Math.round(avgWarmth * 10),
         turns: turnCount,
+        proofs,
         transcript: messages
           .filter((m) => m.role !== 'system')
           .map((m) => ({
@@ -205,7 +205,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     if (passed) {
       logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'apply' });
     }
-  }, [done, passed, moduleId, lesson.id, lesson.scenarioId, warmth, warmthHistory, turnCount, messages]);
+  }, [done, passed, moduleId, lesson.id, lesson.scenarioId, warmth, warmthHistory, proofs, turnCount, messages]);
 
   const handleTimerExpire = useCallback(() => {
     if (done || isLoading) return;
@@ -222,6 +222,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     setMessages([]);
     setWarmth(startingWarmth);
     setWarmthHistory([]);
+    setProofs([]);
     const init: Totals = {};
     scenario?.scoreKeys.forEach((k) => { init[k] = 0; });
     setTotals(init);
@@ -241,6 +242,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     setStarted(true);
     setWarmth(startingWarmth);
     setWarmthHistory([]);
+    setProofs([]);
     setMessages([{ role: 'system', text: scenario!.opening }]);
     const init: Totals = {};
     scenario!.scoreKeys.forEach((k) => { init[k] = 0; });
@@ -275,6 +277,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     scenarioId: string,
     history: Message[],
     staffMessage: string,
+    prevProof: string | null,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> => {
     const controller = new AbortController();
@@ -283,7 +286,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
       const res = await fetch('/api/roleplay', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scenarioId, conversationHistory: history, staffMessage }),
+        body: JSON.stringify({ scenarioId, conversationHistory: history, staffMessage, prevProof }),
         signal: controller.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -311,6 +314,9 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     setTimerRunning(false);
 
     const history = updated.filter((m) => m.role !== 'system');
+    // Chain this turn to the run so far; retries of the same turn re-send the
+    // same prevProof (a proof only exists once a turn actually succeeded).
+    const prevProof = proofs.length > 0 ? proofs[proofs.length - 1] : null;
 
     // ── Retry loop: up to 3 attempts, 1 s between each ───────
     const MAX_RETRIES = 3;
@@ -323,7 +329,7 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
         await new Promise<void>((resolve) => setTimeout(resolve, 1000));
       }
       try {
-        data = await callRoleplayAPI(lesson.scenarioId, history, savedInput);
+        data = await callRoleplayAPI(lesson.scenarioId, history, savedInput, prevProof);
         lastErr = null;
         break;
       } catch (err) {
@@ -352,6 +358,11 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
     const newWarmth: number = data.warmth ?? warmth;
     setWarmth(newWarmth);
     setWarmthHistory((prev) => [...prev, newWarmth]);
+    // Collect this turn's proof. Absent only when the server can't sign
+    // (missing secret) — the session then logs as unverified.
+    if (typeof data.proof === 'string') {
+      setProofs((prev) => [...prev, data.proof]);
+    }
     setTip(data.coach_tip ?? null);
 
     const newTotals = { ...totals };
