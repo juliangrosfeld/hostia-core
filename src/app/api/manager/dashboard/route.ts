@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { CURRICULUM, resolveCurriculum, type Module } from '@/lib/curriculum';
 import { activityDayIndex, computeStreak } from '@/lib/streak';
-import { computeTotalXp, type CompletionPhaseRow, type SessionXpRow } from '@/lib/progress-model';
+import { computeTotalXp, fullyDoneByModule, type CompletionPhaseRow, type SessionXpRow } from '@/lib/progress-model';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -228,6 +228,25 @@ export async function GET() {
     totalXpByStaff.set(s.id, totalXp);
   }
 
+  // ── Full completion per staff ──────────────────────────────────────────────
+  // FULLY completed lessons per staff member (lib/progress-model.ts — every
+  // phase the lesson has, apply = passed roleplay). This is the only lesson
+  // count the roster and the weekly-lessons KPI may use.
+  const fullyDoneByModuleByStaff = new Map<string, Map<string, Set<string>>>();
+  for (const s of allStaff) {
+    fullyDoneByModuleByStaff.set(s.id, fullyDoneByModule(completionsByStaff.get(s.id) ?? [], modules));
+  }
+  // Required phases per catalog lesson, for pinning a full completion in time.
+  const requiredPhasesByLesson = new Map<string, string[]>();
+  for (const m of modules) {
+    for (const l of m.lessons) {
+      requiredPhasesByLesson.set(
+        `${m.id}::${l.id}`,
+        l.scenarioId ? ['learn', 'practice', 'apply'] : ['learn', 'practice'],
+      );
+    }
+  }
+
   // ── Streaks ────────────────────────────────────────────────────────────────
   // Per-staff activity day-sets (roleplays + lesson completions) → streaks via
   // the shared lib/streak.ts math (same definition as the staff hero). Built
@@ -319,21 +338,34 @@ export async function GET() {
   const healthDelta = round(avg(warmth30) - avg(warmthPrev30));
 
   // ── 8–10. Lessons completed this week vs last week ─────────────────────────
-  // A lesson counts as completed at its FIRST lesson_completions row (any
-  // phase) — the same definition the staff view and roster use. Counting raw
-  // rows would count learn/practice/apply as three separate "lessons".
-  const firstCompletionAt = new Map<string, number>(); // `${staff}|${module}|${lesson}` → earliest ts
+  // A lesson counts as completed when its LAST required phase lands (full
+  // completion — the same lib/progress-model.ts definition the staff view and
+  // roster use), so a failed roleplay never books a "lesson" here. Per lesson,
+  // the completion moment = the latest of the required phases' earliest rows.
+  const firstPhaseAt = new Map<string, number>(); // `${staff}|${module}|${lesson}|${phase}` → earliest ts
   for (const c of completions) {
-    const key = `${c.staff_id}|${c.module_id}|${c.lesson_id}`;
+    const key = `${c.staff_id}|${c.module_id}|${c.lesson_id}|${c.phase}`;
     const t = ts(c.completed_at);
-    const prev = firstCompletionAt.get(key);
-    if (prev === undefined || t < prev) firstCompletionAt.set(key, t);
+    const prev = firstPhaseAt.get(key);
+    if (prev === undefined || t < prev) firstPhaseAt.set(key, t);
   }
   let lessonsThisWeek = 0;
   let lessonsLastWeek = 0;
-  for (const t of firstCompletionAt.values()) {
-    if (t >= d7) lessonsThisWeek++;
-    else if (t >= d14) lessonsLastWeek++;
+  for (const staffId of staffIds) {
+    const done = fullyDoneByModuleByStaff.get(staffId);
+    if (!done) continue;
+    for (const [moduleId, lessonIds] of done) {
+      for (const lessonId of lessonIds) {
+        const phases = requiredPhasesByLesson.get(`${moduleId}::${lessonId}`) ?? [];
+        let completedAt = 0;
+        for (const ph of phases) {
+          const t = firstPhaseAt.get(`${staffId}|${moduleId}|${lessonId}|${ph}`);
+          if (t !== undefined && t > completedAt) completedAt = t;
+        }
+        if (completedAt >= d7) lessonsThisWeek++;
+        else if (completedAt >= d14) lessonsLastWeek++;
+      }
+    }
   }
   let deltaPercent: number | null;
   if (lessonsLastWeek === 0) deltaPercent = lessonsThisWeek > 0 ? null : 0;
@@ -491,15 +523,19 @@ export async function GET() {
   // Per-staff metrics are identical whatever phase filter is active (activity
   // is per staff member), so the roster is built once from the full data and
   // each entry carries currentPhaseId — the client filters it locally.
-  const lessonsDoneByStaff = new Map<string, Set<string>>();
+  // Lessons done = FULLY completed lessons (shared model, hoisted above) — the
+  // same number the staff member's own module cards add up to.
+  const lessonsDoneCountByStaff = new Map<string, number>();
+  for (const [staffId, byModule] of fullyDoneByModuleByStaff) {
+    let count = 0;
+    for (const lessons of byModule.values()) count += lessons.size;
+    lessonsDoneCountByStaff.set(staffId, count);
+  }
   const sessionsCountByStaff = new Map<string, number>();
   const staffModuleWarmth = new Map<string, number[]>(); // key `${staffId}|${moduleId}`
   const warmthByStaff = new Map<string, number[]>();
   const applyBadgesByStaff = new Map<string, number>();
   for (const c of allCompletions) {
-    const set = lessonsDoneByStaff.get(c.staff_id) ?? new Set<string>();
-    set.add(c.lesson_id);
-    lessonsDoneByStaff.set(c.staff_id, set);
     if (c.phase === 'apply') applyBadgesByStaff.set(c.staff_id, (applyBadgesByStaff.get(c.staff_id) ?? 0) + 1);
   }
   for (const s of allSessions) {
@@ -519,14 +555,16 @@ export async function GET() {
 
   const roster = allStaff
     .map((s) => {
-      const lessonsDone = lessonsDoneByStaff.get(s.id)?.size ?? 0;
+      const lessonsDone = lessonsDoneCountByStaff.get(s.id) ?? 0;
       const sessionCount = sessionsCountByStaff.get(s.id) ?? 0;
       const myWarmth = warmthByStaff.get(s.id) ?? [];
       const score = myWarmth.length ? round(avg(myWarmth)) : 0;
       // Total XP (roleplay + lesson) — the same number the staff hero shows.
       const xp = totalXpByStaff.get(s.id) ?? 0;
       const active = Boolean(s.last_active) && ts(s.last_active) >= d7;
-      const hasHistory = lessonsDone > 0 || sessionCount > 0;
+      // Any activity row counts as history (a partially-done lesson is not a
+      // "new" staffer) — only the lessonsDone COUNT requires full completion.
+      const hasHistory = (completionsByStaff.get(s.id)?.length ?? 0) > 0 || sessionCount > 0;
 
       let status: 'star' | 'active' | 'at-risk' | 'new';
       if (!hasHistory) status = 'new';

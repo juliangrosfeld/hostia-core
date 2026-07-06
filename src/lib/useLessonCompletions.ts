@@ -7,8 +7,9 @@ const EMPTY_KEYS: ReadonlySet<string> = new Set();
 
 // The signed-in staff member's completed lessons, as a set of
 // `${module_id}::${lesson_id}` keys. Completion uses the SAME definition as the
-// module progress bars — a lesson counts as done once it has any
-// lesson_completions row (learn, practice, or apply). See /api/lesson-completions.
+// module progress bars — a lesson counts as done only when EVERY phase it has
+// is done (learn + practice, plus a PASSED roleplay for apply lessons). See
+// /api/lesson-completions and lib/progress-model.ts.
 //
 // Skipped for a manager "view as" preview (enabled=false): the mock staffer's
 // curriculum carries its own hardcoded lesson.status, so there's nothing to fetch.

@@ -22,10 +22,14 @@
 //    idempotent by construction and pre-existing completions earn it
 //    retroactively.
 //
-// NOTE the deliberate split between the two completion definitions:
-//  • PROGRESS (module %, checkmarks, current module, locking) still counts a
-//    lesson at its first completion row, any phase — forgiving UX.
-//  • XP requires full completion — the reward tracks truly finished work.
+// COMPLETION has exactly ONE definition, everywhere: a lesson is complete only
+// when EVERY phase it actually has is done — learn + practice always, apply
+// only when the lesson carries a roleplay (scenarioId). The apply row is
+// written exclusively on a PASSED roleplay, so a failed roleplay never
+// completes a lesson; the staff member retries the roleplay to finish it.
+// Progress (module %, checkmarks, locking, current module) and XP both derive
+// from this rule — the old "any phase row counts" progress shortcut let a
+// failed roleplay show a lesson as complete and is gone.
 //
 // CURRENT MODULE ("Continue: …") = the first not-yet-complete content module
 // in DISPLAY ORDER — the same phase-aware, order_in_phase ordering the staff
@@ -43,12 +47,12 @@ export interface SessionXpRow {
   xp_earned: number | null;
   passed: boolean;
 }
-// Progress readers (module %, current module) select only the lesson key…
+// Every completion reader needs the phase — full completion (every phase the
+// lesson has) is the single app-wide definition for progress AND XP.
 export interface CompletionKeyRow {
   module_id: string;
   lesson_id: string;
 }
-// …while XP needs the phase to know whether the lesson is FULLY complete.
 export interface CompletionPhaseRow extends CompletionKeyRow {
   phase: string;
 }
@@ -74,16 +78,44 @@ export function lessonWarmthBonus(baseXp: number, bestWarmth: number): number {
   return 0;
 }
 
-// Distinct completed lesson ids per module (any phase row counts — the
-// app-wide completion definition).
-export function distinctDoneByModule(
-  completions: CompletionKeyRow[],
-): Map<string, Set<string>> {
-  const done = new Map<string, Set<string>>();
+// The phases a lesson requires: learn + practice always, apply only when the
+// lesson has a roleplay. The apply row is only ever written on a PASSED
+// roleplay, so requiring it makes "complete" mean "roleplay passed".
+function hasRequiredPhases(done: Set<string> | undefined, hasApply: boolean): boolean {
+  if (!done?.has('learn') || !done.has('practice')) return false;
+  return !hasApply || done.has('apply');
+}
+
+// Phases done per lesson key, from raw completion rows.
+function phasesDoneByLesson(completions: CompletionPhaseRow[]): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
   for (const c of completions) {
-    const set = done.get(c.module_id) ?? new Set<string>();
-    set.add(c.lesson_id);
-    done.set(c.module_id, set);
+    const key = lessonKey(c.module_id, c.lesson_id);
+    const set = map.get(key) ?? new Set<string>();
+    set.add(c.phase);
+    map.set(key, set);
+  }
+  return map;
+}
+
+// FULLY completed lesson ids per module — the app-wide completion definition.
+// Walks the catalog (not the completion rows) so orphaned completions for
+// removed lessons never count, and each lesson's required phases are
+// authoritative.
+export function fullyDoneByModule(
+  completions: CompletionPhaseRow[],
+  modules: Module[],
+): Map<string, Set<string>> {
+  const phasesDone = phasesDoneByLesson(completions);
+  const done = new Map<string, Set<string>>();
+  for (const m of modules) {
+    if (m.id === CERT_MODULE_ID) continue;
+    for (const l of m.lessons) {
+      if (!hasRequiredPhases(phasesDone.get(lessonKey(m.id, l.id)), Boolean(l.scenarioId))) continue;
+      const set = done.get(m.id) ?? new Set<string>();
+      set.add(l.id);
+      done.set(m.id, set);
+    }
   }
   return done;
 }
@@ -103,13 +135,7 @@ export function computeTotalXp(input: {
   );
 
   // Phases done + best passed warmth, per lesson.
-  const phasesDone = new Map<string, Set<string>>();
-  for (const c of input.completions) {
-    const key = lessonKey(c.module_id, c.lesson_id);
-    const set = phasesDone.get(key) ?? new Set<string>();
-    set.add(c.phase);
-    phasesDone.set(key, set);
-  }
+  const phasesDone = phasesDoneByLesson(input.completions);
   const bestWarmth = new Map<string, number>();
   for (const s of input.sessions) {
     if (!s.passed || s.warmth_score === null) continue;
@@ -124,10 +150,8 @@ export function computeTotalXp(input: {
     if (m.id === CERT_MODULE_ID) continue;
     for (const l of m.lessons) {
       const key = lessonKey(m.id, l.id);
-      const done = phasesDone.get(key);
-      if (!done?.has('learn') || !done.has('practice')) continue;
       const hasApply = Boolean(l.scenarioId);
-      if (hasApply && !done.has('apply')) continue;
+      if (!hasRequiredPhases(phasesDone.get(key), hasApply)) continue;
       lessonXp += l.xp;
       if (hasApply) lessonXp += lessonWarmthBonus(l.xp, bestWarmth.get(key) ?? 0);
     }

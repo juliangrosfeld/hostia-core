@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { resolveCurriculum, type Phase } from '@/lib/curriculum';
 import {
-  distinctDoneByModule, orderedCurrentPhaseModules, deriveCurrentModule,
+  fullyDoneByModule, orderedCurrentPhaseModules, deriveCurrentModule,
 } from '@/lib/progress-model';
 
 export const runtime = 'nodejs';
@@ -54,7 +54,7 @@ export async function GET() {
   const [completionRes, moduleRes, phaseCompletionRes, phasesRes] = await Promise.all([
     supabase
       .from('lesson_completions')
-      .select('module_id, lesson_id')
+      .select('module_id, lesson_id, phase')
       .eq('property_id', profile.property_id)
       .eq('staff_id', profile.id),
     admin
@@ -89,7 +89,7 @@ export async function GET() {
         .in('phase_id', phases.map((p) => p.id))
     : { data: [] };
 
-  const doneByModule = distinctDoneByModule(completions);
+  const doneByModule = fullyDoneByModule(completions, modules);
   const ordered = orderedCurrentPhaseModules({
     modules,
     phases,

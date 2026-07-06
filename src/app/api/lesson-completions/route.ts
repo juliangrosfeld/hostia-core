@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { CURRICULUM } from '@/lib/curriculum';
+import { fullyDoneByModule } from '@/lib/progress-model';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,10 +13,10 @@ function isNonEmptyString(v: unknown): v is string {
   return typeof v === 'string' && v.trim().length > 0;
 }
 
-// GET: the signed-in staff member's completed lessons. Reuses the exact same
-// "any phase completion counts" definition as the home-progress / curriculum
-// module-progress endpoints — a lesson is completed once it has at least one
-// lesson_completions row (learn, practice, or apply). Returns distinct
+// GET: the signed-in staff member's FULLY completed lessons — the exact same
+// definition as the home-progress / curriculum module-progress endpoints
+// (lib/progress-model.ts): every phase the lesson has must be done, and the
+// apply row only exists for a PASSED roleplay. Returns distinct
 // { module_id, lesson_id } pairs so the client can mark lessons done without
 // re-deriving completion. RLS scopes the read to the caller's own rows.
 export async function GET() {
@@ -37,7 +39,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('lesson_completions')
-    .select('module_id, lesson_id')
+    .select('module_id, lesson_id, phase')
     .eq('property_id', profile.property_id)
     .eq('staff_id', profile.id);
 
@@ -46,14 +48,13 @@ export async function GET() {
     return NextResponse.json({ error: 'Could not load completions' }, { status: 500 });
   }
 
-  // De-dupe (a lesson has one row per finished phase) → distinct lessons.
-  const seen = new Set<string>();
+  // Required phases come from the full lesson catalog: lesson content (and so
+  // scenarioId) is identical however the property's modules are configured, so
+  // no property_modules fetch is needed here.
+  const doneByModule = fullyDoneByModule(data ?? [], CURRICULUM);
   const completed: { module_id: string; lesson_id: string }[] = [];
-  for (const row of data ?? []) {
-    const key = `${row.module_id}::${row.lesson_id}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    completed.push({ module_id: row.module_id, lesson_id: row.lesson_id });
+  for (const [module_id, lessons] of doneByModule) {
+    for (const lesson_id of lessons) completed.push({ module_id, lesson_id });
   }
 
   return NextResponse.json({ completed });

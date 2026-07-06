@@ -5,7 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { resolveCurriculum, type Module, type Phase } from '@/lib/curriculum';
 import {
-  distinctDoneByModule, completedCount, isModuleComplete,
+  fullyDoneByModule, completedCount, isModuleComplete,
   orderedCurrentPhaseModules, deriveCurrentModule,
 } from '@/lib/progress-model';
 
@@ -101,7 +101,7 @@ export async function GET() {
   const [completionRes, phaseCompletionRes, phasesRes] = await Promise.all([
     supabase
       .from('lesson_completions')
-      .select('module_id, lesson_id')
+      .select('module_id, lesson_id, phase')
       .eq('property_id', propertyId)
       .eq('staff_id', profile.id),
     supabase
@@ -117,9 +117,10 @@ export async function GET() {
       : Promise.resolve({ data: [] as Phase[] }),
   ]);
 
-  // Distinct completed lesson ids per module → real completedLessons count
-  // (shared model — the same math every other progress reader uses).
-  const doneByModule = distinctDoneByModule(completionRes.data ?? []);
+  // FULLY completed lesson ids per module → real completedLessons count
+  // (shared model — the same math every other progress reader uses). A lesson
+  // needs every phase it has (apply = passed roleplay) to count.
+  const doneByModule = fullyDoneByModule(completionRes.data ?? [], modules);
 
   const completedPhaseIds = (phaseCompletionRes.data ?? []).map((r) => r.phase_id);
   const phases = (phasesRes.data ?? []) as Phase[];

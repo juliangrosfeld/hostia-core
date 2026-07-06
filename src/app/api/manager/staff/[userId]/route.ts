@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveCurriculum } from '@/lib/curriculum'
+import { fullyDoneByModule } from '@/lib/progress-model'
 import { getModuleSkillScore } from '@/lib/xp'
 import { SCENARIOS } from '@/lib/scenarios'
 
@@ -60,7 +61,7 @@ export async function GET(
   const [completionRes, sessionRes, moduleRes] = await Promise.all([
     supabase
       .from('lesson_completions')
-      .select('module_id, lesson_id')
+      .select('module_id, lesson_id, phase')
       .eq('property_id', manager.property_id)
       .eq('staff_id', userId)
       .limit(5000),
@@ -87,15 +88,10 @@ export async function GET(
   const sessions = sessionRes.data ?? []
   const modules = resolveCurriculum(moduleRes.data)
 
-  // Per-module distinct completed lessons (any phase row counts — the
-  // app-wide definition) + skill score (avg warmth over PASSED sessions,
-  // via the same getModuleSkillScore the mock profile used).
-  const doneByModule = new Map<string, Set<string>>()
-  for (const c of completions) {
-    const set = doneByModule.get(c.module_id) ?? new Set<string>()
-    set.add(c.lesson_id)
-    doneByModule.set(c.module_id, set)
-  }
+  // Per-module FULLY completed lessons (every phase the lesson has — the
+  // app-wide lib/progress-model.ts definition) + skill score (avg warmth over
+  // PASSED sessions, via the same getModuleSkillScore the mock profile used).
+  const doneByModule = fullyDoneByModule(completions, modules)
   const sessionsByModule = new Map<string, { warmth_score: number; passed: boolean }[]>()
   for (const s of sessions) {
     const bucket = sessionsByModule.get(s.module_id) ?? []

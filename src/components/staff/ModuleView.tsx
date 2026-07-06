@@ -53,9 +53,17 @@ function LessonRow({
         <span className="lesson-clock" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <Clock size={12} /> {lesson.duration}
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Zap size={12} color="var(--brand)" /> {lesson.xp} XP
-        </span>
+        {/* XP label: "earned" only once the lesson is fully complete (which is
+            when the XP actually pays out) — otherwise it's the amount on offer. */}
+        {isDone ? (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--sage-deep)', fontWeight: 600 }}>
+            <Zap size={12} color="var(--sage-deep)" fill="var(--sage-deep)" /> {lesson.xp} XP earned
+          </span>
+        ) : (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Zap size={12} color="var(--brand)" /> {lesson.xp} XP available
+          </span>
+        )}
         <ChevronRight size={16} />
       </div>
     </div>
