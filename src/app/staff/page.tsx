@@ -14,6 +14,7 @@ import { useLessonCompletions } from '@/lib/useLessonCompletions'
 import { useHomeProgress } from '@/lib/useHomeProgress'
 import { useStaffXPAndStreak } from '@/lib/useStaffXPAndStreak'
 import { substitutePropertyDeep } from '@/lib/substitute-property'
+import { DEMO_PROPERTY_ID } from '@/lib/config'
 
 type StaffView = 'home' | 'module' | 'lesson'
 type Phase = 'learn' | 'practice' | 'apply'
@@ -38,8 +39,12 @@ function StaffPageInner() {
   )
   const asId = searchParams.get('as')
   const viewingAs = asId ? (STAFF.find((s) => s.id === asId) ?? null) : null
-  // Real staff → their completed lessons; manager "view as" keeps mock status.
-  const { completedKeys } = useLessonCompletions(!viewingAs)
+  // Real staff → their completed/started lessons; manager "view as" keeps mock status.
+  const { completedKeys, startedKeys } = useLessonCompletions(!viewingAs)
+  // The curriculum's hardcoded lesson.status values are preview data. Only a
+  // manager "view as" preview and the Hostia Demo property may render them as
+  // lesson state — a real account's badges/XP come from live completions only.
+  const trustMockStatus = Boolean(viewingAs) || property?.id === DEMO_PROPERTY_ID
   // Hero data — fetched here and gated below, so HomeView paints its real hero
   // copy + XP/streak on the first render (no mock-then-real flicker).
   const { progress, loading: progressLoading } = useHomeProgress(viewingAs)
@@ -85,8 +90,8 @@ function StaffPageInner() {
     <div style={{ '--brand-color': brandColor } as React.CSSProperties}>
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
       {view === 'home' && <HomeView curriculum={curriculum} phaseData={phaseData} progress={progress} earnedXp={earnedXp} streak={streak} onOpenModule={openModule} viewingAs={viewingAs} property={property} userName={user?.full_name ?? null} />}
-      {view === 'module' && activeModule && <ModuleView module={activeModule} moduleNumber={activeModuleNumber} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} />}
-      {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} propertyName={propertyName} />}
+      {view === 'module' && activeModule && <ModuleView module={activeModule} moduleNumber={activeModuleNumber} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} startedKeys={startedKeys} trustMockStatus={trustMockStatus} />}
+      {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} trustMockStatus={trustMockStatus} propertyName={propertyName} />}
     </div>
   )
 }

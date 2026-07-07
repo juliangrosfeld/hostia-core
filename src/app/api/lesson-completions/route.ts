@@ -57,7 +57,20 @@ export async function GET() {
     for (const lesson_id of lessons) completed.push({ module_id, lesson_id });
   }
 
-  return NextResponse.json({ completed });
+  // Started = at least one phase row but not fully complete. Drives the lesson
+  // list's "Continue" state for real accounts; an untouched lesson is in
+  // neither set.
+  const seen = new Set<string>();
+  const started: { module_id: string; lesson_id: string }[] = [];
+  for (const row of data ?? []) {
+    const key = `${row.module_id}::${row.lesson_id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (doneByModule.get(row.module_id)?.has(row.lesson_id)) continue;
+    started.push({ module_id: row.module_id, lesson_id: row.lesson_id });
+  }
+
+  return NextResponse.json({ completed, started });
 }
 
 // POST: log that the signed-in staff member finished a lesson phase.

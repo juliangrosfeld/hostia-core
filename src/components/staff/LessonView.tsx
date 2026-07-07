@@ -40,11 +40,14 @@ interface LessonViewProps {
   setPhase: (p: Phase) => void;
   onBack: () => void;
   completedKeys: ReadonlySet<string>;
+  // Trust the curriculum's hardcoded lesson.status (manager "view as" preview
+  // and the demo property only) — real accounts read only completedKeys.
+  trustMockStatus: boolean;
   propertyName?: string | null;
 }
 
 export default function LessonView({
-  module, lesson, lessonIndex, phase, setPhase, onBack, completedKeys, propertyName,
+  module, lesson, lessonIndex, phase, setPhase, onBack, completedKeys, trustMockStatus, propertyName,
 }: LessonViewProps) {
   // Apply ("Live roleplay") only exists for lessons backed by a scenario.
   // Onboarding lessons have no scenarioId, so they show only Learn & Practice.
@@ -52,7 +55,7 @@ export default function LessonView({
   const effectivePhase: Phase = phase === 'apply' && !hasApply ? 'practice' : phase;
 
   // Same completion check as the module lesson list — reused, not re-derived.
-  const isDone = isLessonComplete(module.id, lesson, completedKeys);
+  const isDone = isLessonComplete(module.id, lesson, completedKeys, trustMockStatus);
 
   return (
     <div className="page animate-fade-up">

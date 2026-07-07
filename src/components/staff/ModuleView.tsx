@@ -5,7 +5,7 @@ import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Eye, Star, UtensilsCrossed,
 } from 'lucide-react';
 import type { Module, Lesson } from '@/lib/curriculum';
-import { isLessonComplete } from '@/lib/useLessonCompletions';
+import { isLessonComplete, lessonKey } from '@/lib/useLessonCompletions';
 
 // Icon map matching curriculum iconName strings
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -22,13 +22,10 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 function LessonRow({
-  num, lesson, isDone, onClick,
+  num, lesson, isDone, isCurrent, onClick,
 }: {
-  num: number; lesson: Lesson; isDone: boolean; onClick: () => void;
+  num: number; lesson: Lesson; isDone: boolean; isCurrent: boolean; onClick: () => void;
 }) {
-  // A completed lesson never shows the "current" (Continue) emphasis.
-  const isCurrent = !isDone && lesson.status === 'current';
-
   return (
     <div
       className={`lesson-row${isDone ? ' is-done' : ''}${isCurrent ? ' is-current' : ''}`}
@@ -77,15 +74,28 @@ interface ModuleViewProps {
   onBack: () => void;
   onOpenLesson: (lesson: Lesson, index: number) => void;
   completedKeys: ReadonlySet<string>;
+  startedKeys: ReadonlySet<string>;
+  // Trust the curriculum's hardcoded lesson.status (manager "view as" preview
+  // and the demo property only) — real accounts read only the live sets.
+  trustMockStatus: boolean;
 }
 
-export default function ModuleView({ module, moduleNumber, onBack, onOpenLesson, completedKeys }: ModuleViewProps) {
+export default function ModuleView({
+  module, moduleNumber, onBack, onOpenLesson, completedKeys, startedKeys, trustMockStatus,
+}: ModuleViewProps) {
   const Icon = ICON_MAP[module.iconName] ?? Hand;
 
   // Hero stats derived from the same completion source as the lesson rows
   // below (mock `status` or live completions) — never the hardcoded
   // `module.progress`, which is 0 for every real-data module.
-  const doneCount = module.lessons.filter((l) => isLessonComplete(module.id, l, completedKeys)).length;
+  const isDone = (l: Lesson) => isLessonComplete(module.id, l, completedKeys, trustMockStatus);
+  // "Continue" emphasis: real accounts need actual activity (a phase done but
+  // the lesson not finished); mock contexts keep the curriculum's status. A
+  // completed lesson never shows it.
+  const isCurrent = (l: Lesson) => !isDone(l) && (trustMockStatus
+    ? l.status === 'current'
+    : startedKeys.has(lessonKey(module.id, l.id)));
+  const doneCount = module.lessons.filter(isDone).length;
   const progressPct = module.lessons.length > 0 ? Math.round((doneCount / module.lessons.length) * 100) : 0;
 
   return (
@@ -149,7 +159,8 @@ export default function ModuleView({ module, moduleNumber, onBack, onOpenLesson,
                 key={l.id}
                 num={i + 1}
                 lesson={l}
-                isDone={isLessonComplete(module.id, l, completedKeys)}
+                isDone={isDone(l)}
+                isCurrent={isCurrent(l)}
                 onClick={() => onOpenLesson(l, i)}
               />
             ))}
