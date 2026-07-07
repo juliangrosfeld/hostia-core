@@ -3,6 +3,7 @@
 import { ChevronLeft, Clock, Zap, BookOpen, Target, Play, CheckCircle2, RotateCcw } from 'lucide-react';
 import type { Module, Lesson } from '@/lib/curriculum';
 import { isLessonComplete } from '@/lib/useLessonCompletions';
+import { logLessonCompletion } from '@/lib/completions';
 import LearnPhase from './LearnPhase';
 import PracticePhase from './PracticePhase';
 import ApplyPhase from './ApplyPhase';
@@ -57,6 +58,24 @@ export default function LessonView({
   // Same completion check as the module lesson list — reused, not re-derived.
   const isDone = isLessonComplete(module.id, lesson, completedKeys, trustMockStatus);
 
+  // Completion must not depend on WHICH control moved the person off a phase.
+  // Phases with no pass gate are finished by leaving them: Learn (reading has
+  // no assessment) and a quiz-less Practice. Pass-gated phases (quiz Practice,
+  // Apply roleplay) log inside their components on a genuine pass — never here.
+  // Every phase switch — top tab bar or bottom CTA — goes through changePhase,
+  // so both controls share this one logging path.
+  const logPhaseLeave = (from: Phase) => {
+    if (from === 'learn') {
+      logLessonCompletion({ module_id: module.id, lesson_id: lesson.id, phase: 'learn' });
+    } else if (from === 'practice' && lesson.quiz.length === 0) {
+      logLessonCompletion({ module_id: module.id, lesson_id: lesson.id, phase: 'practice' });
+    }
+  };
+  const changePhase = (next: Phase) => {
+    if (next !== effectivePhase) logPhaseLeave(effectivePhase);
+    setPhase(next);
+  };
+
   return (
     <div className="page animate-fade-up">
       <div className="container">
@@ -99,7 +118,7 @@ export default function LessonView({
             </div>
             <button
               className="btn-ghost lesson-redo-btn"
-              onClick={() => setPhase('learn')}
+              onClick={() => changePhase('learn')}
             >
               <RotateCcw size={13} /> Redo
             </button>
@@ -108,18 +127,22 @@ export default function LessonView({
 
         {/* Phase nav */}
         <div className="phase-nav">
-          <PhaseTab id="learn" current={effectivePhase} setPhase={setPhase} icon={BookOpen} label="Learn" desc="Read & absorb" />
-          <PhaseTab id="practice" current={effectivePhase} setPhase={setPhase} icon={Target} label="Practice" desc="Drill & quiz" />
+          <PhaseTab id="learn" current={effectivePhase} setPhase={changePhase} icon={BookOpen} label="Learn" desc="Read & absorb" />
+          <PhaseTab id="practice" current={effectivePhase} setPhase={changePhase} icon={Target} label="Practice" desc="Drill & quiz" />
           {hasApply && (
-            <PhaseTab id="apply" current={effectivePhase} setPhase={setPhase} icon={Play} label="Apply" desc="Live roleplay" />
+            <PhaseTab id="apply" current={effectivePhase} setPhase={changePhase} icon={Play} label="Apply" desc="Live roleplay" />
           )}
         </div>
 
         {effectivePhase === 'learn' && (
-          <LearnPhase lesson={lesson} moduleId={module.id} onAdvance={() => setPhase('practice')} />
+          <LearnPhase lesson={lesson} moduleId={module.id} onAdvance={() => changePhase('practice')} />
         )}
         {effectivePhase === 'practice' && (
-          <PracticePhase lesson={lesson} moduleId={module.id} onAdvance={hasApply ? () => setPhase('apply') : onBack} />
+          <PracticePhase
+            lesson={lesson}
+            moduleId={module.id}
+            onAdvance={hasApply ? () => changePhase('apply') : () => { logPhaseLeave('practice'); onBack(); }}
+          />
         )}
         {effectivePhase === 'apply' && hasApply && (
           <ApplyPhase lesson={lesson} moduleId={module.id} onComplete={onBack} propertyName={propertyName} />

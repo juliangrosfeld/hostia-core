@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ChevronRight, Lightbulb, FileText } from 'lucide-react';
 import type { Lesson, LearnSection, LangCard, PhraseRow } from '@/lib/curriculum';
 import { useUser } from '@/lib/useUser';
-import { logLessonCompletion } from '@/lib/completions';
 
 // ─── Section renderers ────────────────────────────────────────
 
@@ -290,14 +289,9 @@ interface LearnPhaseProps {
   onAdvance: () => void;
 }
 
-export default function LearnPhase({ lesson, moduleId, onAdvance }: LearnPhaseProps) {
-  // Reaching the end of Learn and clicking through to Practice signals the user
-  // finished reading. Log the completion (fire-and-forget) then advance.
-  const handleAdvance = () => {
-    logLessonCompletion({ module_id: moduleId, lesson_id: lesson.id, phase: 'learn' });
-    onAdvance();
-  };
-
+// Learn's completion is logged by LessonView's shared phase-change path —
+// leaving Learn (CTA or tab bar) is what finishes it, so nothing logs here.
+export default function LearnPhase({ lesson, onAdvance }: LearnPhaseProps) {
   if (lesson.learn.length === 0) {
     return (
       <div className="card" style={{ padding: 48, textAlign: 'center' }}>
@@ -308,7 +302,7 @@ export default function LearnPhase({ lesson, moduleId, onAdvance }: LearnPhasePr
         <p style={{ color: 'var(--ink-soft)', fontSize: 15, marginBottom: 28 }}>
           This lesson is being finalized. Check back shortly.
         </p>
-        <button className="btn-brand" onClick={handleAdvance}>
+        <button className="btn-brand" onClick={onAdvance}>
           Continue to Practice <ChevronRight size={16} />
         </button>
       </div>
@@ -319,7 +313,7 @@ export default function LearnPhase({ lesson, moduleId, onAdvance }: LearnPhasePr
     <div className="animate-fade-up">
       {lesson.learn.map((section, i) => renderSection(section, i))}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 40 }}>
-        <button className="btn-brand" onClick={handleAdvance}>
+        <button className="btn-brand" onClick={onAdvance}>
           Ready to practice <ChevronRight size={16} />
         </button>
       </div>
