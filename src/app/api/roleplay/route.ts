@@ -177,9 +177,10 @@ export async function POST(request: NextRequest) {
   systemPrompt += `
 
 WARMTH CALIBRATION:
-- Grade warmth on the guest's CURRENT feeling after the staff reply, with no ramp-up limit: a genuinely flawless staff response can and should move warmth to 10 at any point, including the very first turn.
+- "warmth" grades how the guest feels about the SERVICE right now, after the staff's latest reply — not how long the relationship has lasted. The scenario's "starts at N" is only the guest's mood before the staff first speaks; it never limits how high one reply can take them.
+- There is NO ramp-up: a genuinely flawless reply earns warmth 10 immediately, even on the very first turn. Never hold a 10 back just because the conversation only began.
 - The same applies to the per-turn "scores": a flawless response on a dimension earns a 10 on that dimension.
-- Stay strict at the top: 10 means flawless — warm, specific, natural, and exactly right for this guest and moment. Merely good responses do not earn 10s.`;
+- Stay strict at the top: 10 means flawless — warm, specific, natural, and exactly right for this guest and moment. Merely good responses earn 7-9, not 10.`;
 
   const conversationText =
     Array.isArray(conversationHistory) && conversationHistory.length > 0
