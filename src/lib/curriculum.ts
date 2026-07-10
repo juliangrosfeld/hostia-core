@@ -110,7 +110,45 @@ export const PHASE_TOPICS: Record<Phase['track'], Record<number, string[]>> = {
 
 // ─── MODULE 0: ONBOARDING — WELCOME TO [PROPERTY] ────────────
 
+// The intro video for the "Welcome to Hostia" lesson. The real video isn't
+// produced yet: while this is empty the lesson renders cleanly with no video
+// block. Paste the final embed URL (YouTube/Vimeo embed link) here and the
+// video appears — no other change needed.
+const HOSTIA_WELCOME_VIDEO_URL = '';
+
 const onboardingLessons: Lesson[] = [
+  {
+    id: 'welcome-to-hostia',
+    title: 'Welcome to Hostia',
+    desc: 'How Hostia works and how to find your way around',
+    duration: '4 min',
+    xp: 10,
+    status: 'available',
+    learn: [
+      { type: 'intro', text: 'Hostia is your personal hospitality trainer. Everything you\'ll learn for your work at [Property] lives here — short lessons, quick quizzes, and live practice conversations with an AI guest. This first lesson takes four minutes and shows you how to find your way around, so every lesson after this one feels familiar.' },
+      ...(HOSTIA_WELCOME_VIDEO_URL
+        ? [{
+            type: 'video-group' as const,
+            videos: [{
+              title: 'How Hostia works',
+              url: HOSTIA_WELCOME_VIDEO_URL,
+              description: 'A quick tour of Hostia: your home screen, lessons, and live scenarios.',
+            }],
+          }]
+        : []),
+      { type: 'steps', title: 'How a lesson works', items: [
+        { num: 1, title: 'Learn', body: 'Read the lesson content — short, practical, and written for your floor. Use the tabs at the top of any lesson to move between its phases.' },
+        { num: 2, title: 'Practice', body: 'A quick quiz checks that the lesson stuck. The bar at the top shows how you\'re doing question by question — green is right, red is wrong. You can retry as often as you like.' },
+        { num: 3, title: 'Apply', body: 'Some lessons end with a live scenario: a realistic chat with an AI guest where you respond as yourself. Keep the guest\'s warmth up to pass — and don\'t worry, you can always try again.', badge: 'Live' },
+      ] },
+      { type: 'callout', tone: 'tip', label: 'XP & streaks', text: 'Finishing every phase of a lesson earns its XP, and training on back-to-back days builds your streak. Your home screen shows both, plus a Continue button that always takes you straight back to where you left off.' },
+    ],
+    quiz: [
+      { q: 'What are the three phases a lesson can have?', options: ['Read, Watch, Repeat', 'Learn, Practice, Apply', 'Start, Middle, End', 'Bronze, Silver, Gold'], correct: 1, explain: 'Learn is the reading, Practice is the quiz, and Apply — on lessons that have one — is a live scenario with an AI guest.' },
+      { q: 'When does a lesson count as fully complete?', options: ['As soon as you open it', 'After you read the Learn phase', 'When you finish every phase it has — including passing the live scenario if there is one', 'When your manager marks it done'], correct: 2, explain: 'A lesson is complete when every phase it has is finished. If it ends in a live scenario, passing that scenario is part of completing it — and that\'s also when the lesson\'s XP is paid out.' },
+      { q: 'You come back to Hostia after a few days. What\'s the fastest way to pick up where you left off?', options: ['Scroll through every module until something looks unfinished', 'Ask a colleague which lesson you were on', 'The Continue button on your home screen — it takes you straight to your current module', 'Start again from the first lesson'], correct: 2, explain: 'Your home screen always shows your progress and a Continue button that jumps straight to your current module. No hunting required.' },
+    ],
+  },
   {
     id: 'our-story',
     title: 'Our Story & DNA',
@@ -2491,10 +2529,10 @@ export const CURRICULUM: Module[] = [
     iconName: 'House',
     color: '#051956',
     progress: 0,
-    totalLessons: 6,
+    totalLessons: 7,
     completedLessons: 0,
     available: true,
-    xpTotal: 150,
+    xpTotal: 160,
     lessons: onboardingLessons,
   },
   // Module 1
