@@ -19,7 +19,33 @@ import { useUser } from '@/lib/useUser';
 
 import KpiCard, { Sparkline } from './KpiCard';
 import InsightCard from './InsightCard';
+import InfoDot from './InfoDot';
 import StaffRow from './StaffRow';
+
+// ⓘ explanations for every dashboard card. Copy must stay truthful to the
+// metric definitions in /api/manager/dashboard — update both together.
+const CARD_INFO = {
+  phaseDistribution:
+    'How many staff are currently working in each phase of the training journey. Click a phase tile to filter the whole dashboard to just those staff; "All Phases" resets it.',
+  teamHealth:
+    'Your team’s average guest-warmth score (0–100) from live roleplay sessions in the last 30 days, compared with the 30 days before.',
+  active:
+    'How many of your staff trained in the last 7 days. Anyone with no activity for over a week counts as at risk.',
+  lessons:
+    'Lessons your team fully completed this week — every phase of the lesson finished — compared with last week.',
+  certified:
+    'Staff who have passed their Phase 1 certification, out of your whole team — plus how many are close to getting there.',
+  trendChart:
+    'Your team’s average roleplay warmth score, day by day over the last 30 days — the trend behind the Team health number.',
+  skillGaps:
+    'Each training module’s average roleplay score across the team, weakest first — so you can see where coaching pays off most.',
+  insightWeakest:
+    'Flags the training module where your team currently scores lowest, so you know what to focus on this week.',
+  insightAtRisk:
+    'Watches for staff who haven’t trained in over a week — a quick nudge or 1:1 usually re-engages them.',
+  insightStar:
+    'Highlights your current top performer, ranked by badges, streak and average score — a natural peer coach for new hires.',
+} as const;
 
 // ─── Real-data dashboard payload (see /api/manager/dashboard) ─────────────────
 
@@ -278,7 +304,10 @@ function PhaseDistribution({
     <div className="card" style={{ padding: 20, marginBottom: 24 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
         <div>
-          <div className="label-mono">Phase distribution</div>
+          <div className="label-mono" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            Phase distribution
+            <InfoDot label="Phase distribution" text={CARD_INFO.phaseDistribution} />
+          </div>
           <div className="card-title">Where your team is in the journey</div>
         </div>
       </div>
@@ -853,11 +882,11 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
 
         {/* ─ KPI cards ─ */}
         <div className="kpi-row">
-          <KpiCard label="Team health" value={`${healthValue}%`} delta={healthDeltaText} trend={healthTrend} icon={Activity} accent="#81B29A">
+          <KpiCard label="Team health" value={`${healthValue}%`} delta={healthDeltaText} trend={healthTrend} icon={Activity} accent="#81B29A" info={CARD_INFO.teamHealth}>
             <Sparkline data={healthSpark} color="#81B29A" />
           </KpiCard>
 
-          <KpiCard label="Active" value={`${displayActive}/${displayStaffCount}`} delta={`${displayAtRisk} at risk`} trend={displayAtRisk > 1 ? 'warn' : 'flat'} icon={Users} accent="#111111">
+          <KpiCard label="Active" value={`${displayActive}/${displayStaffCount}`} delta={`${displayAtRisk} at risk`} trend={displayAtRisk > 1 ? 'warn' : 'flat'} icon={Users} accent="#111111" info={CARD_INFO.active}>
             <div className="avatar-stack">
               {isReal ? (
                 <>
@@ -880,7 +909,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             </div>
           </KpiCard>
 
-          <KpiCard label="Lessons" value={lessonsValue} delta={lessonsDeltaText} trend={lessonsTrend} icon={GraduationCap} accent="#D4A574">
+          <KpiCard label="Lessons" value={lessonsValue} delta={lessonsDeltaText} trend={lessonsTrend} icon={GraduationCap} accent="#D4A574" info={CARD_INFO.lessons}>
             <div className="micro-bars">
               {lessonBars.map((v, i) => (
                 <div key={i} className="micro-bar" style={{ height: `${v * 5}px`, background: '#D4A574' }} />
@@ -888,7 +917,7 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             </div>
           </KpiCard>
 
-          <KpiCard label="Certified" value={certifiedValue} delta={certifiedDeltaText} trend="flat" icon={Award} accent="#F5A623">
+          <KpiCard label="Certified" value={certifiedValue} delta={certifiedDeltaText} trend="flat" icon={Award} accent="#F5A623" info={CARD_INFO.certified}>
             <div className="cert-progress">
               <div style={{ width: `${certPct}%` }} />
             </div>
@@ -900,7 +929,10 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
           <div className="card chart-card">
             <div className="card-head">
               <div>
-                <div className="label-mono">Team average score</div>
+                <div className="label-mono" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  Team average score
+                  <InfoDot label="Team average score" text={CARD_INFO.trendChart} />
+                </div>
                 <div className="card-title">{chartTrendUp ? 'Trending up' : 'Trending down'}</div>
               </div>
               <div className={`trend-chip ${chartChipClass}`}>
@@ -929,7 +961,10 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
           <div className="card chart-card">
             <div className="card-head">
               <div>
-                <div className="label-mono">Skill gaps</div>
+                <div className="label-mono" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  Skill gaps
+                  <InfoDot label="Skill gaps" text={CARD_INFO.skillGaps} />
+                </div>
                 <div className="card-title">Where the team is weakest</div>
               </div>
             </div>
@@ -968,18 +1003,24 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
             icon={AlertTriangle}
             title={insightWeakestTitle}
             body={insightWeakestBody}
+            info={CARD_INFO.insightWeakest}
+            infoLabel="Weakest skill"
           />
           <InsightCard
             tone="alert"
             icon={AlertCircle}
             title={`${displayAtRisk} staff at risk`}
             body={insightAtRiskBody}
+            info={CARD_INFO.insightAtRisk}
+            infoLabel="Staff at risk"
           />
           <InsightCard
             tone="good"
             icon={Star}
             title={insightStarTitle}
             body={insightStarBody}
+            info={CARD_INFO.insightStar}
+            infoLabel="Top performer"
             cta={starTarget ? insightStarCta : undefined}
             onCta={starTarget ? () => onOpenStaff(starTarget, isReal) : undefined}
           />

@@ -2,6 +2,7 @@
 
 import { TrendingUp, AlertTriangle } from 'lucide-react';
 import type { ElementType, ReactNode } from 'react';
+import InfoDot from './InfoDot';
 
 interface KpiCardProps {
   label: string;
@@ -10,6 +11,8 @@ interface KpiCardProps {
   trend: 'up' | 'warn' | 'flat';
   icon: ElementType;
   accent: string;
+  /** Short explanation revealed by an ⓘ dot next to the label. */
+  info?: string;
   children?: ReactNode;
 }
 
@@ -35,12 +38,15 @@ function Sparkline({ data, color }: { data: number[]; color: string }) {
 
 export { Sparkline };
 
-export default function KpiCard({ label, value, delta, trend, icon: Icon, accent, children }: KpiCardProps) {
+export default function KpiCard({ label, value, delta, trend, icon: Icon, accent, info, children }: KpiCardProps) {
   return (
     <div className="kpi-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div className="label-mono">{label}</div>
+          <div className="label-mono" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            {label}
+            {info && <InfoDot label={label} text={info} />}
+          </div>
           <div className="kpi-value">{value}</div>
         </div>
         <div className="kpi-icon" style={{ background: `${accent}18`, color: accent }}>
