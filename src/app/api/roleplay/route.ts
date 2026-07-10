@@ -169,6 +169,18 @@ export async function POST(request: NextRequest) {
   // it's at "[Property]" and can echo the literal placeholder back to staff.
   systemPrompt = substituteProperty(systemPrompt, propertyName);
 
+  // Shared warmth calibration, appended to every scenario prompt. Scenario
+  // prompts anchor warmth at a starting level, and the model tends to ramp it
+  // up gradually from there — which made a flawless session average out well
+  // below 100 (the stored score is the per-turn average). Grading must sit on
+  // the current reply's merits alone, so a perfect run can actually reach 100.
+  systemPrompt += `
+
+WARMTH CALIBRATION:
+- Grade warmth on the guest's CURRENT feeling after the staff reply, with no ramp-up limit: a genuinely flawless staff response can and should move warmth to 10 at any point, including the very first turn.
+- The same applies to the per-turn "scores": a flawless response on a dimension earns a 10 on that dimension.
+- Stay strict at the top: 10 means flawless — warm, specific, natural, and exactly right for this guest and moment. Merely good responses do not earn 10s.`;
+
   const conversationText =
     Array.isArray(conversationHistory) && conversationHistory.length > 0
       ? (conversationHistory as { role: string; text: string }[])
