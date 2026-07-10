@@ -30,39 +30,51 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
       <div className="top-nav">
         <div className="top-nav-inner">
 
-          {/* Left: property logo (only when set) + BY GLAD AI */}
+          {/* Left: BY GLAD AI wordmark (links home) */}
           <Link href={canManage ? '/manager' : '/staff'} className="brand" style={{ textDecoration: 'none' }}>
-            {property?.logoUrl && (
-              <img
-                src={property.logoUrl}
-                alt={propertyName ?? 'Property logo'}
-                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
-              />
-            )}
             <span className="brand-tag">BY GLAD AI</span>
           </Link>
 
-          {/* Center: property pill (only when a property name is loaded) */}
-          {propertyName && (
+          {/* Center: property logo directly next to the property name.
+              Non-interactive (like the pill before it) so the centered block
+              never intercepts clicks meant for the nav controls around it. */}
+          {(property?.logoUrl || propertyName) && (
             <div
-              className="property-pill"
               style={{
                 position: 'absolute',
                 left: '50%',
                 transform: 'translateX(-50%)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 6,
-                margin: 0,
+                gap: 10,
                 pointerEvents: 'none',
-                // Brand-colored accent: text + tinted background/border derived
-                // from --brand-color (set on the page wrapper; #1B2B4B fallback).
-                color: 'var(--brand-color, #1B2B4B)',
-                background: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 9%, white)',
-                borderColor: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 22%, white)',
               }}
             >
-              {propertyName}
+              {property?.logoUrl && (
+                <img
+                  src={property.logoUrl}
+                  alt={propertyName ?? 'Property logo'}
+                  style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+                />
+              )}
+              {propertyName && (
+                <div
+                  className="property-pill"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    margin: 0,
+                    // Brand-colored accent: text + tinted background/border derived
+                    // from --brand-color (set on the page wrapper; #1B2B4B fallback).
+                    color: 'var(--brand-color, #1B2B4B)',
+                    background: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 9%, white)',
+                    borderColor: 'color-mix(in srgb, var(--brand-color, #1B2B4B) 22%, white)',
+                  }}
+                >
+                  {propertyName}
+                </div>
+              )}
             </div>
           )}
 
