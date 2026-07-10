@@ -7,6 +7,7 @@ import ManagerDashboard from '@/components/manager/ManagerDashboard';
 import StaffProfile from '@/components/manager/StaffProfile';
 import type { StaffMember } from '@/lib/staff-data';
 import { useUser } from '@/lib/useUser';
+import { useScrollToTop } from '@/lib/useScrollToTop';
 
 export default function ManagerPage() {
   const router = useRouter();
@@ -16,6 +17,10 @@ export default function ManagerPage() {
   // Whether the opened profile is a real staff member (real property) — the
   // profile then fetches actual module progress/sessions instead of mock.
   const [selectedLive, setSelectedLive] = useState(false);
+
+  // Every screen change starts at the top: dashboard ↔ staff detail, and
+  // switching between different staff profiles.
+  useScrollToTop(view, selectedStaff?.id);
 
   // Manager/admin-only area. Unauthenticated users are bounced to /login;
   // staff users are sent back to /staff before any manager UI renders.

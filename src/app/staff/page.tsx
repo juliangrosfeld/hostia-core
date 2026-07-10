@@ -13,6 +13,7 @@ import { useCurriculum } from '@/lib/useCurriculum'
 import { useLessonCompletions } from '@/lib/useLessonCompletions'
 import { useHomeProgress } from '@/lib/useHomeProgress'
 import { useStaffXPAndStreak } from '@/lib/useStaffXPAndStreak'
+import { useScrollToTop } from '@/lib/useScrollToTop'
 import { substitutePropertyDeep } from '@/lib/substitute-property'
 import { DEMO_PROPERTY_ID } from '@/lib/config'
 
@@ -54,6 +55,10 @@ function StaffPageInner() {
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
   const [activeLessonIndex, setActiveLessonIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('learn')
+
+  // Every screen change starts at the top: home ↔ module ↔ lesson, a different
+  // lesson in the same view, and Learn/Practice/Apply phase switches.
+  useScrollToTop(view, activeModule?.id, activeLesson?.id, phase)
 
   // Bump last_active on every staff page load. Done server-side via the
   // heartbeat route (not a direct client write) so it's reliable and consistent
