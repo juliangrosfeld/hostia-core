@@ -17,6 +17,10 @@ export default function PracticePhase({ lesson, moduleId, onAdvance }: PracticeP
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  // Per-question correctness, appended when an answer locks in (options
+  // disable after selection, so a recorded result is final for the run).
+  // Drives the progress pips only — score/pass logic reads `score`, not this.
+  const [results, setResults] = useState<boolean[]>([]);
 
   const quiz = lesson.quiz;
 
@@ -38,6 +42,7 @@ export default function PracticePhase({ lesson, moduleId, onAdvance }: PracticeP
     setSelected(null);
     setScore(0);
     setDone(false);
+    setResults([]);
   };
 
   // If no quiz content for this lesson, advancing past it still completes the
@@ -129,7 +134,11 @@ export default function PracticePhase({ lesson, moduleId, onAdvance }: PracticeP
               key={i}
               style={{
                 width: 24, height: 4, borderRadius: 2,
-                background: i < qIdx ? 'var(--sage)' : i === qIdx ? 'var(--brand)' : 'var(--sand-deeper)',
+                // Answered questions show their result (green/red); the current
+                // unanswered one is brand-colored; the rest are neutral.
+                background: i < results.length
+                  ? (results[i] ? 'var(--sage)' : 'var(--coral)')
+                  : i === qIdx ? 'var(--brand)' : 'var(--sand-deeper)',
               }}
             />
           ))}
@@ -156,7 +165,11 @@ export default function PracticePhase({ lesson, moduleId, onAdvance }: PracticeP
               <button
                 key={i}
                 className={cls}
-                onClick={() => selected === null && setSelected(i)}
+                onClick={() => {
+                  if (selected !== null) return;
+                  setSelected(i);
+                  setResults((prev) => [...prev, i === q.correct]);
+                }}
                 disabled={selected !== null}
               >
                 <span style={{ flex: 1, textAlign: 'left' }}>{opt}</span>
