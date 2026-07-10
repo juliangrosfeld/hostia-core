@@ -480,7 +480,11 @@ export default function ApplyPhase({ lesson, moduleId, onComplete, propertyName 
 
   // ── Done screen ──────────────────────────────────────────────
   if (done) {
-    const maxPerKey = MAX_TURNS * 10;
+    // Score denominators use turns actually PLAYED, not MAX_TURNS. A passed
+    // session ends early by design (2 consecutive good turns), so grading a
+    // 3-turn pass out of 7 turns' worth of points made 100% mathematically
+    // unreachable — a flawless early pass showed "Average score 43%".
+    const maxPerKey = Math.max(turnCount, 1) * 10;
     const totalScore = scenario.scoreKeys.reduce((a, k) => a + (totals[k] ?? 0), 0);
     const maxTotal = maxPerKey * scenario.scoreKeys.length;
     const avgPct = Math.round((totalScore / maxTotal) * 100);
