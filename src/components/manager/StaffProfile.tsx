@@ -298,10 +298,13 @@ export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName,
     let cancelled = false;
     fetch(`/api/manager/staff/${s.id}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((d) => { if (!cancelled) setLiveDetail(d); })
+      // Module titles come from the authored catalog ("Welcome to [Property]") —
+      // substitute at the data boundary so the radar/progress list never show
+      // the literal token.
+      .then((d) => { if (!cancelled) setLiveDetail(substitutePropertyDeep(d, propertyName)); })
       .catch(() => { if (!cancelled) setLiveError(true); });
     return () => { cancelled = true; };
-  }, [live, s.id]);
+  }, [live, s.id, propertyName]);
 
   const liveLoading = live && liveDetail === null && !liveError;
 
