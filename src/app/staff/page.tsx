@@ -6,7 +6,9 @@ import TopNav from '@/components/TopNav'
 import HomeView from '@/components/staff/HomeView'
 import ModuleView from '@/components/staff/ModuleView'
 import LessonView from '@/components/staff/LessonView'
-import { type Module, type Lesson } from '@/lib/curriculum'
+import ExamView from '@/components/staff/exam/ExamView'
+import { type Module, type Lesson, type Phase as CurriculumPhase } from '@/lib/curriculum'
+import { getExamConfig } from '@/lib/exam'
 import { STAFF } from '@/lib/staff-data'
 import { useUser } from '@/lib/useUser'
 import { useCurriculum } from '@/lib/useCurriculum'
@@ -17,7 +19,7 @@ import { useScrollToTop } from '@/lib/useScrollToTop'
 import { substitutePropertyDeep } from '@/lib/substitute-property'
 import { DEMO_PROPERTY_ID } from '@/lib/config'
 
-type StaffView = 'home' | 'module' | 'lesson'
+type StaffView = 'home' | 'module' | 'lesson' | 'exam'
 type Phase = 'learn' | 'practice' | 'apply'
 
 function StaffPageInner() {
@@ -55,6 +57,8 @@ function StaffPageInner() {
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
   const [activeLessonIndex, setActiveLessonIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('learn')
+  // The curriculum phase whose certification exam is being taken.
+  const [examPhase, setExamPhase] = useState<CurriculumPhase | null>(null)
 
   // Every screen change starts at the top: home ↔ module ↔ lesson, a different
   // lesson in the same view, and Learn/Practice/Apply phase switches.
@@ -69,8 +73,14 @@ function StaffPageInner() {
     fetch('/api/heartbeat', { method: 'POST' }).catch(() => {})
   }, [userId])
 
-  const goHome = () => { setView('home'); setActiveModule(null); setActiveLesson(null) }
+  const goHome = () => { setView('home'); setActiveModule(null); setActiveLesson(null); setExamPhase(null) }
   const openModule = (m: Module) => { setActiveModule(m); setView('module') }
+  // The exam card only unlocks when a config exists for the track+phase, but
+  // guard again here so a stray click can never open an empty exam.
+  const startExam = (p: CurriculumPhase) => {
+    if (!getExamConfig(p.track, p.phase_number)) return
+    setExamPhase(p); setView('exam')
+  }
   const openLesson = (m: Module, lesson: Lesson, index: number) => {
     setActiveModule(m); setActiveLesson(lesson); setActiveLessonIndex(index); setPhase('learn'); setView('lesson')
   }
@@ -94,7 +104,15 @@ function StaffPageInner() {
   return (
     <div style={{ '--brand-color': brandColor } as React.CSSProperties}>
       <TopNav viewingAs={viewingAs} onClearViewAs={clearViewAs} user={navUser} property={navProperty} />
-      {view === 'home' && <HomeView curriculum={curriculum} phaseData={phaseData} progress={progress} earnedXp={earnedXp} streak={streak} onOpenModule={openModule} viewingAs={viewingAs} property={property} userName={user?.full_name ?? null} />}
+      {view === 'home' && <HomeView curriculum={curriculum} phaseData={phaseData} progress={progress} earnedXp={earnedXp} streak={streak} onOpenModule={openModule} onStartExam={startExam} viewingAs={viewingAs} property={property} userName={user?.full_name ?? null} />}
+      {view === 'exam' && examPhase && (
+        <ExamView
+          config={getExamConfig(examPhase.track, examPhase.phase_number)!}
+          phase={examPhase}
+          propertyName={propertyName}
+          onExit={goHome}
+        />
+      )}
       {view === 'module' && activeModule && <ModuleView module={activeModule} moduleNumber={activeModuleNumber} onBack={goHome} onOpenLesson={(lesson, index) => openLesson(activeModule, lesson, index)} completedKeys={completedKeys} startedKeys={startedKeys} trustMockStatus={trustMockStatus} />}
       {view === 'lesson' && activeModule && activeLesson && <LessonView module={activeModule} lesson={activeLesson} lessonIndex={activeLessonIndex} phase={phase} setPhase={setPhase} onBack={backToModule} completedKeys={completedKeys} trustMockStatus={trustMockStatus} propertyName={propertyName} />}
     </div>

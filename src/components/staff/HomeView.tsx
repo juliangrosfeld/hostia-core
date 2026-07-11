@@ -4,7 +4,8 @@ import { Play, Lock, Trophy as TrophyIcon, CheckCircle2, Zap, Flame } from 'luci
 import {
   Hand, BookOpen, MessageSquare, Shield, Users, Brain, House, Utensils, UtensilsCrossed, Trophy, Eye, Star,
 } from 'lucide-react';
-import { PHASE_TOPICS, type Module } from '@/lib/curriculum';
+import { PHASE_TOPICS, type Module, type Phase } from '@/lib/curriculum';
+import { getExamConfig } from '@/lib/exam';
 import type { StaffMember } from '@/lib/staff-data';
 import type { PropertyProfile } from '@/lib/useUser';
 import type { PhaseData, ResolvedModule } from '@/lib/useCurriculum';
@@ -171,10 +172,11 @@ function ModuleCard({
   return (
     <div
       className={`module-card${isComplete ? ' is-complete' : ''}`}
-      onClick={isLocked && !isCertification ? undefined : onClick}
+      onClick={isLocked ? undefined : onClick}
       style={{
         ...(isCertification ? { border: '2px solid #B8860B' } : undefined),
         ...(isLocked && !isCertification ? { opacity: 0.55, cursor: 'not-allowed' } : undefined),
+        ...(isLocked && isCertification ? { cursor: 'not-allowed' } : undefined),
       }}
     >
       <div className="module-band" style={{ background: module.color }} />
@@ -200,7 +202,7 @@ function ModuleCard({
         {isCertification ? (
           <div style={{ marginBottom: 6 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', color: '#B8860B', background: 'rgba(184,134,11,0.12)', borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
-              🏆 Phase 1 Final Exam
+              🏆 Final Exam
             </span>
           </div>
         ) : hasRoleplay && (
@@ -211,10 +213,17 @@ function ModuleCard({
           </div>
         )}
         {isCertification ? (
-          <div style={{ fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Lock size={12} color="#B8860B" strokeWidth={2} />
-            Complete all Phase 1 modules to unlock
-          </div>
+          isLocked ? (
+            <div style={{ fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Lock size={12} color="#B8860B" strokeWidth={2} />
+              Complete every module above to unlock
+            </div>
+          ) : (
+            <div style={{ fontSize: 12.5, fontWeight: 700, color: '#B8860B', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Play size={12} strokeWidth={2.5} />
+              You&apos;re ready — start the exam
+            </div>
+          )
         ) : (
           <div className="module-progress-row">
             <div className="module-progress-bar">
@@ -256,8 +265,8 @@ function formatCurriculumTime(curriculum: Module[]): string {
 // source of truth) and imported above.
 
 function PhaseCurriculum({
-  data, onOpenModule,
-}: { data: PhaseData; onOpenModule: (m: Module) => void }) {
+  data, onOpenModule, onStartExam,
+}: { data: PhaseData; onOpenModule: (m: Module) => void; onStartExam: (phase: Phase) => void }) {
   const ordered = data.phases; // already ordered by phase_number ASC
   const totalPhases = ordered.length;
   const completed = new Set(data.completedPhaseIds);
@@ -289,13 +298,38 @@ function PhaseCurriculum({
   const isPhaseOne = current.phase.phase_number === 1;
   const currentModules: ResolvedModule[] = (
     isPhaseOne ? [...current.modules, ...data.unassigned] : [...current.modules]
-  ).sort((a, b) => (a.order_in_phase ?? 999) - (b.order_in_phase ?? 999));
+  )
+    // The certification is never a content module — it renders as the
+    // synthesized exam card below, so drop any DB-configured placeholder.
+    .filter((m) => m.id !== 'phase-1-certification')
+    .sort((a, b) => (a.order_in_phase ?? 999) - (b.order_in_phase ?? 999));
 
   const totalMods = currentModules.length;
   const doneMods = currentModules.filter(
     (m) => m.totalLessons > 0 && m.completedLessons >= m.totalLessons,
   ).length;
   const pct = totalMods > 0 ? Math.round((doneMods / totalMods) * 100) : 0;
+
+  // The phase certification exam card, appended after the content modules.
+  // Unlocks when every module is fully complete AND this track+phase has an
+  // exam configured (all three tracks do for Phase 1; future phases as their
+  // exams are built). Passing writes the phase completion, so a certified
+  // phase — and its exam card — moves to the "past" tiles above.
+  const examReady = totalMods > 0 && doneMods === totalMods;
+  const examExists = getExamConfig(current.phase.track, current.phase.phase_number) != null;
+  const examModule: Module = {
+    id: 'phase-1-certification',
+    title: `Phase ${current.phase.phase_number} Certification`,
+    subtitle: `Prove what you know. Earn your ${current.phase.certification_title} badge.`,
+    iconName: 'Trophy',
+    color: '#B8860B',
+    progress: 0,
+    totalLessons: 0,
+    completedLessons: 0,
+    available: examExists && examReady,
+    xpTotal: 0,
+    lessons: [],
+  };
 
   return (
     <div style={{ marginTop: 48 }}>
@@ -354,6 +388,10 @@ function PhaseCurriculum({
               onClick={() => onOpenModule(m)}
             />
           ))}
+          <ModuleCard
+            module={examModule}
+            onClick={() => onStartExam(current.phase)}
+          />
         </div>
       ) : (
         <div style={{ padding: '32px', textAlign: 'center', color: 'var(--ink-soft)', fontSize: 14, border: '1px dashed var(--sand-deeper)', borderRadius: 14 }}>
@@ -416,13 +454,14 @@ interface HomeViewProps {
   earnedXp: number;
   streak: number;
   onOpenModule: (m: Module) => void;
+  onStartExam: (phase: Phase) => void;
   viewingAs: StaffMember | null;
   property?: PropertyProfile | null;
   userName?: string | null;
 }
 
 export default function HomeView({
-  curriculum, phaseData, progress, earnedXp, streak, onOpenModule, viewingAs, property, userName,
+  curriculum, phaseData, progress, earnedXp, streak, onOpenModule, onStartExam, viewingAs, property, userName,
 }: HomeViewProps) {
   const ownFirstName = userName?.trim() ? userName.trim().split(/\s+/)[0] : 'there';
   const firstName = viewingAs ? viewingAs.name.split(' ')[0] : ownFirstName;
@@ -551,7 +590,7 @@ export default function HomeView({
 
         {usePhaseLayout ? (
           /* Phase-aware curriculum — current phase + locked future phases */
-          <PhaseCurriculum data={phaseData!} onOpenModule={onOpenModule} />
+          <PhaseCurriculum data={phaseData!} onOpenModule={onOpenModule} onStartExam={onStartExam} />
         ) : (
           <>
             {/* Curriculum header */}
