@@ -45,16 +45,16 @@ function sanitizeTranscript(v: unknown): TranscriptEntry[] {
 // signed-in staff member. This is the missing write half of the XP pipeline:
 // /api/staff/xp-streak and the manager dashboard both read this table.
 //
-// GRADING TRUST MODEL: when the client submits the session's HMAC proof chain
-// (one proof per turn, signed by /api/roleplay), passed / warmth_score /
+// GRADING TRUST MODEL: the client must submit the session's HMAC proof chain
+// (one proof per turn, signed by /api/roleplay); passed / warmth_score /
 // turns / xp_earned are ALL derived server-side from the verified per-turn
-// warmth values — the client-sent grade is advisory only. Sessions without a
-// chain (started before the proof rollout, or a deployment missing
-// ROLEPLAY_PROOF_SECRET) are accepted with the client's values but stored
-// verified = FALSE. A chain that FAILS verification is rejected — that is
-// tampering, not a legacy client. Inserts use the standard session-bound
-// client so RLS ("Staff can insert own sessions", auth_id-resolved) enforces
-// that staff can only write their own rows.
+// warmth values — the client-sent grade is advisory only. A session without
+// a chain is rejected outright (rollout settled 2026-07-11: every deployed
+// client sends proofs, so a missing chain is either tampering or a
+// misconfigured deployment losing ROLEPLAY_PROOF_SECRET — both must fail
+// loudly, not land as unverified rows). Inserts use the standard
+// session-bound client so RLS ("Staff can insert own sessions",
+// auth_id-resolved) enforces that staff can only write their own rows.
 export async function POST(request: Request) {
   const supabase = await createClient();
 
@@ -118,73 +118,67 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No property associated with this account' }, { status: 400 });
   }
 
-  // 4. Verify the proof chain and derive the grade server-side. The client's
-  //    passed/warmth_score/turns are only used on the flagged legacy path.
+  // 4. Verify the proof chain and derive the grade server-side. The chain is
+  //    mandatory — a session without one is rejected, never stored.
   const proofsRaw = body.proofs;
   if (proofsRaw !== undefined && proofsRaw !== null &&
       (!Array.isArray(proofsRaw) || proofsRaw.some((p) => typeof p !== 'string'))) {
     return NextResponse.json({ error: 'Invalid field: proofs' }, { status: 400 });
   }
   const proofs = (proofsRaw ?? []) as string[];
-
-  let verified = false;
-  let proof_chain_hash: string | null = null;
-  let finalPassed = passed;
-  let finalWarmthScore = warmth_score;
-  let finalTurns = turns;
-
-  if (proofs.length > 0) {
-    const result = verifyProofChain({
-      proofs,
-      authId: user.id,
-      scenarioId: scenario_id.trim(),
-      maxTurns: MAX_TURNS,
-    });
-    if ('error' in result) {
-      console.warn('[roleplay-sessions] proof verification FAILED:', result.error);
-      return NextResponse.json(
-        { error: `Session verification failed: ${result.error}` },
-        { status: 400 }
-      );
-    }
-
-    const graded = gradeRoleplay(result.warmths);
-
-    // Terminal check: a session is only ever logged when it ended — either
-    // passed, or failed at MAX_TURNS. A chain that is neither is a truncated
-    // prefix (bad final turns dropped to inflate the average) — reject it.
-    if (!graded.passed && result.warmths.length < MAX_TURNS) {
-      console.warn('[roleplay-sessions] proof chain ends before a terminal state — rejected');
-      return NextResponse.json(
-        { error: 'Session verification failed: incomplete session' },
-        { status: 400 }
-      );
-    }
-
-    if (
-      graded.passed !== passed ||
-      graded.warmthScore !== warmth_score ||
-      result.warmths.length !== turns
-    ) {
-      // Shouldn't happen with an honest client (same grading lib both sides)
-      // — worth a log line either way. The derived values win regardless.
-      console.warn('[roleplay-sessions] client grade differed from server derivation:', {
-        client: { passed, warmth_score, turns },
-        derived: { passed: graded.passed, warmth_score: graded.warmthScore, turns: result.warmths.length },
-      });
-    }
-    finalPassed = graded.passed;
-    finalWarmthScore = graded.warmthScore;
-    finalTurns = result.warmths.length;
-    verified = true;
-    // Unique per chain (DB-enforced) — a replayed chain can't create a second row.
-    proof_chain_hash = hashProofToken(proofs[proofs.length - 1]);
-  } else {
-    // Accept-and-flag: legacy sessions started before the proof rollout (and
-    // deployments without ROLEPLAY_PROOF_SECRET) carry no chain. Tighten this
-    // branch to a rejection once the rollout has settled.
-    console.warn('[roleplay-sessions] storing UNVERIFIED session (no proof chain) for staff', profile.id);
+  if (proofs.length === 0) {
+    console.warn('[roleplay-sessions] REJECTED session without proof chain for staff', profile.id);
+    return NextResponse.json(
+      { error: 'Session verification failed: missing proof chain' },
+      { status: 400 }
+    );
   }
+
+  const result = verifyProofChain({
+    proofs,
+    authId: user.id,
+    scenarioId: scenario_id.trim(),
+    maxTurns: MAX_TURNS,
+  });
+  if ('error' in result) {
+    console.warn('[roleplay-sessions] proof verification FAILED:', result.error);
+    return NextResponse.json(
+      { error: `Session verification failed: ${result.error}` },
+      { status: 400 }
+    );
+  }
+
+  const graded = gradeRoleplay(result.warmths);
+
+  // Terminal check: a session is only ever logged when it ended — either
+  // passed, or failed at MAX_TURNS. A chain that is neither is a truncated
+  // prefix (bad final turns dropped to inflate the average) — reject it.
+  if (!graded.passed && result.warmths.length < MAX_TURNS) {
+    console.warn('[roleplay-sessions] proof chain ends before a terminal state — rejected');
+    return NextResponse.json(
+      { error: 'Session verification failed: incomplete session' },
+      { status: 400 }
+    );
+  }
+
+  if (
+    graded.passed !== passed ||
+    graded.warmthScore !== warmth_score ||
+    result.warmths.length !== turns
+  ) {
+    // Shouldn't happen with an honest client (same grading lib both sides)
+    // — worth a log line either way. The derived values win regardless.
+    console.warn('[roleplay-sessions] client grade differed from server derivation:', {
+      client: { passed, warmth_score, turns },
+      derived: { passed: graded.passed, warmth_score: graded.warmthScore, turns: result.warmths.length },
+    });
+  }
+  const finalPassed = graded.passed;
+  const finalWarmthScore = graded.warmthScore;
+  const finalTurns = result.warmths.length;
+  const verified = true;
+  // Unique per chain (DB-enforced) — a replayed chain can't create a second row.
+  const proof_chain_hash = hashProofToken(proofs[proofs.length - 1]);
 
   // 5. XP is a server-side derivation of the performance signal — never the
   //    client's number (xp.ts is the single source of the tier table).
