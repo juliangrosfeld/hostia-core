@@ -123,9 +123,10 @@ export default function ExamView({ config: rawConfig, phase, propertyName, onExi
               Prove what you know.
             </h1>
             <p style={{ color: 'var(--ink-soft)', fontSize: 15, lineHeight: 1.6, maxWidth: 480, margin: '0 auto 28px' }}>
-              Four rounds covering everything from Phase {phase.phase_number}. Score{' '}
-              <b style={{ color: 'var(--brand-deep)' }}>{EXAM_PASS_SCORE}% or higher</b> overall to earn your{' '}
-              <b style={{ color: 'var(--brand-deep)' }}>{phase.certification_title}</b>{' '}badge and unlock the next phase.
+              Four rounds covering everything from Phase {phase.phase_number}. You need{' '}
+              <b style={{ color: 'var(--brand-deep)' }}>{EXAM_PASS_SCORE}% or higher across all four rounds</b>{' '}
+              to pass and earn your certification — the{' '}
+              <b style={{ color: 'var(--brand-deep)' }}>{phase.certification_title}</b>{' '}badge — and unlock the next phase.
               You can retake the exam if you don&apos;t pass.
             </p>
 
