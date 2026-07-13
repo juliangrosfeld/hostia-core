@@ -825,7 +825,13 @@ body {
 /* ============================================================
    PREVENT HORIZONTAL OVERFLOW
    ============================================================ */
+/* Prevent horizontal scroll without breaking position: sticky. `hidden` turns
+   body into a scroll container, which silently disables every descendant
+   sticky (top nav, admin sidebar — the sidebar visibly stopped partway down
+   the page). `clip` clips the same overflow but creates no scroll container;
+   the `hidden` line stays first as a fallback for pre-2022 browsers. */
 html, body { overflow-x: hidden; }
+html, body { overflow-x: clip; }
 
 /* Prevent double-tap zoom on interactive elements */
 button, a, [role="button"] { touch-action: manipulation; }
