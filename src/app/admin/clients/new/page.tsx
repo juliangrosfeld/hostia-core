@@ -212,7 +212,7 @@ export default function NewClientPage() {
             >
               {logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={logoUrl} alt="Logo preview" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
+                <img src={logoUrl} alt="Logo preview" className="client-logo" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
               ) : (
                 <Upload size={18} color="var(--ink-soft)" />
               )}

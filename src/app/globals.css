@@ -135,6 +135,9 @@ body {
   color: var(--brand);
 }
 .brand-tag { font-size: 10px; letter-spacing: 0.2em; color: var(--ink-soft); margin-left: 4px; }
+/* Client/property logo image — every place a client logo renders (top-nav,
+   admin logo previews) uses this class so the corner rounding stays uniform. */
+.client-logo { border-radius: 8px; }
 .property-pill {
   margin-left: 16px; padding: 5px 12px;
   background: var(--sand-warm); border-radius: 999px;

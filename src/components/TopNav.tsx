@@ -54,6 +54,7 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
                 <img
                   src={property.logoUrl}
                   alt={propertyName ?? 'Property logo'}
+                  className="client-logo"
                   style={{ height: 32, width: 'auto', objectFit: 'contain' }}
                 />
               )}

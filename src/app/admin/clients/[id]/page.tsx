@@ -725,7 +725,7 @@ export default function ClientDetailPage() {
                 >
                   {property.logo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={property.logo_url} alt="Logo" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
+                    <img src={property.logo_url} alt="Logo" className="client-logo" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />
                   ) : (
                     <Upload size={18} color="var(--ink-soft)" />
                   )}
