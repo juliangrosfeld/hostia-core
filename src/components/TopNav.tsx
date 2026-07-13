@@ -30,8 +30,16 @@ export default function TopNav({ viewingAs, onClearViewAs, user, property }: Top
       <div className="top-nav">
         <div className="top-nav-inner">
 
-          {/* Left: BY GLAD AI wordmark (links home) */}
+          {/* Left: Hostia mark + BY GLAD AI wordmark (links home). The PNG has
+              generous transparent padding around the H glyph, so it renders
+              slightly oversized with negative margins to sit flush with the
+              wordmark without stretching the nav bar. */}
           <Link href={canManage ? '/manager' : '/staff'} className="brand" style={{ textDecoration: 'none' }}>
+            <img
+              src="/hostia-logo.png"
+              alt="Hostia"
+              style={{ height: 36, width: 36, objectFit: 'contain', margin: '-6px -8px -6px -8px' }}
+            />
             <span className="brand-tag">BY GLAD AI</span>
           </Link>
 
