@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/supabase/requireAdmin'
+import { CURRICULUM } from '@/lib/curriculum'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -102,5 +103,44 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ property, id: property.id })
+  // Auto-assign the track's Phase 1 module set so a new client is ready to
+  // train the moment it exists — the old flow required ~8 manual toggles.
+  // Only lesson-carrying modules are assigned (the 0-lesson certification
+  // pseudo-module is synthesized by the staff home, never a DB row we need).
+  let assignedModuleCount = 0
+  if (property.venue_type) {
+    const { data: phase1 } = await admin
+      .from('phases')
+      .select('id')
+      .eq('track', property.venue_type)
+      .eq('phase_number', 1)
+
+    const phaseIds = (phase1 ?? []).map((p) => p.id)
+    if (phaseIds.length > 0) {
+      const { data: mpa } = await admin
+        .from('module_phase_assignments')
+        .select('module_id, order_in_phase')
+        .in('phase_id', phaseIds)
+        .order('order_in_phase', { ascending: true })
+
+      const contentIds = new Set(CURRICULUM.filter((m) => m.totalLessons > 0).map((m) => m.id))
+      const toAssign = (mpa ?? []).filter((r) => contentIds.has(r.module_id))
+
+      if (toAssign.length > 0) {
+        const { error: assignError } = await admin.from('property_modules').insert(
+          toAssign.map((r, i) => ({
+            property_id: property.id,
+            module_id: r.module_id,
+            order_index: i,
+            is_active: true,
+          }))
+        )
+        // A failed auto-assign must not fail property creation — the admin
+        // can still assign manually; surface the count so the UI can tell.
+        if (!assignError) assignedModuleCount = toAssign.length
+      }
+    }
+  }
+
+  return NextResponse.json({ property, id: property.id, assignedModuleCount })
 }

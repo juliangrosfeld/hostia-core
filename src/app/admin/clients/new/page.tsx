@@ -119,7 +119,8 @@ export default function NewClientPage() {
         New Client
       </h1>
       <p style={{ margin: '0 0 28px', fontSize: 14.5, color: 'var(--ink-soft)' }}>
-        Create a new property. You can assign modules and configure overrides next.
+        Create a new property. The track&apos;s Phase 1 modules are assigned automatically —
+        the setup checklist walks you through the rest.
       </p>
 
       <form

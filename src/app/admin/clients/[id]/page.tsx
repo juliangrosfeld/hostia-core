@@ -227,6 +227,112 @@ function ConfirmDeleteModal({
   )
 }
 
+// Guided builder for the scenario_context override: a few prompted fields
+// composed into the venue paragraph that seeds every AI roleplay prompt.
+// Inserting only fills the textarea — the admin still reviews and saves.
+function ScenarioContextBuilder({
+  propertyName, hasExisting, onInsert,
+}: {
+  propertyName: string; hasExisting: boolean; onInsert: (text: string) => void;
+}) {
+  const [open, setOpen] = useState(false)
+  const [venueDesc, setVenueDesc] = useState('')
+  const [location, setLocation] = useState('')
+  const [menu, setMenu] = useState('')
+  const [serviceStyle, setServiceStyle] = useState('')
+
+  function compose(): string {
+    const name = propertyName.trim() || 'This restaurant'
+    const sentences = [
+      `${name} is ${venueDesc.trim()}${location.trim() ? ` in ${location.trim()}` : ''}.`,
+    ]
+    if (menu.trim()) sentences.push(`The menu centers on ${menu.trim()}.`)
+    if (serviceStyle.trim()) sentences.push(`Service style: ${serviceStyle.trim()}.`)
+    return sentences.join(' ')
+  }
+
+  const fieldStyle: React.CSSProperties = { ...inputStyle, fontSize: 13.5, padding: '9px 12px' }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        style={{
+          alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 6,
+          padding: '7px 12px', borderRadius: 8, border: '1px dashed var(--sand-deeper)',
+          background: 'var(--sand)', color: 'var(--ocean-deep)',
+          fontSize: 12.5, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer',
+        }}
+      >
+        <Plus size={13} /> Use guided template
+      </button>
+    )
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex', flexDirection: 'column', gap: 12,
+        padding: '14px 16px', borderRadius: 12,
+        border: '1px solid var(--sand-deeper)', background: 'var(--sand)',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--ocean-deep)' }}>
+          Guided template
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          title="Close template"
+          style={{
+            width: 26, height: 26, borderRadius: 7, border: '1px solid var(--sand-deeper)',
+            background: 'white', color: 'var(--ink-soft)', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <X size={13} />
+        </button>
+      </div>
+      <div>
+        <label style={{ ...labelStyle, marginBottom: 5 }}>What kind of venue? *</label>
+        <input type="text" value={venueDesc} onChange={(e) => setVenueDesc(e.target.value)} placeholder="a gourmet burger restaurant" style={fieldStyle} />
+      </div>
+      <div>
+        <label style={{ ...labelStyle, marginBottom: 5 }}>Location</label>
+        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Willemstad, Curaçao" style={fieldStyle} />
+      </div>
+      <div>
+        <label style={{ ...labelStyle, marginBottom: 5 }}>Menu &amp; signature items</label>
+        <input type="text" value={menu} onChange={(e) => setMenu(e.target.value)} placeholder="smash burgers, loaded fries, local craft beers" style={fieldStyle} />
+      </div>
+      <div>
+        <label style={{ ...labelStyle, marginBottom: 5 }}>Service style</label>
+        <input type="text" value={serviceStyle} onChange={(e) => setServiceStyle(e.target.value)} placeholder="relaxed counter service — quick, warm, personal" style={fieldStyle} />
+      </div>
+      <button
+        type="button"
+        disabled={!venueDesc.trim()}
+        onClick={() => {
+          onInsert(compose())
+          setOpen(false)
+        }}
+        style={{
+          alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 6,
+          padding: '9px 14px', borderRadius: 9, border: 'none',
+          background: '#F5A623', color: '#051956',
+          fontSize: 13, fontWeight: 800, fontFamily: 'inherit',
+          cursor: venueDesc.trim() ? 'pointer' : 'default',
+          opacity: venueDesc.trim() ? 1 : 0.5,
+        }}
+      >
+        <Check size={14} /> {hasExisting ? 'Replace scenario context' : 'Insert into scenario context'}
+      </button>
+    </div>
+  )
+}
+
 function Toast({ tone, text }: { tone: 'ok' | 'err'; text: string }) {
   return (
     <div
@@ -279,6 +385,8 @@ export default function ClientDetailPage() {
   const [expandedPhases, setExpandedPhases] = useState<Set<string> | null>(null)
   const [assignAllBusy, setAssignAllBusy] = useState<string | null>(null)
 
+  const [staffCount, setStaffCount] = useState(0)
+
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
@@ -325,6 +433,7 @@ export default function ClientDetailPage() {
         if (cancelled) return
         setProperty(data.property)
         setAssigned(new Set((data.propertyModules ?? []).map((m: PropertyModule) => m.module_id)))
+        setStaffCount(typeof data.staffCount === 'number' ? data.staffCount : 0)
 
         // Merge stored overrides with the default keys so they always appear.
         const stored: Override[] = (data.propertyOverrides ?? []).map((o: Override) => ({
@@ -723,8 +832,141 @@ export default function ClientDetailPage() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
+        {/* ── 0. Setup checklist — derived live from real data, no state of
+               its own. Vanishes into a slim confirmation once complete. ── */}
+        {(() => {
+          const scenarioContextValue = (overrides.find((o) => o.key === 'scenario_context')?.value ?? '').trim()
+          const items: { key: string; label: string; done: boolean; hint: string; target: string }[] = [
+            {
+              key: 'venue',
+              label: 'Set the venue type',
+              done: Boolean(property.venue_type),
+              hint: 'Drives the curriculum track, phases, and exams.',
+              target: 'section-details',
+            },
+            {
+              key: 'modules',
+              label: 'Assign the track’s modules',
+              done: hasTrack && trackModules.length > 0 && assignedTrackCount === trackModules.length,
+              hint: hasTrack ? `${assignedTrackCount} of ${trackModules.length} assigned.` : 'Set the venue type first.',
+              target: 'section-modules',
+            },
+            {
+              key: 'logo',
+              label: 'Upload the client logo',
+              done: Boolean(property.logo_url),
+              hint: 'Shown across the staff app and manager dashboard.',
+              target: 'section-details',
+            },
+            {
+              key: 'context',
+              label: 'Write the roleplay scenario context',
+              done: scenarioContextValue !== '',
+              hint: 'Seeds every AI guest conversation for this client.',
+              target: 'section-overrides',
+            },
+            {
+              key: 'invite',
+              label: 'Invite a manager',
+              done: managers.length + pendingInvites.length > 0,
+              hint: 'They run onboarding for their own staff.',
+              target: 'section-managers',
+            },
+            {
+              key: 'accepted',
+              label: 'Manager accepts the invite',
+              done: managers.length > 0,
+              hint: 'The invite link expires after 7 days.',
+              target: 'section-managers',
+            },
+            {
+              key: 'staff',
+              label: 'First staff member onboarded',
+              done: staffCount > 0,
+              hint: 'Managers add staff from their dashboard.',
+              target: 'section-managers',
+            },
+          ]
+          const doneCount = items.filter((i) => i.done).length
+          const allDone = doneCount === items.length
+
+          if (allDone) {
+            return (
+              <div
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '13px 18px', borderRadius: 14,
+                  border: '1px solid rgba(94,139,126,0.4)', background: 'rgba(94,139,126,0.08)',
+                  color: 'var(--sage-deep)', fontSize: 14, fontWeight: 700,
+                }}
+              >
+                <Check size={16} strokeWidth={2.5} /> Setup complete — this client is live-ready.
+              </div>
+            )
+          }
+
+          return (
+            <section style={cardStyle}>
+              <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+                <h2 style={sectionTitleStyle}>Setup checklist</h2>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)', fontVariantNumeric: 'tabular-nums' }}>
+                  {doneCount} of {items.length} done
+                </span>
+              </div>
+              <p style={sectionSubStyle}>Everything this client needs before staff can start training.</p>
+              <div style={{ height: 6, borderRadius: 999, background: 'var(--sand-warm)', marginBottom: 18, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${(doneCount / items.length) * 100}%`, borderRadius: 999, background: '#F5A623', transition: 'width 0.3s ease' }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {items.map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => document.getElementById(item.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%',
+                      padding: '9px 10px', borderRadius: 10, border: 'none',
+                      background: 'transparent', textAlign: 'left',
+                      fontFamily: 'inherit', cursor: 'pointer',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 20, height: 20, borderRadius: '50%', flexShrink: 0, marginTop: 1,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: item.done ? 'var(--sage-deep)' : 'white',
+                        border: item.done ? 'none' : '1.5px solid var(--sand-deeper)',
+                        color: 'white',
+                      }}
+                    >
+                      {item.done && <Check size={12} strokeWidth={3} />}
+                    </span>
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      <span
+                        style={{
+                          display: 'block', fontSize: 14, fontWeight: 600,
+                          color: item.done ? 'var(--ink-soft)' : 'var(--ocean-deep)',
+                          textDecoration: item.done ? 'line-through' : 'none',
+                          textDecorationColor: 'var(--sand-deeper)',
+                        }}
+                      >
+                        {item.label}
+                      </span>
+                      {!item.done && (
+                        <span style={{ display: 'block', fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 1 }}>
+                          {item.hint}
+                        </span>
+                      )}
+                    </span>
+                    {!item.done && <ChevronRight size={15} color="var(--ink-soft)" style={{ flexShrink: 0, marginTop: 3 }} />}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )
+        })()}
+
         {/* ── 1. Property Details ── */}
-        <section style={cardStyle}>
+        <section id="section-details" style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 20 }}>
             <div>
               <h2 style={sectionTitleStyle}>Property Details</h2>
@@ -838,7 +1080,7 @@ export default function ClientDetailPage() {
         </section>
 
         {/* ── 2. Managers ── */}
-        <section style={cardStyle}>
+        <section id="section-managers" style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
             <h2 style={sectionTitleStyle}>Managers</h2>
             <button
@@ -982,7 +1224,7 @@ export default function ClientDetailPage() {
         </section>
 
         {/* ── 3. Module Library ── */}
-        <section style={cardStyle}>
+        <section id="section-modules" style={cardStyle}>
           <h2 style={sectionTitleStyle}>Module Library</h2>
           <p style={sectionSubStyle}>
             {hasTrack
@@ -1192,7 +1434,7 @@ export default function ClientDetailPage() {
         </section>
 
         {/* ── 4. Property Overrides ── */}
-        <section style={cardStyle}>
+        <section id="section-overrides" style={cardStyle}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
             <h2 style={sectionTitleStyle}>Property Overrides</h2>
             {overridesMsg && <Toast tone={overridesMsg.tone} text={overridesMsg.text} />}
@@ -1238,13 +1480,24 @@ export default function ClientDetailPage() {
                     )}
                   </div>
                   {isTextarea ? (
-                    <textarea
-                      value={o.value}
-                      onChange={(e) => setOverrideValue(o.key, e.target.value)}
-                      rows={4}
-                      placeholder="This is Brgr Haus, a gourmet burger restaurant in Willemstad, Curaçao…"
-                      style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5, minHeight: 96 }}
-                    />
+                    <>
+                      <textarea
+                        value={o.value}
+                        onChange={(e) => setOverrideValue(o.key, e.target.value)}
+                        rows={4}
+                        placeholder="This is Brgr Haus, a gourmet burger restaurant in Willemstad, Curaçao…"
+                        style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.5, minHeight: 96 }}
+                      />
+                      {o.key === 'scenario_context' && (
+                        <ScenarioContextBuilder
+                          propertyName={
+                            (overrides.find((ov) => ov.key === 'property_name')?.value ?? '').trim() || property.name
+                          }
+                          hasExisting={o.value.trim() !== ''}
+                          onInsert={(text) => setOverrideValue('scenario_context', text)}
+                        />
+                      )}
+                    </>
                   ) : (
                     <input
                       type="text"

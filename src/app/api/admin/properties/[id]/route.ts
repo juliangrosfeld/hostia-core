@@ -41,10 +41,18 @@ export async function GET(
     .select('*')
     .eq('property_id', id)
 
+  // Staff headcount feeds the setup checklist ("first staff member onboarded").
+  const { count: staffCount } = await admin
+    .from('users')
+    .select('id', { count: 'exact', head: true })
+    .eq('property_id', id)
+    .eq('role', 'staff')
+
   return NextResponse.json({
     property,
     propertyModules: propertyModules ?? [],
     propertyOverrides: propertyOverrides ?? [],
+    staffCount: staffCount ?? 0,
   })
 }
 
