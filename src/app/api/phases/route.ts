@@ -38,5 +38,15 @@ export async function GET(req: NextRequest) {
     assignments = mpa ?? [];
   }
 
-  return NextResponse.json({ phases, assignments });
+  // Module ids assigned to a phase in ANY track — lets the admin UI tell
+  // "belongs to another track" (hidden there) apart from "assigned to no
+  // track at all" (surfaced as to-be-categorized). Cheap unfiltered read of
+  // the same public reference table.
+  const { data: allRows, error: allError } = await supabase
+    .from('module_phase_assignments')
+    .select('module_id');
+  if (allError) return NextResponse.json({ error: allError.message }, { status: 500 });
+  const allAssignedModuleIds = [...new Set((allRows ?? []).map((r) => r.module_id))];
+
+  return NextResponse.json({ phases, assignments, allAssignedModuleIds });
 }

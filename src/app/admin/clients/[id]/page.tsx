@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
   ArrowLeft, Check, AlertCircle, Save, Plus, Trash2, Loader2,
-  UserPlus, Copy, Mail, X, Upload,
+  UserPlus, Copy, Mail, X, Upload, ChevronDown, ChevronRight, Trophy,
 } from 'lucide-react'
 import { CURRICULUM, type Phase } from '@/lib/curriculum'
 
@@ -270,6 +270,14 @@ export default function ClientDetailPage() {
   // /api/curriculum uses for staff, so admin grouping can never drift from
   // what staff actually see. (curriculum.ts carries no phase fields anymore.)
   const [phaseAssignments, setPhaseAssignments] = useState<ModulePhaseAssignment[]>([])
+  // Module ids assigned to a phase in ANY track — a module missing from this
+  // track's mapping but present here belongs to another track and is hidden,
+  // instead of landing in "to be categorized".
+  const [allAssignedIds, setAllAssignedIds] = useState<Set<string>>(new Set())
+  // Collapsed/expanded phase groups. null = not yet initialized (phases still
+  // loading); once loaded, phases that actually have content start expanded.
+  const [expandedPhases, setExpandedPhases] = useState<Set<string> | null>(null)
+  const [assignAllBusy, setAssignAllBusy] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -375,8 +383,18 @@ export default function ClientDetailPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (cancelled || !d?.phases) return
-        setPhases(d.phases as Phase[])
-        setPhaseAssignments((d.assignments ?? []) as ModulePhaseAssignment[])
+        const loadedPhases = d.phases as Phase[]
+        const loadedAssignments = (d.assignments ?? []) as ModulePhaseAssignment[]
+        setPhases(loadedPhases)
+        setPhaseAssignments(loadedAssignments)
+        setAllAssignedIds(new Set((d.allAssignedModuleIds ?? []) as string[]))
+        // Initial expand state: phases that have at least one real (lesson-
+        // carrying) module open, empty future phases collapsed.
+        const contentIds = new Set(CURRICULUM.filter((m) => m.totalLessons > 0).map((m) => m.id))
+        const phasesWithContent = new Set(
+          loadedAssignments.filter((a) => contentIds.has(a.module_id)).map((a) => a.phase_id)
+        )
+        setExpandedPhases(new Set(loadedPhases.filter((p) => phasesWithContent.has(p.id)).map((p) => p.id)))
       })
       .catch(() => {})
     return () => { cancelled = true }
@@ -601,7 +619,59 @@ export default function ClientDetailPage() {
     }
   }
 
-  const assignedCount = useMemo(() => assigned.size, [assigned])
+  // ── Assign every missing module of a phase in one call ────────
+  async function assignAllInPhase(phaseId: string, moduleIds: string[]) {
+    if (assignAllBusy || moduleIds.length === 0) return
+    setAssignAllBusy(phaseId)
+    try {
+      const res = await fetch(`/api/admin/properties/${propertyId}/modules`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ module_ids: moduleIds }),
+      })
+      if (res.ok) {
+        setAssigned((prev) => new Set([...prev, ...moduleIds]))
+      }
+    } catch {
+      // leave the toggles as-is on failure
+    } finally {
+      setAssignAllBusy(null)
+    }
+  }
+
+  function togglePhaseExpanded(phaseId: string) {
+    setExpandedPhases((prev) => {
+      const next = new Set(prev ?? [])
+      if (next.has(phaseId)) next.delete(phaseId)
+      else next.add(phaseId)
+      return next
+    })
+  }
+
+  // ── Track-scoped module sets ──────────────────────────────────
+  // Only lesson-carrying modules count — the 0-lesson certification pseudo-
+  // module is never listed as assignable (the staff home synthesizes its own
+  // exam card and ignores any property_modules row for it).
+  const metaByModule = useMemo(
+    () => new Map(phaseAssignments.map((a) => [a.module_id, a])),
+    [phaseAssignments]
+  )
+  const trackModules = useMemo(
+    () => CURRICULUM.filter((m) => m.totalLessons > 0 && metaByModule.has(m.id)),
+    [metaByModule]
+  )
+  // Genuinely uncategorized = in no track's phase mapping at all. Modules
+  // mapped to another track's phases are simply not this property's business.
+  const uncategorized = useMemo(
+    () => CURRICULUM.filter((m) => m.totalLessons > 0 && !metaByModule.has(m.id) && !allAssignedIds.has(m.id)),
+    [metaByModule, allAssignedIds]
+  )
+  const assignedTrackCount = useMemo(
+    () => trackModules.filter((m) => assigned.has(m.id)).length,
+    [trackModules, assigned]
+  )
+  const hasTrack = Boolean(property?.venue_type) && phases.length > 0
+  const trackLabel = VENUE_TYPES.find((v) => v.value === property?.venue_type)?.label ?? ''
 
   // ── Render ────────────────────────────────────────────────────
   if (loading) {
@@ -915,7 +985,9 @@ export default function ClientDetailPage() {
         <section style={cardStyle}>
           <h2 style={sectionTitleStyle}>Module Library</h2>
           <p style={sectionSubStyle}>
-            {assignedCount} of {CURRICULUM.length} modules assigned, grouped by phase. Toggle to assign or remove.
+            {hasTrack
+              ? `${assignedTrackCount} of ${trackModules.length} ${trackLabel} modules assigned, grouped by phase. Toggle to assign or remove.`
+              : 'Toggle to assign or remove modules.'}
           </p>
 
           {!property.venue_type && (
@@ -932,12 +1004,6 @@ export default function ClientDetailPage() {
           )}
 
           {(() => {
-            // Group CURRICULUM modules by their module_phase_assignments row for
-            // THIS property's track. A module with no assignment in this track
-            // lands in the "to be categorized" bucket shown last — it never
-            // disappears (the old hardcoded-phase_id grouping made modules
-            // assigned to another track's phase vanish entirely).
-            const metaByModule = new Map(phaseAssignments.map((a) => [a.module_id, a]))
             const renderModuleButton = (m: typeof CURRICULUM[number]) => {
               const isAssigned = assigned.has(m.id)
               const busy = moduleBusy === m.id
@@ -982,44 +1048,141 @@ export default function ClientDetailPage() {
               )
             }
 
-            const groupHeading = (label: string, sub: string) => (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '4px 0 2px' }}>
-                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-deep)' }}>
-                  {label}
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{sub}</span>
-              </div>
-            )
+            // No usable track yet (venue type unset, or its phases haven't
+            // loaded) — flat list of every lesson-carrying module so a
+            // track-less property (e.g. the demo) stays manageable.
+            if (!hasTrack) {
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {CURRICULUM.filter((m) => m.totalLessons > 0).map(renderModuleButton)}
+                </div>
+              )
+            }
 
-            const uncategorized = CURRICULUM.filter((m) => !metaByModule.get(m.id))
+            const byOrder = (a: typeof CURRICULUM[number], b: typeof CURRICULUM[number]) =>
+              (metaByModule.get(a.id)?.order_in_phase ?? 999) -
+              (metaByModule.get(b.id)?.order_in_phase ?? 999)
 
             return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {phases.map((ph) => {
-                  const mods = CURRICULUM
+                  const mods = trackModules
                     .filter((m) => metaByModule.get(m.id)?.phase_id === ph.id)
-                    .sort(
-                      (a, b) =>
-                        (metaByModule.get(a.id)?.order_in_phase ?? 999) -
-                        (metaByModule.get(b.id)?.order_in_phase ?? 999)
-                    )
+                    .sort(byOrder)
+                  // The 0-lesson certification pseudo-module marks this phase
+                  // as having an exam — shown as a fixed line, never a toggle.
+                  const hasExam = CURRICULUM.some(
+                    (m) => m.totalLessons === 0 && metaByModule.get(m.id)?.phase_id === ph.id
+                  )
+                  const assignedInPhase = mods.filter((m) => assigned.has(m.id)).length
+                  const missing = mods.filter((m) => !assigned.has(m.id)).map((m) => m.id)
+                  const hasContent = mods.length > 0
+                  const expanded = hasContent && (expandedPhases?.has(ph.id) ?? true)
+                  const busy = assignAllBusy === ph.id
+
                   return (
-                    <div key={ph.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {groupHeading(`Phase ${ph.phase_number} — ${ph.title}`, ph.certification_title)}
-                      {mods.length === 0 ? (
-                        <div style={{ padding: '14px 16px', borderRadius: 12, border: '1px dashed var(--sand-deeper)', color: 'var(--ink-soft)', fontSize: 13 }}>
-                          No modules assigned yet
+                    <div key={ph.id} style={{ border: '1px solid var(--sand-deeper)', borderRadius: 14, background: 'white' }}>
+                      <button
+                        onClick={() => hasContent && togglePhaseExpanded(ph.id)}
+                        aria-expanded={expanded}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10, width: '100%',
+                          padding: '13px 16px', border: 'none', background: 'transparent',
+                          textAlign: 'left', fontFamily: 'inherit',
+                          cursor: hasContent ? 'pointer' : 'default',
+                        }}
+                      >
+                        <span style={{ flexShrink: 0, width: 16, display: 'flex', color: hasContent ? 'var(--ink-soft)' : 'var(--sand-deeper)' }}>
+                          {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </span>
+                        <span style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-deep)' }}>
+                            Phase {ph.phase_number} — {ph.title}
+                          </span>
+                          <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{ph.certification_title}</span>
+                        </span>
+                        {hasContent ? (
+                          <>
+                            {missing.length > 0 && (
+                              <span
+                                role="button"
+                                tabIndex={0}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  assignAllInPhase(ph.id, missing)
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    assignAllInPhase(ph.id, missing)
+                                  }
+                                }}
+                                style={{
+                                  flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
+                                  padding: '6px 11px', borderRadius: 8, border: 'none',
+                                  background: '#F5A623', color: '#051956',
+                                  fontSize: 12, fontWeight: 800,
+                                  cursor: busy ? 'default' : 'pointer',
+                                  opacity: busy ? 0.6 : 1,
+                                }}
+                              >
+                                {busy ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+                                Assign all
+                              </span>
+                            )}
+                            <span
+                              style={{
+                                flexShrink: 0, fontSize: 11.5, fontWeight: 700,
+                                fontVariantNumeric: 'tabular-nums',
+                                color: assignedInPhase === mods.length ? 'var(--sage-deep)' : 'var(--ink-soft)',
+                                background: assignedInPhase === mods.length ? 'rgba(94,139,126,0.12)' : 'var(--sand-warm)',
+                                padding: '4px 10px', borderRadius: 999,
+                              }}
+                            >
+                              {assignedInPhase}/{mods.length} assigned
+                            </span>
+                          </>
+                        ) : (
+                          <span style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 600, color: 'var(--ink-soft)', padding: '4px 2px' }}>
+                            No content yet
+                          </span>
+                        )}
+                      </button>
+
+                      {expanded && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '2px 14px 14px' }}>
+                          {mods.map(renderModuleButton)}
+                          {hasExam && (
+                            <div
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 10,
+                                padding: '12px 16px', borderRadius: 12,
+                                border: '1px dashed #B8860B', background: 'rgba(184,134,11,0.05)',
+                                fontSize: 13, color: 'var(--ink)',
+                              }}
+                            >
+                              <Trophy size={15} color="#B8860B" />
+                              <span style={{ fontWeight: 700 }}>Exam — {ph.certification_title}</span>
+                              <span style={{ color: 'var(--ink-soft)', fontSize: 12.5 }}>
+                                appears automatically once every module above is complete
+                              </span>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        mods.map(renderModuleButton)
                       )}
                     </div>
                   )
                 })}
 
                 {uncategorized.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {groupHeading('To be categorized', 'Not yet assigned to a phase')}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, margin: '4px 0 2px' }}>
+                      <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--brand-deep)' }}>
+                        To be categorized
+                      </span>
+                      <span style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Not in any track&apos;s phase mapping yet</span>
+                    </div>
                     {uncategorized.map(renderModuleButton)}
                   </div>
                 )}

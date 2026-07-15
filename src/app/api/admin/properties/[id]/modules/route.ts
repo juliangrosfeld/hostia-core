@@ -5,9 +5,11 @@ import { requireAdmin } from '@/lib/supabase/requireAdmin'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// POST — assign a module to this property.
+// POST — assign one module or a batch of modules to this property.
 //
 // Body: { module_id: string, order_index?: number, is_active?: boolean }
+//   or: { module_ids: string[] }  (bulk — e.g. the "Assign all" phase button;
+//        already-assigned ids are skipped, the rest append in array order)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,18 +19,50 @@ export async function POST(
 
   const { id } = await params
 
-  let body: { module_id?: unknown; order_index?: unknown; is_active?: unknown }
+  let body: { module_id?: unknown; module_ids?: unknown; order_index?: unknown; is_active?: unknown }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
   }
 
+  const admin = createAdminClient()
+
+  // ── Bulk path ─────────────────────────────────────────────────
+  if (Array.isArray(body.module_ids)) {
+    const ids = body.module_ids.filter((m): m is string => typeof m === 'string' && m !== '')
+    if (ids.length === 0) {
+      return NextResponse.json({ error: 'module_ids must contain at least one module id' }, { status: 400 })
+    }
+
+    const { data: existing } = await admin
+      .from('property_modules')
+      .select('module_id, order_index')
+      .eq('property_id', id)
+
+    const already = new Set((existing ?? []).map((r) => r.module_id))
+    const nextOrder = (existing ?? []).reduce((max, r) => Math.max(max, r.order_index + 1), 0)
+    const missing = ids.filter((m) => !already.has(m))
+
+    if (missing.length > 0) {
+      const { error } = await admin.from('property_modules').insert(
+        missing.map((moduleId, i) => ({
+          property_id: id,
+          module_id: moduleId,
+          order_index: nextOrder + i,
+          is_active: true,
+        }))
+      )
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ assigned: missing.length, skipped: ids.length - missing.length })
+  }
+
+  // ── Single-module path ────────────────────────────────────────
   if (typeof body.module_id !== 'string' || !body.module_id) {
     return NextResponse.json({ error: 'module_id is required' }, { status: 400 })
   }
-
-  const admin = createAdminClient()
 
   // Already assigned? Treat as a no-op success so the toggle stays idempotent.
   const { data: existingRow } = await admin
