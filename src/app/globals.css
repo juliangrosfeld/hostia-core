@@ -932,6 +932,10 @@ button, a, [role="button"] { touch-action: manipulation; }
   .module-complete-badge { display: none; }
   .module-card-text { grid-area: text; min-width: 0; }
   .module-progress-row { grid-area: progress; }
+  /* Children without a named area (LIVE ROLEPLAY / FINAL EXAM badge, the
+     certification status line) auto-place into the 52px icon column and
+     render one word per line — pin them to the text column instead. */
+  .module-badge-row, .module-cert-note { grid-column: 2; min-width: 0; }
   .module-title { font-size: 15px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
   .module-sub { font-size: 12px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: unset; margin-bottom: 0; }
 
@@ -946,9 +950,16 @@ button, a, [role="button"] { touch-action: manipulation; }
   .lesson-row:active:not(.is-locked) { background: var(--sand-warm); }
   .lesson-num { width: 40px; height: 40px; }
   .lesson-clock { display: none !important; }
-  .lesson-title-row { min-width: 0; }
-  .lesson-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+  .lesson-title-row { min-width: 0; align-items: flex-start; }
+  /* Titles wrap instead of ellipsizing — the pills and XP text used to eat
+     the row width and leave 3-character titles ("Wel…"). */
+  .lesson-title { flex: 1; min-width: 0; line-height: 1.3; }
   .lesson-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* The green check in .lesson-num already signals completion. */
+  .lesson-done-tag { display: none; }
+  /* "10 XP" is enough on a phone — drop the earned/available word. */
+  .xp-word { display: none; }
+  .lesson-meta { gap: 8px; }
   .exam-card { padding: 16px; }
   .exam-card:hover:not(.is-locked) { background: white; color: var(--brand-deep); }
   .exam-card:active:not(.is-locked) { background: var(--brand-deep); color: white; }
@@ -1023,6 +1034,12 @@ button, a, [role="button"] { touch-action: manipulation; }
 
   /* ─ Insight cards — single column ─ */
   .insight-row { grid-template-columns: 1fr; }
+
+  /* ─ Touch targets: ⓘ dots + insight CTAs ─ */
+  /* Grow the hit area to 36px without shifting layout (icon stays 12px,
+     background only shows on press). */
+  .info-dot { width: 36px; height: 36px; margin: -9px; }
+  .insight-cta { min-height: 44px; }
 
   /* ─ Manager header ─ */
   .mgr-title { font-size: 26px; }

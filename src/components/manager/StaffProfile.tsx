@@ -85,6 +85,35 @@ interface ModuleRow {
   warmth: number;
 }
 
+// Custom PolarAngleAxis tick that wraps long module names onto multiple
+// short lines. Single-line labels ("Guest Psychology") overflow the SVG at
+// narrow viewports and get clipped to "'sychology" / "The Servic".
+function RadarTick({
+  x, y, textAnchor, payload,
+}: {
+  x?: number; y?: number; textAnchor?: 'inherit' | 'end' | 'start' | 'middle'; payload?: { value?: unknown };
+}) {
+  const words = String(payload?.value ?? '').split(' ');
+  const lines: string[] = [];
+  let cur = '';
+  for (const w of words) {
+    if (cur && (cur + ' ' + w).length > 12) {
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = cur ? cur + ' ' + w : w;
+    }
+  }
+  if (cur) lines.push(cur);
+  return (
+    <text x={x} y={y} textAnchor={textAnchor} fill="#4A5568" fontSize={11}>
+      {lines.map((line, i) => (
+        <tspan key={i} x={x} dy={i === 0 ? 0 : 12}>{line}</tspan>
+      ))}
+    </text>
+  );
+}
+
 function relativeTime(iso: string): string {
   const diff = Date.now() - Date.parse(iso);
   if (!Number.isFinite(diff) || diff < 0) return 'Just now';
@@ -440,9 +469,9 @@ export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName,
             </h3>
             <div style={{ height: 280, marginTop: 8 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                <RadarChart data={radarData} outerRadius="70%" margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                   <PolarGrid stroke="#E5DCC9" />
-                  <PolarAngleAxis dataKey="skill" tick={{ fontSize: 11, fill: '#4A5568' }} />
+                  <PolarAngleAxis dataKey="skill" tick={<RadarTick />} />
                   <Radar dataKey="value" stroke="#F5A623" fill="#F5A623" fillOpacity={0.25} strokeWidth={2} />
                 </RadarChart>
               </ResponsiveContainer>

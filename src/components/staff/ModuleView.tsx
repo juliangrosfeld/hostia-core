@@ -46,7 +46,7 @@ function LessonRow({
         </div>
         <div className="lesson-desc" style={{ fontSize: 13, color: 'var(--ink-soft)' }}>{lesson.desc}</div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'var(--ink-soft)', fontSize: 12, flexShrink: 0 }}>
+      <div className="lesson-meta" style={{ display: 'flex', alignItems: 'center', gap: 14, color: 'var(--ink-soft)', fontSize: 12, flexShrink: 0 }}>
         <span className="lesson-clock" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <Clock size={12} /> {lesson.duration}
         </span>
@@ -54,11 +54,11 @@ function LessonRow({
             when the XP actually pays out) — otherwise it's the amount on offer. */}
         {isDone ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--sage-deep)', fontWeight: 600 }}>
-            <Zap size={12} color="var(--sage-deep)" fill="var(--sage-deep)" /> {lesson.xp} XP earned
+            <Zap size={12} color="var(--sage-deep)" fill="var(--sage-deep)" /> {lesson.xp} XP <span className="xp-word">earned</span>
           </span>
         ) : (
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Zap size={12} color="var(--brand)" /> {lesson.xp} XP available
+            <Zap size={12} color="var(--brand)" /> {lesson.xp} XP <span className="xp-word">available</span>
           </span>
         )}
         <ChevronRight size={16} />

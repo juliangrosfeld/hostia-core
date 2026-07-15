@@ -200,13 +200,13 @@ function ModuleCard({
           <p className="module-sub">{module.subtitle}</p>
         </div>
         {isCertification ? (
-          <div style={{ marginBottom: 6 }}>
+          <div className="module-badge-row" style={{ marginBottom: 6 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', color: '#B8860B', background: 'rgba(184,134,11,0.12)', borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
               🏆 Final Exam
             </span>
           </div>
         ) : hasRoleplay && (
-          <div style={{ marginBottom: 6 }}>
+          <div className="module-badge-row" style={{ marginBottom: 6 }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 600, letterSpacing: '0.06em', color: module.color, background: `${module.color}18`, borderRadius: 4, padding: '2px 7px', textTransform: 'uppercase' }}>
               ⚡ Live Roleplay
             </span>
@@ -214,12 +214,12 @@ function ModuleCard({
         )}
         {isCertification ? (
           isLocked ? (
-            <div style={{ fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div className="module-cert-note" style={{ fontSize: 12, color: 'var(--ink-soft)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Lock size={12} color="#B8860B" strokeWidth={2} />
               Complete every module above to unlock
             </div>
           ) : (
-            <div style={{ fontSize: 12.5, fontWeight: 700, color: '#B8860B', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div className="module-cert-note" style={{ fontSize: 12.5, fontWeight: 700, color: '#B8860B', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Play size={12} strokeWidth={2.5} />
               You&apos;re ready — start the exam
             </div>
