@@ -50,7 +50,13 @@ function StaffPageInner() {
   const trustMockStatus = Boolean(viewingAs) || property?.id === DEMO_PROPERTY_ID
   // Hero data — fetched here and gated below, so HomeView paints its real hero
   // copy + XP/streak on the first render (no mock-then-real flicker).
-  const { progress, loading: progressLoading } = useHomeProgress(viewingAs)
+  const { progress: rawProgress, loading: progressLoading } = useHomeProgress(viewingAs)
+  // The hero's moduleTitle/firstModuleTitle come from the raw catalog (e.g.
+  // "Welcome to [Property]") — substitute at this boundary like the curriculum.
+  const progress = useMemo(
+    () => (rawProgress ? substitutePropertyDeep(rawProgress, propertyName) : rawProgress),
+    [rawProgress, propertyName],
+  )
   const { totalXp: earnedXp, streak, loading: xpLoading } = useStaffXPAndStreak(viewingAs)
   const [view, setView] = useState<StaffView>('home')
   const [activeModule, setActiveModule] = useState<Module | null>(null)

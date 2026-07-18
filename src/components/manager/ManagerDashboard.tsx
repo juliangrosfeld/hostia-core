@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Activity, Users, GraduationCap, Award,
   TrendingUp, TrendingDown, AlertTriangle, Star, AlertCircle,
@@ -16,6 +16,7 @@ import {
   type StaffMember,
 } from '@/lib/staff-data';
 import { useUser } from '@/lib/useUser';
+import { substitutePropertyDeep } from '@/lib/substitute-property';
 
 import KpiCard, { Sparkline } from './KpiCard';
 import InsightCard from './InsightCard';
@@ -500,7 +501,15 @@ export default function ManagerDashboard({ onOpenStaff }: ManagerDashboardProps)
   //                the demo path is only ever entered on the server's say-so
   //                (data.isDemo), so a real manager can't be shown fake staff.
   const [status, setStatus] = useState<'loading' | 'demo' | 'real' | 'error'>('loading');
-  const [realData, setRealData] = useState<DashboardData | null>(null);
+  const [rawRealData, setRealData] = useState<DashboardData | null>(null);
+  // Curriculum-derived strings in the payload (skill-gap module titles, insight
+  // copy) are authored against the "[Property]" placeholder. Substituted here
+  // rather than at fetch time so the swap still happens when the property name
+  // loads after the dashboard response.
+  const realData = useMemo(
+    () => (rawRealData ? substitutePropertyDeep(rawRealData, property?.name ?? null) : null),
+    [rawRealData, property],
+  );
 
   // Selected phase filter (phase_id) — null = all phases. Pure client state:
   // the response already carries every phase's metrics block, so switching is
