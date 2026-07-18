@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Check, AlertCircle, Upload, Loader2 } from 'lucide-react'
+import { ArrowLeft, Check, AlertCircle, Upload, Loader2, FileText } from 'lucide-react'
 
 const VENUE_TYPES = [
   { value: 'casual-dining', label: 'Casual Dining' },
@@ -41,6 +41,8 @@ export default function NewClientPage() {
   const [primaryColor, setPrimaryColor] = useState('#051956')
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [menuUrl, setMenuUrl] = useState<string | null>(null)
+  const [menuUploading, setMenuUploading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -67,6 +69,29 @@ export default function NewClientPage() {
     }
   }
 
+  async function handleMenuUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file
+    if (!file) return
+    setMenuUploading(true)
+    setError(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/admin/upload-menu', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok || !data.url) {
+        setError(data.error || 'Failed to upload menu')
+      } else {
+        setMenuUrl(data.url)
+      }
+    } catch {
+      setError('Network error — please try again')
+    } finally {
+      setMenuUploading(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim() || submitting) return
@@ -82,6 +107,7 @@ export default function NewClientPage() {
           venue_type: venueType,
           primary_color: primaryColor,
           logo_url: logoUrl,
+          menu_pdf_url: menuUrl,
         }),
       })
       const data = await res.json()
@@ -237,6 +263,51 @@ export default function NewClientPage() {
                 style={{ display: 'none' }}
               />
             </label>
+          </div>
+        </div>
+
+        <div>
+          <label style={labelStyle}>Menu</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div
+              style={{
+                width: 56, height: 56, borderRadius: 12, flexShrink: 0,
+                border: '1px solid var(--sand-deeper)',
+                background: 'var(--sand-warm)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <FileText size={18} color={menuUrl ? 'var(--brand)' : 'var(--ink-soft)'} />
+            </div>
+            <label
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '10px 16px', borderRadius: 10,
+                border: '1px solid var(--sand-deeper)', background: 'white',
+                fontSize: 13.5, fontWeight: 700, color: 'var(--ink)',
+                cursor: menuUploading ? 'default' : 'pointer',
+              }}
+            >
+              {menuUploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+              {menuUploading ? 'Uploading…' : menuUrl ? 'Replace menu' : 'Upload menu (PDF or image)'}
+              <input
+                type="file"
+                accept="application/pdf,image/png,image/jpeg,image/webp"
+                onChange={handleMenuUpload}
+                disabled={menuUploading}
+                style={{ display: 'none' }}
+              />
+            </label>
+            {menuUrl && (
+              <a
+                href={menuUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', textDecoration: 'none' }}
+              >
+                View
+              </a>
+            )}
           </div>
         </div>
 

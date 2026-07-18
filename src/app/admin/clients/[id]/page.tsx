@@ -6,6 +6,7 @@ import Link from 'next/link'
 import {
   ArrowLeft, Check, AlertCircle, Save, Plus, Trash2, Loader2,
   UserPlus, Copy, Mail, X, Upload, ChevronDown, ChevronRight, Trophy,
+  FileText,
 } from 'lucide-react'
 import { CURRICULUM, type Phase } from '@/lib/curriculum'
 
@@ -27,6 +28,7 @@ interface Property {
   venue_type: string | null
   primary_color: string | null
   logo_url: string | null
+  menu_pdf_url: string | null
 }
 interface PropertyModule {
   module_id: string
@@ -393,6 +395,7 @@ export default function ClientDetailPage() {
   // Per-area status messages.
   const [detailsMsg, setDetailsMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
   const [logoUploading, setLogoUploading] = useState(false)
+  const [menuUploading, setMenuUploading] = useState(false)
   const [moduleBusy, setModuleBusy] = useState<string | null>(null)
   const [overridesSaving, setOverridesSaving] = useState(false)
   const [overridesMsg, setOverridesMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
@@ -662,6 +665,32 @@ export default function ClientDetailPage() {
     }
   }
 
+  // Upload a menu file (PDF or image), then persist its public URL onto the
+  // property via the same PATCH path as the other editable fields.
+  async function handleMenuUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file
+    if (!file || !property) return
+    setMenuUploading(true)
+    setDetailsMsg(null)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('propertyId', property.id)
+      const res = await fetch('/api/admin/upload-menu', { method: 'POST', body: fd })
+      const data = await res.json()
+      if (!res.ok || !data.url) {
+        setDetailsMsg({ tone: 'err', text: data.error || 'Failed to upload menu' })
+      } else {
+        await patchField('menu_pdf_url', data.url)
+      }
+    } catch {
+      setDetailsMsg({ tone: 'err', text: 'Network error' })
+    } finally {
+      setMenuUploading(false)
+    }
+  }
+
   // ── Module assign / unassign ──────────────────────────────────
   async function toggleModule(moduleId: string) {
     const isAssigned = assigned.has(moduleId)
@@ -856,6 +885,13 @@ export default function ClientDetailPage() {
               label: 'Upload the client logo',
               done: Boolean(property.logo_url),
               hint: 'Shown across the staff app and manager dashboard.',
+              target: 'section-details',
+            },
+            {
+              key: 'menu',
+              label: 'Upload the menu',
+              done: Boolean(property.menu_pdf_url),
+              hint: 'Shown to staff inside the "Our Menu" onboarding lesson.',
               target: 'section-details',
             },
             {
@@ -1073,6 +1109,64 @@ export default function ClientDetailPage() {
                   >
                     <Trash2 size={14} /> Remove
                   </button>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Menu</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div
+                  style={{
+                    width: 56, height: 56, borderRadius: 12, flexShrink: 0,
+                    border: '1px solid var(--sand-deeper)',
+                    background: 'var(--sand-warm)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <FileText size={18} color={property.menu_pdf_url ? 'var(--brand)' : 'var(--ink-soft)'} />
+                </div>
+                <label
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '10px 16px', borderRadius: 10,
+                    border: '1px solid var(--sand-deeper)', background: 'white',
+                    fontSize: 13.5, fontWeight: 700, color: 'var(--ink)',
+                    cursor: menuUploading ? 'default' : 'pointer',
+                  }}
+                >
+                  {menuUploading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
+                  {menuUploading ? 'Uploading…' : property.menu_pdf_url ? 'Replace menu' : 'Upload menu (PDF or image)'}
+                  <input
+                    type="file"
+                    accept="application/pdf,image/png,image/jpeg,image/webp"
+                    onChange={handleMenuUpload}
+                    disabled={menuUploading}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                {property.menu_pdf_url && (
+                  <>
+                    <a
+                      href={property.menu_pdf_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', textDecoration: 'none' }}
+                    >
+                      View
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => patchField('menu_pdf_url', '')}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        padding: '10px 12px', borderRadius: 10, border: '1px solid var(--sand-deeper)',
+                        background: 'white', fontSize: 13, fontWeight: 600, color: 'var(--ink-soft)', cursor: 'pointer',
+                      }}
+                    >
+                      <Trash2 size={14} /> Remove
+                    </button>
+                  </>
                 )}
               </div>
             </div>

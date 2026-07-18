@@ -72,14 +72,14 @@ export async function POST(request: NextRequest) {
   const gate = await requireAdmin()
   if (gate.error) return gate.error
 
-  let body: { name?: unknown; venue_type?: unknown; primary_color?: unknown; logo_url?: unknown }
+  let body: { name?: unknown; venue_type?: unknown; primary_color?: unknown; logo_url?: unknown; menu_pdf_url?: unknown }
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 })
   }
 
-  const { name, venue_type, primary_color, logo_url } = body
+  const { name, venue_type, primary_color, logo_url, menu_pdf_url } = body
 
   if (typeof name !== 'string' || !name.trim()) {
     return NextResponse.json({ error: 'Property name is required' }, { status: 400 })
@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
       venue_type: typeof venue_type === 'string' && venue_type ? venue_type : null,
       primary_color: typeof primary_color === 'string' && primary_color ? primary_color : '#051956',
       logo_url: typeof logo_url === 'string' && logo_url ? logo_url : null,
+      menu_pdf_url: typeof menu_pdf_url === 'string' && menu_pdf_url ? menu_pdf_url : null,
     })
     .select()
     .single()
