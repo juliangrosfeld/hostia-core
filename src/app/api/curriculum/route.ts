@@ -98,7 +98,7 @@ export async function GET() {
   const moduleIds = modules.map((m) => m.id);
 
   // This staff member's real completion data + the phases for their track.
-  const [completionRes, phaseCompletionRes, phasesRes] = await Promise.all([
+  const [completionRes, phaseCompletionRes, phasesRes, unlockRes] = await Promise.all([
     supabase
       .from('lesson_completions')
       .select('module_id, lesson_id, phase')
@@ -115,7 +115,31 @@ export async function GET() {
           .eq('track', track)
           .order('phase_number', { ascending: true })
       : Promise.resolve({ data: [] as Phase[] }),
+    // Admin-forced early unlocks for this property (property_overrides key
+    // 'unlocked_modules': a JSON array of module ids).
+    admin
+      .from('property_overrides')
+      .select('value')
+      .eq('property_id', propertyId)
+      .eq('key', 'unlocked_modules')
+      .maybeSingle(),
   ]);
+
+  // The override is ADDITIVE only: a module is unlocked when the sequential
+  // walk below unlocks it OR the admin force-unlocked it. It never locks
+  // anything, never reorders anything, and never changes which module is
+  // "current" (the Continue CTA still targets the first incomplete module).
+  // No override row (or a malformed value) → empty set → locking behaves
+  // exactly as before.
+  let forceUnlocked = new Set<string>();
+  try {
+    const parsed: unknown = JSON.parse(unlockRes?.data?.value ?? '[]');
+    if (Array.isArray(parsed)) {
+      forceUnlocked = new Set(parsed.filter((v): v is string => typeof v === 'string'));
+    }
+  } catch {
+    // Malformed override value — treat as no forced unlocks.
+  }
 
   // FULLY completed lesson ids per module → real completedLessons count
   // (shared model — the same math every other progress reader uses). A lesson
@@ -164,7 +188,8 @@ export async function GET() {
         phase_id: moduleMetaMap.get(m.id)?.phase_id,
         order_in_phase: moduleMetaMap.get(m.id)?.order_in_phase,
         completedLessons: completedCount(m, doneByModule),
-        locked,
+        // Applied after (never inside) the sequential walk — see forceUnlocked.
+        locked: locked && !forceUnlocked.has(m.id),
       };
     });
 

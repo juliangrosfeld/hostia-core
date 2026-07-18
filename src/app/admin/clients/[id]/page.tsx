@@ -6,7 +6,7 @@ import Link from 'next/link'
 import {
   ArrowLeft, Check, AlertCircle, Save, Plus, Trash2, Loader2,
   UserPlus, Copy, Mail, X, Upload, ChevronDown, ChevronRight, Trophy,
-  FileText,
+  FileText, Lock, Unlock,
 } from 'lucide-react'
 import { CURRICULUM, type Phase } from '@/lib/curriculum'
 
@@ -18,6 +18,11 @@ const VENUE_TYPES = [
 
 // Overrides we always surface in the editor, even before they're set.
 const DEFAULT_OVERRIDE_KEYS = ['property_name', 'scenario_context', 'manager_name']
+
+// Managed by the Module Library's per-module unlock toggle, never by the raw
+// overrides editor — a JSON array of module ids the staff app treats as
+// unlocked regardless of sequential order (additive: it can only unlock).
+const UNLOCKED_MODULES_KEY = 'unlocked_modules'
 
 // scenario_context gets a multiline textarea — it's the AI roleplay context.
 const TEXTAREA_KEYS = new Set(['scenario_context'])
@@ -397,6 +402,8 @@ export default function ClientDetailPage() {
   const [logoUploading, setLogoUploading] = useState(false)
   const [menuUploading, setMenuUploading] = useState(false)
   const [moduleBusy, setModuleBusy] = useState<string | null>(null)
+  const [unlockedModules, setUnlockedModules] = useState<Set<string>>(new Set())
+  const [unlockBusy, setUnlockBusy] = useState<string | null>(null)
   const [overridesSaving, setOverridesSaving] = useState(false)
   const [overridesMsg, setOverridesMsg] = useState<{ tone: 'ok' | 'err'; text: string } | null>(null)
 
@@ -438,11 +445,26 @@ export default function ClientDetailPage() {
         setAssigned(new Set((data.propertyModules ?? []).map((m: PropertyModule) => m.module_id)))
         setStaffCount(typeof data.staffCount === 'number' ? data.staffCount : 0)
 
-        // Merge stored overrides with the default keys so they always appear.
-        const stored: Override[] = (data.propertyOverrides ?? []).map((o: Override) => ({
+        // The unlocked-modules override is owned by the Module Library toggle;
+        // pull it out before the raw overrides editor ever sees it.
+        const allStored: Override[] = (data.propertyOverrides ?? []).map((o: Override) => ({
           key: o.key,
           value: o.value,
         }))
+        const unlockRow = allStored.find((o) => o.key === UNLOCKED_MODULES_KEY)
+        if (unlockRow) {
+          try {
+            const parsed: unknown = JSON.parse(unlockRow.value)
+            if (Array.isArray(parsed)) {
+              setUnlockedModules(new Set(parsed.filter((v): v is string => typeof v === 'string')))
+            }
+          } catch {
+            // Malformed value — leave the set empty; the next toggle rewrites it.
+          }
+        }
+
+        // Merge stored overrides with the default keys so they always appear.
+        const stored = allStored.filter((o) => o.key !== UNLOCKED_MODULES_KEY)
         const storedKeys = new Set(stored.map((o) => o.key))
         const merged = [...stored]
         for (const key of DEFAULT_OVERRIDE_KEYS) {
@@ -688,6 +710,32 @@ export default function ClientDetailPage() {
       setDetailsMsg({ tone: 'err', text: 'Network error' })
     } finally {
       setMenuUploading(false)
+    }
+  }
+
+  // ── Early-unlock override ─────────────────────────────────────
+  // Toggles a module in the property's unlocked_modules override. The staff
+  // curriculum API applies it ON TOP of sequential locking (it can only ever
+  // unlock, never lock) — the sequential mechanism itself is untouched.
+  async function toggleUnlockEarly(moduleId: string) {
+    if (unlockBusy) return
+    const next = new Set(unlockedModules)
+    if (next.has(moduleId)) next.delete(moduleId)
+    else next.add(moduleId)
+    setUnlockBusy(moduleId)
+    try {
+      const res = await fetch(`/api/admin/properties/${propertyId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          overrides: [{ key: UNLOCKED_MODULES_KEY, value: JSON.stringify([...next].sort()) }],
+        }),
+      })
+      if (res.ok) setUnlockedModules(next)
+    } catch {
+      // Network error — state stays as it was; the toggle can be retried.
+    } finally {
+      setUnlockBusy(null)
     }
   }
 
@@ -1380,6 +1428,51 @@ export default function ClientDetailPage() {
                   <span style={{ fontSize: 11, color: 'var(--ink-soft)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                     {m.totalLessons} lessons
                   </span>
+                  {isAssigned && hasTrack && (() => {
+                    const isUnlocked = unlockedModules.has(m.id)
+                    const unlockingBusy = unlockBusy === m.id
+                    return (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        title={
+                          isUnlocked
+                            ? 'Unlocked early for staff — click to restore sequential locking'
+                            : 'Follows sequential order — click to unlock early for staff'
+                        }
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (!unlockingBusy) toggleUnlockEarly(m.id)
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            if (!unlockingBusy) toggleUnlockEarly(m.id)
+                          }
+                        }}
+                        style={{
+                          flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5,
+                          padding: '5px 10px', borderRadius: 999,
+                          border: isUnlocked ? '1px solid rgba(94,139,126,0.5)' : '1px solid var(--sand-deeper)',
+                          background: isUnlocked ? 'rgba(94,139,126,0.12)' : 'white',
+                          color: isUnlocked ? 'var(--sage-deep)' : 'var(--ink-soft)',
+                          fontSize: 11, fontWeight: 700,
+                          cursor: unlockingBusy ? 'default' : 'pointer',
+                          opacity: unlockingBusy ? 0.6 : 1,
+                        }}
+                      >
+                        {unlockingBusy ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : isUnlocked ? (
+                          <Unlock size={12} />
+                        ) : (
+                          <Lock size={12} />
+                        )}
+                        {isUnlocked ? 'Unlocked early' : 'Sequential'}
+                      </span>
+                    )
+                  })()}
                 </button>
               )
             }
