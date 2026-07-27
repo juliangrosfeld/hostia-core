@@ -3,8 +3,11 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { CURRICULUM, resolveCurriculum, type Module } from '@/lib/curriculum';
-import { activityDayIndex, computeStreak } from '@/lib/streak';
-import { computeTotalXp, fullyDoneByModule, type CompletionPhaseRow, type SessionXpRow } from '@/lib/progress-model';
+import { activityDayIndex, computeStreak, dayIndexOf } from '@/lib/streak';
+import {
+  computeTotalXp, fullCompletionTimes, fullyDoneByModule,
+  type CompletionPhaseRow, type SessionXpRow,
+} from '@/lib/progress-model';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -38,9 +41,11 @@ interface StaffSkills {
   greetings: number; serviceFlow: number; language: number; complaints: number;
   floor: number; guestPsychology: number; casualDiningFloor: number;
 }
-// NOTE: users.xp / users.streak_days are dead columns (never written). XP and
-// streaks are COMPUTED from roleplay_sessions + lesson_completions below — the
-// same source /api/staff/xp-streak uses, so staff hero and roster always agree.
+// NOTE: users.xp / users.streak_days are dead columns (never written). XP is
+// COMPUTED from roleplay_sessions + lesson_completions below; streaks from
+// lesson_completions + phase_completions (roleplay alone earns no streak day —
+// see lib/streak.ts). Both use the same sources /api/staff/xp-streak does, so
+// staff hero and roster always agree.
 interface StaffRow { id: string; full_name: string | null; last_active: string | null; }
 interface SessionRow extends SessionXpRow { staff_id: string; warmth_score: number; completed_at: string; }
 interface CompletionRow extends CompletionPhaseRow { staff_id: string; completed_at: string; }
@@ -130,11 +135,13 @@ export async function GET() {
   const d30 = now - 30 * DAY;
   const d60 = now - 60 * DAY;
 
-  // 4. Fetch in parallel. users / roleplay_sessions / lesson_completions go
-  //    through the authenticated client so RLS is the security boundary AND every
-  //    query is also explicitly scoped to property_id (defense in depth). Only
-  //    property_modules (non-sensitive config) is read with the admin client,
-  //    mirroring /api/curriculum, because its RLS is closed to non-owners.
+  // 4. Fetch in parallel. The per-staff activity tables — users,
+  //    roleplay_sessions, lesson_completions and phase_completions — go through
+  //    the authenticated client so RLS is the security boundary AND every query
+  //    is also explicitly scoped to property_id (defense in depth). Only the
+  //    non-sensitive catalog/config reads (properties.venue_type,
+  //    property_modules, phases) use the admin client, mirroring /api/curriculum,
+  //    because their RLS is closed to non-owners.
   const admin = createAdminClient();
 
   // Property track (venue_type → track 1:1) drives the phase set.
@@ -176,7 +183,7 @@ export async function GET() {
       : Promise.resolve({ data: [] as { id: string; phase_number: number; title: string }[], error: null }),
     supabase
       .from('phase_completions')
-      .select('staff_id, phase_id')
+      .select('staff_id, phase_id, completed_at')
       .eq('property_id', propertyId)
       .limit(20_000),
   ]);
@@ -236,32 +243,35 @@ export async function GET() {
   for (const s of allStaff) {
     fullyDoneByModuleByStaff.set(s.id, fullyDoneByModule(completionsByStaff.get(s.id) ?? [], modules));
   }
-  // Required phases per catalog lesson, for pinning a full completion in time.
-  const requiredPhasesByLesson = new Map<string, string[]>();
-  for (const m of modules) {
-    for (const l of m.lessons) {
-      requiredPhasesByLesson.set(
-        `${m.id}::${l.id}`,
-        l.scenarioId ? ['learn', 'practice', 'apply'] : ['learn', 'practice'],
-      );
-    }
+  // WHEN each of those lessons was completed (shared lib/progress-model.ts
+  // derivation) — feeds both the streaks below and the weekly-lessons KPI, so
+  // the two can never disagree about which day a lesson was finished on.
+  const completionTimesByStaff = new Map<string, number[]>();
+  for (const s of allStaff) {
+    completionTimesByStaff.set(s.id, fullCompletionTimes(completionsByStaff.get(s.id) ?? [], modules));
   }
 
   // ── Streaks ────────────────────────────────────────────────────────────────
-  // Per-staff activity day-sets (roleplays + lesson completions) → streaks via
-  // the shared lib/streak.ts math (same definition as the staff hero). Built
-  // from the UNfiltered activity so a phase filter never shortens a streak.
-  const activeDaysByStaff = new Map<string, Set<number>>();
-  const addActiveDay = (staffId: string, iso: string | null) => {
-    if (!iso) return;
-    const set = activeDaysByStaff.get(staffId) ?? new Set<number>();
-    set.add(activityDayIndex(iso));
-    activeDaysByStaff.set(staffId, set);
+  // Per-staff EARNED day-sets → streaks via the shared lib/streak.ts math
+  // (identical rule and inputs to the staff hero, /api/staff/xp-streak): a day
+  // is earned by a NEW lesson reaching full completion, or by a passed phase
+  // exam. Roleplay activity on its own earns nothing, so allSessions is
+  // deliberately NOT an input here. Built from the UNfiltered activity so a
+  // phase filter never shortens a streak.
+  const earnedDaysByStaff = new Map<string, Set<number>>();
+  const addEarnedDay = (staffId: string, day: number) => {
+    const set = earnedDaysByStaff.get(staffId) ?? new Set<number>();
+    set.add(day);
+    earnedDaysByStaff.set(staffId, set);
   };
-  for (const s of allSessions) addActiveDay(s.staff_id, s.completed_at);
-  for (const c of allCompletions) addActiveDay(c.staff_id, c.completed_at);
+  for (const [staffId, times] of completionTimesByStaff) {
+    for (const t of times) addEarnedDay(staffId, dayIndexOf(t));
+  }
+  for (const pc of (phaseCompletionRes.data ?? []) as { staff_id: string; completed_at: string | null }[]) {
+    if (pc.completed_at) addEarnedDay(pc.staff_id, activityDayIndex(pc.completed_at));
+  }
   const streakOf = (staffId: string): number =>
-    computeStreak(activeDaysByStaff.get(staffId) ?? new Set<number>());
+    computeStreak(earnedDaysByStaff.get(staffId) ?? new Set<number>());
 
   // ── Phase placement ───────────────────────────────────────────────────────
   // A staff member's CURRENT phase = the lowest-numbered phase they haven't yet
@@ -339,32 +349,15 @@ export async function GET() {
 
   // ── 8–10. Lessons completed this week vs last week ─────────────────────────
   // A lesson counts as completed when its LAST required phase lands (full
-  // completion — the same lib/progress-model.ts definition the staff view and
-  // roster use), so a failed roleplay never books a "lesson" here. Per lesson,
-  // the completion moment = the latest of the required phases' earliest rows.
-  const firstPhaseAt = new Map<string, number>(); // `${staff}|${module}|${lesson}|${phase}` → earliest ts
-  for (const c of completions) {
-    const key = `${c.staff_id}|${c.module_id}|${c.lesson_id}|${c.phase}`;
-    const t = ts(c.completed_at);
-    const prev = firstPhaseAt.get(key);
-    if (prev === undefined || t < prev) firstPhaseAt.set(key, t);
-  }
+  // completion — the same lib/progress-model.ts definition the staff view,
+  // roster and streaks use), so a failed roleplay never books a "lesson" here.
+  // completionTimesByStaff above is that derivation, shared with the streaks.
   let lessonsThisWeek = 0;
   let lessonsLastWeek = 0;
   for (const staffId of staffIds) {
-    const done = fullyDoneByModuleByStaff.get(staffId);
-    if (!done) continue;
-    for (const [moduleId, lessonIds] of done) {
-      for (const lessonId of lessonIds) {
-        const phases = requiredPhasesByLesson.get(`${moduleId}::${lessonId}`) ?? [];
-        let completedAt = 0;
-        for (const ph of phases) {
-          const t = firstPhaseAt.get(`${staffId}|${moduleId}|${lessonId}|${ph}`);
-          if (t !== undefined && t > completedAt) completedAt = t;
-        }
-        if (completedAt >= d7) lessonsThisWeek++;
-        else if (completedAt >= d14) lessonsLastWeek++;
-      }
+    for (const completedAt of completionTimesByStaff.get(staffId) ?? []) {
+      if (completedAt >= d7) lessonsThisWeek++;
+      else if (completedAt >= d14) lessonsLastWeek++;
     }
   }
   let deltaPercent: number | null;

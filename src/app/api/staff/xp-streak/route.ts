@@ -2,9 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
-import { activityDayIndex, computeStreak } from '@/lib/streak';
+import { activityDayIndex, computeStreak, dayIndexOf } from '@/lib/streak';
 import { resolveCurriculum } from '@/lib/curriculum';
-import { computeTotalXp } from '@/lib/progress-model';
+import { computeTotalXp, fullCompletionTimes } from '@/lib/progress-model';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,10 +22,12 @@ export const dynamic = 'force-dynamic';
 // dashboard deliberately excludes manager activity from all staff-facing
 // aggregates — the two pools never mix.
 //
-// Streak = number of consecutive calendar days (UTC) with at least one completion,
-// counting backward from today across BOTH lesson_completions and roleplay_sessions.
-// A day with no activity *yet today* does not break the streak as long as yesterday
-// had activity — only a fully missed day breaks it.
+// Streak = consecutive property-local calendar days that were EARNED, counting
+// backward from today. A day is earned by completing a NEW lesson (a lesson
+// reaching FULL completion that day) or by passing a phase exam. Repeats and
+// roleplay-only activity earn nothing — see lib/streak.ts for the full rule and
+// why roleplay_sessions is not a streak input. A day with nothing *yet today*
+// does not break the streak as long as yesterday was earned.
 //
 // Demo property short-circuits with { isDemo: true } so the client keeps its mock
 // values (mirrors /api/staff/home-progress).
@@ -56,7 +58,7 @@ export async function GET() {
   // resolve lesson XP amounts) is read with the admin client, mirroring
   // /api/curriculum.
   const admin = createAdminClient();
-  const [sessionRes, completionRes, moduleRes] = await Promise.all([
+  const [sessionRes, completionRes, moduleRes, phaseCompletionRes] = await Promise.all([
     supabase
       .from('roleplay_sessions')
       .select('module_id, lesson_id, warmth_score, xp_earned, passed, completed_at')
@@ -72,27 +74,31 @@ export async function GET() {
       .select('module_id, order_index, is_active')
       .eq('property_id', profile.property_id)
       .order('order_index'),
+    // Passed phase exams earn a streak day too — an exam day is real training
+    // effort, and it writes no lesson_completions row of its own.
+    supabase
+      .from('phase_completions')
+      .select('completed_at')
+      .eq('staff_id', profile.id),
   ]);
 
   const sessions = sessionRes.data ?? [];
   const completions = completionRes.data ?? [];
+  const modules = resolveCurriculum(moduleRes.data);
 
   // Total XP — roleplay + lesson XP via the shared model.
-  const { totalXp } = computeTotalXp({
-    sessions,
-    completions,
-    modules: resolveCurriculum(moduleRes.data),
-  });
+  const { totalXp } = computeTotalXp({ sessions, completions, modules });
 
-  // Streak — set of day-indices with any activity, walked backward from today.
-  // Shared math with the manager dashboard roster (lib/streak.ts).
-  const activeDays = new Set<number>();
-  for (const s of sessions) {
-    if (s.completed_at) activeDays.add(activityDayIndex(s.completed_at));
-  }
-  for (const c of completions) {
-    if (c.completed_at) activeDays.add(activityDayIndex(c.completed_at));
+  // Streak — set of EARNED day-indices, walked backward from today. Same
+  // day-set construction as the manager dashboard roster, over the same shared
+  // derivations (fullCompletionTimes + lib/streak.ts), so hero and roster can
+  // never disagree. Note roleplay_sessions is used for XP above but is NOT a
+  // streak input.
+  const earnedDays = new Set<number>();
+  for (const t of fullCompletionTimes(completions, modules)) earnedDays.add(dayIndexOf(t));
+  for (const p of phaseCompletionRes.data ?? []) {
+    if (p.completed_at) earnedDays.add(activityDayIndex(p.completed_at));
   }
 
-  return NextResponse.json({ isDemo: false, totalXp, streak: computeStreak(activeDays) });
+  return NextResponse.json({ isDemo: false, totalXp, streak: computeStreak(earnedDays) });
 }

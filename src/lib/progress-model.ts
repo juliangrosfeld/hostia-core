@@ -56,6 +56,11 @@ export interface CompletionKeyRow {
 export interface CompletionPhaseRow extends CompletionKeyRow {
   phase: string;
 }
+// Completion rows with their timestamp, for readers that need to pin a full
+// completion in time (streaks, the weekly-lessons KPI).
+export interface CompletionTimeRow extends CompletionPhaseRow {
+  completed_at: string | null;
+}
 export interface ModulePhaseRow {
   module_id: string;
   phase_id: string;
@@ -118,6 +123,53 @@ export function fullyDoneByModule(
     }
   }
   return done;
+}
+
+// WHEN each fully completed lesson was completed, as epoch-ms, for one staff
+// member. A lesson's completion moment is the timestamp of its LAST required
+// phase, with each phase pinned to its EARLIEST row — so the moment marks when
+// the lesson actually became complete, and re-doing a phase can never move it.
+// (Repeats can't move it anyway: lesson_completions is UNIQUE per
+// (staff, lesson, phase) and the write path upserts with ignoreDuplicates, so
+// a repeat writes no row at all.)
+//
+// This is the ONE derivation for "a lesson was completed on day X" — the streak
+// day-set and the manager dashboard's weekly-lessons KPI both read it, so a
+// lesson can never count as this-week's progress for one and not the other.
+// Returns one entry per fully completed lesson, unordered.
+export function fullCompletionTimes(
+  completions: CompletionTimeRow[],
+  modules: Module[],
+): number[] {
+  // Earliest timestamp per (lesson, phase).
+  const firstPhaseAt = new Map<string, number>();
+  for (const c of completions) {
+    if (!c.completed_at) continue;
+    const key = `${lessonKey(c.module_id, c.lesson_id)}::${c.phase}`;
+    const t = Date.parse(c.completed_at);
+    if (Number.isNaN(t)) continue;
+    const prev = firstPhaseAt.get(key);
+    if (prev === undefined || t < prev) firstPhaseAt.set(key, t);
+  }
+
+  // Walk the catalog, not the rows — same reason as everywhere else here:
+  // orphaned completions for removed lessons must never count.
+  const times: number[] = [];
+  for (const m of modules) {
+    if (m.id === CERT_MODULE_ID) continue;
+    for (const l of m.lessons) {
+      const required = l.scenarioId ? ['learn', 'practice', 'apply'] : ['learn', 'practice'];
+      let completedAt = 0;
+      let complete = true;
+      for (const ph of required) {
+        const t = firstPhaseAt.get(`${lessonKey(m.id, l.id)}::${ph}`);
+        if (t === undefined) { complete = false; break; }
+        if (t > completedAt) completedAt = t;
+      }
+      if (complete) times.push(completedAt);
+    }
+  }
+  return times;
 }
 
 // Total XP for one staff member. `modules` must be the property's resolved
