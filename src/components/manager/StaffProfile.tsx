@@ -20,7 +20,7 @@
 
 import { useEffect, useState } from 'react';
 import {
-  ChevronLeft, Check, Lock, MessageSquare, BookOpen, Eye, X,
+  ChevronLeft, Check, Lock, MessageSquare, X,
   Star, Flame, Award,
 } from 'lucide-react';
 import {
@@ -304,14 +304,13 @@ function TranscriptModal({ session, onClose }: { session: RoleplaySession; onClo
 interface StaffProfileProps {
   staff: StaffMember;
   onBack: () => void;
-  onViewAs?: (s: StaffMember) => void;
   propertyName?: string | null;
   // True on real properties → fetch this staff member's actual module
   // progress and sessions. False/omitted → demo mock derivation.
   live?: boolean;
 }
 
-export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName, live = false }: StaffProfileProps) {
+export default function StaffProfile({ staff: s, onBack, propertyName, live = false }: StaffProfileProps) {
   const [openSession, setOpenSession] = useState<RoleplaySession | null>(null);
   const [note, setNote] = useState('');
 
@@ -412,21 +411,6 @@ export default function StaffProfile({ staff: s, onBack, onViewAs, propertyName,
                   <Award size={12} color="var(--sage-deep)" /> {s.badges} badges
                 </span>
               </div>
-            </div>
-
-            {/* Actions */}
-            <div className="staff-hero-actions" style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
-              {onViewAs && (
-                <button className="btn-brand-sm" onClick={() => onViewAs(s)}>
-                  <Eye size={13} /> View as {firstName}
-                </button>
-              )}
-              <button className="btn-ghost-sm" onClick={() => { /* TODO: messaging (live) */ }}>
-                <MessageSquare size={13} /> Send message
-              </button>
-              <button className="btn-ghost-sm" onClick={() => { /* TODO: module assignment (live) */ }}>
-                <BookOpen size={13} /> Assign module
-              </button>
             </div>
           </div>
 

@@ -1069,8 +1069,6 @@ button, a, [role="button"] { touch-action: manipulation; }
   /* ─ Staff detail ─ */
   .staff-hero { padding: 20px; border-radius: 16px; }
   .staff-hero-inner { flex-direction: column !important; gap: 16px !important; }
-  .staff-hero-actions { width: 100% !important; flex-direction: row !important; flex-wrap: wrap !important; }
-  .staff-hero-actions button, .staff-hero-actions a { flex: 1; justify-content: center; min-width: 100px; }
   .detail-grid { grid-template-columns: 1fr; }
   .staff-stats { flex-wrap: wrap; gap: 16px; padding-top: 16px; margin-top: 16px; }
   .div-vert { display: none; }

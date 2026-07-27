@@ -41,10 +41,6 @@ export default function ManagerPage() {
     setSelectedStaff(null);
   };
 
-  const viewAsStaff = (s: StaffMember) => {
-    router.push(`/staff?as=${s.id}`);
-  };
-
   if (loading || !user || (user.role !== 'manager' && user.role !== 'admin')) {
     return (
       <div
@@ -75,7 +71,7 @@ export default function ManagerPage() {
       <TopNav user={navUser} property={navProperty} />
       {view === 'dashboard' && <ManagerDashboard onOpenStaff={openStaff} />}
       {view === 'staff-detail' && selectedStaff && (
-        <StaffProfile key={selectedStaff.id} staff={selectedStaff} onBack={goBack} onViewAs={viewAsStaff} propertyName={property?.name ?? null} live={selectedLive} />
+        <StaffProfile key={selectedStaff.id} staff={selectedStaff} onBack={goBack} propertyName={property?.name ?? null} live={selectedLive} />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, Flame, Trophy, Eye, MessageSquare, Target, Check, Lock } from 'lucide-react';
+import { ChevronLeft, Flame, Trophy, MessageSquare, Check, Lock } from 'lucide-react';
 import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
@@ -29,10 +29,9 @@ const STATUS_LABEL: Record<StaffMember['status'], string> = {
 interface StaffDetailProps {
   staff: StaffMember;
   onBack: () => void;
-  onViewAs: (s: StaffMember) => void;
 }
 
-export default function StaffDetail({ staff: s, onBack, onViewAs }: StaffDetailProps) {
+export default function StaffDetail({ staff: s, onBack }: StaffDetailProps) {
   const skillData = (Object.keys(SKILL_LABELS) as (keyof typeof SKILL_LABELS)[]).map((k) => ({
     skill: SKILL_LABELS[k],
     value: s.skills[k],
@@ -80,13 +79,6 @@ export default function StaffDetail({ staff: s, onBack, onViewAs }: StaffDetailP
                 <span className="chip"><Flame size={11} color="var(--brand)" /> {s.streak}-day streak</span>
                 <span className="chip"><Trophy size={11} color="#D4A574" /> {s.badges} badges</span>
               </div>
-            </div>
-            <div className="staff-hero-actions" style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
-              <button className="btn-brand-sm" onClick={() => onViewAs(s)}>
-                <Eye size={13} /> View as {s.name.split(' ')[0]}
-              </button>
-              <button className="btn-ghost-sm"><MessageSquare size={13} /> Send message</button>
-              <button className="btn-ghost-sm"><Target size={13} /> Assign module</button>
             </div>
           </div>
 
