@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { DEMO_PROPERTY_ID } from '@/lib/config';
 import { CURRICULUM, resolveCurriculum, type Module } from '@/lib/curriculum';
 import { activityDayIndex, computeStreak, dayIndexOf } from '@/lib/streak';
+import { LIMITS, enforceRateLimit, userSubject } from '@/lib/rate-limit';
 import {
   computeTotalXp, fullCompletionTimes, fullyDoneByModule,
   type CompletionPhaseRow, type SessionXpRow,
@@ -117,6 +118,12 @@ export async function GET() {
   if (profile.role !== 'manager' && profile.role !== 'admin') {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
   }
+
+  // 1b. Rate limit — this is the most expensive read in the app (up to 10k
+  // sessions + 20k completions per call), so cap how fast one account can
+  // re-run it. Well above what the UI issues: one call per load plus refreshes.
+  const limited = await enforceRateLimit(LIMITS.dashboardReadPerUser, userSubject(user.id));
+  if (limited) return limited;
 
   const propertyId = profile.property_id as string | null;
   if (!propertyId) {

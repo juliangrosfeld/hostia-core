@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { LIMITS, enforceRateLimit, ipSubject } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -26,6 +27,11 @@ async function findValidInvite(token: string) {
 // GET — validate a token and return what the accept page needs to render:
 // the invitee's name and the property they're being asked to manage.
 export async function GET(request: NextRequest) {
+  // Rate limit per IP — this route has no session to key on, and it is the one
+  // place an unauthenticated caller can drive service-role DB reads.
+  const limited = await enforceRateLimit(LIMITS.inviteLookupPerIp, ipSubject(request))
+  if (limited) return limited
+
   const token = request.nextUrl.searchParams.get('token')
   if (!token) {
     return NextResponse.json({ valid: false, error: 'Missing invite token' }, { status: 400 })
@@ -65,6 +71,11 @@ export async function GET(request: NextRequest) {
 //
 // On success the manager can sign in normally at /login.
 export async function POST(request: NextRequest) {
+  // Tighter than the GET: every call past the token check creates a Supabase
+  // auth user. Unauthenticated account creation gets the strictest limit here.
+  const limited = await enforceRateLimit(LIMITS.inviteAcceptPerIp, ipSubject(request))
+  if (limited) return limited
+
   let body: { token?: unknown; password?: unknown }
   try {
     body = await request.json()

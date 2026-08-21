@@ -6,6 +6,7 @@ import {
   fullyDoneByModule, isModuleComplete, orderedCurrentPhaseModules,
 } from '@/lib/progress-model';
 import { getExamConfig, gradeExam, type ExamAnswers } from '@/lib/exam';
+import { LIMITS, enforceRateLimit, userSubject } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,13 @@ export async function POST(request: Request) {
   if (!body.answers || typeof body.answers !== 'object') {
     return NextResponse.json({ error: 'Missing or invalid field: answers' }, { status: 400 });
   }
+
+  // Rate limit — grading happens server-side, so unlimited submissions would
+  // let a staffer converge on the answer key by resubmitting. Charged before
+  // the eligibility queries, and per user rather than per IP so one restaurant's
+  // shared connection can't throttle a whole team.
+  const limited = await enforceRateLimit(LIMITS.examSubmitPerUser, userSubject(user.id));
+  if (limited) return limited;
 
   const { data: profile } = await supabase
     .from('users')

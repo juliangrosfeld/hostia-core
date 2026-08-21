@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { LIMITS, enforceRateLimit, userSubject } from '@/lib/rate-limit'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -25,6 +26,11 @@ export async function POST(request: Request) {
   if (requester.role !== 'manager' && requester.role !== 'admin') {
     return NextResponse.json({ error: 'Not authorized' }, { status: 403 })
   }
+
+  // 2b. Rate limit — each call past here creates a Supabase auth user, so cap
+  // what a single compromised manager account can mass-create.
+  const limited = await enforceRateLimit(LIMITS.staffCreatePerUser, userSubject(authUser.id))
+  if (limited) return limited
 
   // 3. Parse and validate input
   let body: Record<string, unknown>

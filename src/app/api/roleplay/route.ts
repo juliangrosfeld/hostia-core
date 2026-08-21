@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { SCENARIOS } from '@/lib/scenarios';
 import { substituteProperty } from '@/lib/substitute-property';
 import { signTurnProof } from '@/lib/roleplay-proof';
+import { LIMITS, enforceRateLimit, enforceRateLimits, ipSubject, userSubject } from '@/lib/rate-limit';
 
 interface PropertyPromptConfig {
   scenarioContext: string | null;
@@ -43,37 +44,6 @@ async function getPropertyPromptConfig(propertyId: string | null): Promise<Prope
   }
 }
 
-// ── Rate limiter ─────────────────────────────────────────────────────────────
-// Per-instance, in-memory — a cheap first shield, not the security boundary.
-// The security boundary is the auth check below.
-const RATE_LIMIT = 30;
-const WINDOW_MS = 60_000;
-
-const rateLimitStore = new Map<string, { count: number; windowStart: number }>();
-
-function getIp(request: NextRequest): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('x-real-ip') ||
-    'unknown'
-  );
-}
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitStore.get(ip);
-
-  if (!entry || now - entry.windowStart > WINDOW_MS) {
-    rateLimitStore.set(ip, { count: 1, windowStart: now });
-    return false;
-  }
-
-  if (entry.count >= RATE_LIMIT) return true;
-
-  entry.count++;
-  return false;
-}
-
 // ── Input sanitization ───────────────────────────────────────────────────────
 function stripHtml(str: string): string {
   return str.replace(/<[^>]*>/g, '');
@@ -86,14 +56,10 @@ function stripHtml(str: string): string {
 // client-supplied prompt here — that turns the endpoint into a general-purpose
 // LLM proxy on our API key.
 export async function POST(request: NextRequest) {
-  // Rate limit check — cheap shield before any DB work.
-  const ip = getIp(request);
-  if (isRateLimited(ip)) {
-    return NextResponse.json(
-      { error: 'Too many requests. Please wait before trying again.' },
-      { status: 429, headers: { 'Retry-After': '60' } }
-    );
-  }
+  // Rate limit, layer 1 — per IP, charged BEFORE the session lookup so an
+  // unauthenticated flood cannot make us do auth work at this route's rate.
+  const ipLimited = await enforceRateLimit(LIMITS.roleplayTurnPerIp, ipSubject(request));
+  if (ipLimited) return ipLimited;
 
   // Auth — must be a signed-in user (any role; staff run roleplays, managers
   // and admins preview them).
@@ -102,6 +68,15 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // Rate limit, layer 2 — per USER, the identity that actually spends Anthropic
+  // credit. Per-minute stops a runaway client loop; per-day caps what a single
+  // compromised account can cost overnight while pacing itself under that.
+  const userLimited = await enforceRateLimits(
+    [LIMITS.roleplayTurnPerUser, LIMITS.roleplayTurnPerUserDaily],
+    userSubject(user.id),
+  );
+  if (userLimited) return userLimited;
 
   // Key guard
   const apiKey = process.env.ANTHROPIC_API_KEY;

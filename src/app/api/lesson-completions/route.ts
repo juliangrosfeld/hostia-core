@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { CURRICULUM } from '@/lib/curriculum';
 import { fullyDoneByModule } from '@/lib/progress-model';
+import { LIMITS, enforceRateLimit, userSubject } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -85,6 +86,11 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // 1b. Rate limit — these rows are the basis of XP and streaks, so cap the
+  // write rate per user.
+  const limited = await enforceRateLimit(LIMITS.lessonCompletionPerUser, userSubject(user.id));
+  if (limited) return limited;
 
   // 2. Parse + validate the body.
   let body: { module_id?: unknown; lesson_id?: unknown; phase?: unknown };

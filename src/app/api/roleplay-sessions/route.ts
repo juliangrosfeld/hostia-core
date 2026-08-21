@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { calculateRoleplayXP } from '@/lib/xp';
 import { gradeRoleplay, MAX_TURNS } from '@/lib/roleplay-grading';
 import { hashProofToken, verifyProofChain } from '@/lib/roleplay-proof';
+import { LIMITS, enforceRateLimit, userSubject } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -63,6 +64,11 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
+  // 1b. Rate limit — bounded by how fast roleplays can legitimately finish, so
+  // a client loop (or a script) can't flood the table with session rows.
+  const limited = await enforceRateLimit(LIMITS.roleplaySessionPerUser, userSubject(user.id));
+  if (limited) return limited;
 
   // 2. Parse + validate the body.
   let body: Record<string, unknown>;

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/supabase/requireAdmin'
+import { LIMITS, enforceRateLimit, userSubject } from '@/lib/rate-limit'
 import { DEMO_PROPERTY_ID } from '@/lib/config'
 
 export const runtime = 'nodejs'
@@ -36,6 +37,11 @@ interface PropertyRow {
 export async function GET() {
   const gate = await requireAdmin()
   if (gate.error) return gate.error
+
+  // Rate limit — this read scans every property's users, modules, lessons and
+  // roleplays, so cap how fast one account can re-run it.
+  const limited = await enforceRateLimit(LIMITS.dashboardReadPerUser, userSubject(gate.profile.id))
+  if (limited) return limited
 
   const admin = createAdminClient()
 

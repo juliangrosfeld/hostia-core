@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdmin } from '@/lib/supabase/requireAdmin'
+import { LIMITS, enforceRateLimit, userSubject } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -54,6 +55,10 @@ function sniffImageType(bytes: Uint8Array): string | null {
 export async function POST(request: NextRequest) {
   const gate = await requireAdmin()
   if (gate.error) return gate.error
+
+  // Admin-gated, but every upload consumes storage — cap the burst rate.
+  const limited = await enforceRateLimit(LIMITS.adminUploadPerUser, userSubject(gate.profile.id))
+  if (limited) return limited
 
   let form: FormData
   try {
