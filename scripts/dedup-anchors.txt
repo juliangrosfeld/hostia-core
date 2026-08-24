@@ -1,0 +1,92 @@
+A1|curriculum.ts|1|Every guest is acknowledged within 5 seconds of stepping through the door.
+A1|curriculum.ts|1|Greet every guest within 5 seconds. If you detect their language
+A1|curriculum.ts|1|Greet within 5 seconds of arrival. Confirm reservation.
+A1|curriculum.ts|1|desc: 'Immediate greeting within 5 seconds of arrival'
+A1|curriculum.ts|1|title: 'The 5-Second Rule'
+A1|curriculum.ts|1|What is the [Property] standard for greeting speed?
+A1|scenarios.ts|1|Greet the family within 5 seconds with genuine warmth
+A1|scenarios.ts|1|Greeting within 5 seconds (timer is 45 seconds
+A1|scenarios.ts|1|Greeting within 5 seconds (simulated by how quickly
+A1|exam.ts|3|'Reception — greet within 5 seconds',
+A2|curriculum.ts|1|do: '"Absolutely — my pleasure."'
+A2|curriculum.ts|1|"No problem" — Implies it could have been a problem. Choose "absolutely" or "my pleasure" instead.
+A2|curriculum.ts|1|"Of course" instead of "no problem."
+A2|curriculum.ts|1|do: '"Of course — right away."'
+A2|curriculum.ts|1|Replace "no problem" with "of course" until it is automatic.
+A2|curriculum.ts|1|A guest thanks you for handling a problem quickly. Which response is correct?
+A2|curriculum.ts|1|A guest thanks you and you want to respond well. What do you say?
+A3|curriculum.ts|1|Cards or wallet appearing on the table — they want the bill now; don't make them ask.
+A3|curriculum.ts|1|Present the bill warmly and with no pressure
+A3|curriculum.ts|1|anticipate the bill request and have it ready without being asked
+A3|curriculum.ts|1|Have the bill ready before they ask.
+A3|exam.ts|1|Cards and a wallet appear on the table. You…
+A3|exam.ts|1|Cards and a wallet land on the table. You…
+A4|scenarios.ts|0|Correct at [Property]: food from the right, drinks from the left.
+A4|curriculum.ts|1|Serve from the correct side (property standard).
+A4|curriculum.ts|1|Serve from the correct side. Never interrupt conversations.
+A4|curriculum.ts|1|Serve from the left. Clear from the right. Pour from the right.
+A4|curriculum.ts|1|From which side do you place plated food, and from which side do you clear?
+A4|exam.ts|1|'The right, because the glasses sit to the upper right'
+A4|exam.ts|1|'Left, and cleared from the right'
+A4|scenarios.ts|1|- Serve from the left, clear from the right, pour from the right
+A5|curriculum.ts|1|title: 'Standard cover setup'
+A5|curriculum.ts|1|title: 'Setting a cover, piece by piece'
+A5|curriculum.ts|1|On the plate or to the left of the fork.
+A5|curriculum.ts|1|Tines up, handle parallel to the knife.
+A6|curriculum.ts|1|title: 'Natural upselling moments', items: [
+A6|curriculum.ts|1|When should you offer dessert or digestifs?
+B1|curriculum.ts|0|title: 'The 4-step complaint protocol', items: [
+B1|curriculum.ts|1|label: 'Prohibited in complaint handling'
+B1|curriculum.ts|1|title: 'Difficult scenarios — correct responses'
+B1|curriculum.ts|1|title: 'What guests actually want when they complain'
+B1|curriculum.ts|0|desc: 'The 4-step protocol that turns a broken moment into a defining one'
+B1|curriculum.ts|0|A guest says "We've been waiting 30 minutes." You say:
+B1|curriculum.ts|0|After resolving a complaint, you should:
+B1|curriculum.ts|0|A guest says "This is overcooked." You say:
+B2|curriculum.ts|1|Read the table before you open your mouth. Match energy to energy.
+B2|curriculum.ts|0|group: '💑 Couples',
+B2|curriculum.ts|1|Universal rules — every table, every time
+B2|curriculum.ts|0|A couple is deep in conversation, haven't looked up, seated 3 minutes.
+B2|curriculum.ts|0|A group of 6 is celebrating a birthday, loud and happy.
+B2|curriculum.ts|0|A solo businessman has his laptop open and hasn't touched his menu.
+B2|curriculum.ts|1|A couple at table 5 has been waiting 8 minutes and is starting to look around.
+B3|curriculum.ts|0|The best servers don't look like they're working harder than everyone else
+B3|curriculum.ts|0|title: 'Proactive vs reactive — the shift', items: [
+B3|curriculum.ts|1|Two habits turn attention into efficiency.
+B3|curriculum.ts|1|title: '6 efficiency habits every floor server should build'
+B3|curriculum.ts|1|The observant regular is the ultimate test
+B3|curriculum.ts|0|What's the core difference between proactive and reactive service?
+B4|curriculum.ts|1|Arrive 10–15 minutes early, in clean uniform, groomed and ready to start on time.
+B4|curriculum.ts|1|Put phones away during service — your attention belongs to the floor.
+B5|curriculum.ts|0|title: '5 habits of efficient servers', items: [
+B5|curriculum.ts|0|Which of these is a core habit of an efficient server?
+B5|curriculum.ts|0|You are walking past table 3 on your way to the kitchen. What should you do?
+B5|curriculum.ts|1|{ num: 5, title: 'Pre-bus passes'
+B6|curriculum.ts|1|desc: 'The 3-part formula that sells any dish or drink in one sentence'
+B6|curriculum.ts|1|badge: 'Close the sale'
+B6|curriculum.ts|1|The method signals craft and pride — and justifies the price before they ask.
+B6|curriculum.ts|1|Lead with the key ingredient or what makes it special. "This starts with hand-selected Wagyu
+B6|curriculum.ts|1|label: 'Formula in action'
+B6|curriculum.ts|1|title: 'What makes a description land'
+B6|curriculum.ts|1|The menu describes the dish. You bring it to life.
+B7|curriculum.ts|0|Cutlery laid together on the plate — the universal "I'm done" signal; don't leave it sitting.
+B7|curriculum.ts|0|They're finished with the course — clear it promptly.
+B7|curriculum.ts|0|Reactive clears when asked; proactive clears the finished plate the moment cutlery goes down.
+C1|curriculum.ts|0|You guys ready or still deciding? Take your time — we're here all night!
+C1|curriculum.ts|1|First time here? Our signature burger is the move — freshly ground daily
+C2|curriculum.ts|0|A real solution, fast — not a process, not an escalation.
+C2|curriculum.ts|0|Escalate to a manager immediately — some situations require more authority
+C3|curriculum.ts|2|Arrive 10–15 minutes early, in clean uniform
+C3|curriculum.ts|1|What's the expectation around arriving for a shift?
+C3|curriculum.ts|1|Get there 15 minutes before your start time.
+C3|curriculum.ts|1|When should you arrive for your first shift?
+C4|curriculum.ts|1|A guest asks a detailed wine question you cannot really answer.
+C5|curriculum.ts|0|Is everything better now? Is there anything else I can do?
+E|curriculum.ts|1|[Star]
+E|curriculum.ts|2|[what makes it special]
+E|scenarios.ts|1|[specific dish]
+A4|scenarios.ts|1|Correct at [Property]: follow the house service-direction standard — serve from the left, clear and pour from the right.
+B1|curriculum.ts|1|label: 'The protocol lives in one place'
+B7|curriculum.ts|1|Once the last guest at the table shows it, clear together in the next natural pause.
+B7|curriculum.ts|1|They're finished with the course — clear the table together once the last guest signals.
+C2|curriculum.ts|1|A real solution, fast — never a process. Escalate only after your own best effort has not landed.
