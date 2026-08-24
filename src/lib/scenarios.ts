@@ -1168,7 +1168,7 @@ WRONG CALLS (trigger warmth drop + coaching note):
 - Any call that results in partial service
 
 FOLLOW-UP SEQUENCE (ask these in order after the right call):
-- "Do I serve from the left or right?" → Correct at [Property]: food from the right, drinks from the left.
+- "Do I serve from the left or right?" → Correct at [Property]: follow the house service-direction standard — serve from the left, clear and pour from the right.
 - "Should I say anything to the table about the wait?" → Correct: a brief, warm acknowledgment ("thank you for your patience") is appropriate.
 
 Return ONLY valid JSON:

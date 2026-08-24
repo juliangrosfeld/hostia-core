@@ -410,33 +410,6 @@ const greetingsLessons: Lesson[] = [
         text: 'Every table at [Property] tells you something before anyone says a word. A couple on a date wants presence, not interruption. A group of friends wants energy and fun. A solo businessman wants precision and speed. Read the room before you open your mouth.',
       },
       {
-        type: 'callout',
-        tone: 'rule',
-        label: 'The Standard',
-        text: 'Read the table before you open your mouth. Match energy to energy. A quiet couple doesn\'t need your best party energy — and a birthday table doesn\'t need a formal check-in. Service adapts to the guest, not the other way around.',
-      },
-      {
-        type: 'culture-cards',
-        items: [
-          {
-            group: '💑 Couples',
-            cues: 'Discrete, quieter tone — their conversation is the priority. Approach softly, make eye contact, give a small nod and wait for them to acknowledge you before speaking. Check in briefly and non-intrusively, then give them space. Never hover. Never interrupt mid-sentence.',
-          },
-          {
-            group: '👥 Groups (4+)',
-            cues: 'Match their energy — more interaction is welcome. Be warm, enthusiastic, and flexible with pacing. "You guys ready or still deciding? Take your time — we\'re here all night!" Never be stiff or formal. Never rush their ordering.',
-          },
-          {
-            group: '💼 Business / Solo',
-            cues: 'Efficient, precise, minimal small talk. They want speed and accuracy — not conversation. Check in quickly and cleanly. Offer what they need before they have to ask: "Your order and the bill whenever you\'re ready — just wave." Never make them wait. Never ask unnecessary questions.',
-          },
-          {
-            group: '🌍 Tourists (First-timers)',
-            cues: 'Enthusiastic, local knowledge, help them discover. Offer recommendations naturally. "First time here? Our signature burger is the move — freshly ground daily." Make them feel like insiders, not tourists. Never make them feel out of place.',
-          },
-        ],
-      },
-      {
         type: 'do-dont',
         title: 'In practice',
         items: [
@@ -445,7 +418,7 @@ const greetingsLessons: Lesson[] = [
             dont: 'Walk up and start talking mid-sentence at a couple\'s table.',
           },
           {
-            do: '"You guys ready or still deciding? Take your time — we\'re here all night!" (birthday table, big group)',
+            do: '"Are you ready, or would you like a few more minutes? No rush at all — we\'re here all night." (birthday table, big group)',
             dont: 'Be stiff and formal at a group celebration.',
           },
           {
@@ -471,37 +444,37 @@ const greetingsLessons: Lesson[] = [
     ],
     quiz: [
       {
-        q: 'A couple is deep in conversation, haven\'t looked up, seated 3 minutes. What do you do?',
+        q: 'You reach a table while the two guests are mid-conversation. What is the approach?',
         options: [
-          'Interrupt politely and take their order',
-          'Approach quietly, make eye contact, give a small nod and wait for them to acknowledge you',
-          'Wait until they call you over',
-          'Send a runner to check',
+          'Catch their eye, nod, and wait for them to acknowledge you before speaking.',
+          'Open with a quick "sorry to interrupt" and move straight on to the specials.',
+          'Stand quietly beside the table until their conversation stops on its own.',
+          'Skip the table this round and come back once they have finished talking.',
         ],
-        correct: 1,
-        explain: 'The nod-and-wait is the five-star move. You show presence without interrupting their moment.',
+        correct: 0,
+        explain: 'Never interrupt mid-sentence. The nod-and-wait leaves them to choose the moment they break off — you are present without taking the moment over.',
       },
       {
-        q: 'A group of 6 is celebrating a birthday, loud and happy. How do you match them?',
+        q: 'You have just served a table their food. What does "never hover" mean in practice?',
         options: [
-          'Professional and formal — keep it serious',
-          'Match their energy — be warm, smile, acknowledge the birthday',
-          'Keep it quick and efficient',
-          'Let them settle before approaching',
+          'Stay within a metre of the table so you can react instantly.',
+          'Avoid the table entirely until one of them signals for you.',
+          'Check in once, then give them space and read the table from a distance.',
+          'Keep returning every few minutes to ask whether they need anything further.',
         ],
-        correct: 1,
-        explain: 'Groups want energy matched. Stiff service at a birthday table kills the vibe.',
+        correct: 2,
+        explain: 'One check-in, then distance. Hovering makes guests self-conscious and repeated check-ins interrupt them — reading the table from across the room does the same job invisibly.',
       },
       {
-        q: 'A solo businessman has his laptop open and hasn\'t touched his menu. What does this tell you?',
+        q: 'Why does bringing the same energy to every table fail?',
         options: [
-          'He hasn\'t decided — leave him longer',
-          'He\'s working — approach efficiently, ask if he\'s ready, don\'t linger',
-          'He needs help with the menu',
-          'He wants to be left completely alone',
+          'It is more tiring than adapting your tone to each table.',
+          'Managers assess servers on their range of tone and register.',
+          'Guests expect identical service, so a single register is the safer choice.',
+          'A quiet couple and a loud birthday group want opposite things from you.',
         ],
-        correct: 1,
-        explain: 'Laptop = working. He wants speed and precision, not conversation.',
+        correct: 3,
+        explain: 'Read first, act second. The warm, high-energy approach that lands at a birthday table is an intrusion at a couple\'s table three metres away.',
       },
       {
         q: 'Tourists are photographing their food. You should:',
@@ -618,7 +591,7 @@ const physicalCraftLessons: Lesson[] = [
       { q: 'A guest is walking toward you in a narrow corridor. You should:', options: ['Continue walking — they will move', 'Step aside and let them pass', 'Speed up to get past them quickly', 'Ask them to move to the side'], correct: 1, explain: 'Guests always have right of way. Always step aside — never expect a guest to move for you. This is non-negotiable.' },
       { q: 'You are approaching a kitchen door exit with a full tray. You should:', options: ['Walk through quickly to save time', 'Slow down and look before entering or exiting', 'Use your shoulder to push through', 'Announce loudly that you are coming through'], correct: 1, explain: 'Kitchen door exits are danger zones — always slow down and look before entering or exiting. A moment of caution prevents a collision.' },
       { q: 'You notice a wet floor near table 5 during service. What is the correct action?', options: ['Walk carefully and continue with service', 'Tell a manager immediately and avoid the area', 'Clean it yourself while still carrying items', 'Let guests know to be careful'], correct: 1, explain: 'Never rush on a wet floor. Alert a manager immediately and avoid the area. Safety first — service waits.' },
-      { q: 'You are walking past table 3 on your way to the kitchen. What should you do?', options: ['Walk straight through without stopping', 'Glance at the table and check if anything is needed', 'Stop and ask if everything is okay', 'Only stop if a guest flags you'], correct: 1, explain: 'Every pass by a table is an opportunity — the pre-bus pass. Check what is needed as you walk by. It catches problems before they become requests.' },
+      { q: 'A colleague runs across the dining room to reach the pass. What does that communicate to the room?', options: ['That the team is responsive and on top of the service.', 'Nothing at all — guests stay focused on their own tables.', 'That the floor is busy, which guests expect at peak times.', 'That something is wrong — running signals panic.'], correct: 3, explain: 'Never run and never shuffle. Running signals panic and stresses the whole room; shuffling signals disengagement. Smooth, quiet, purposeful movement is what tells guests the floor is under control.' },
     ],
   },
   {
@@ -919,19 +892,14 @@ const languageLessons: Lesson[] = [
   {
     id: 'handling-complaints',
     title: 'Handling Difficult Conversations',
-    desc: 'The 4-step protocol that turns a broken moment into a defining one',
+    desc: 'The words that turn a broken moment into a defining one',
     duration: '8 min',
     xp: 50,
     status: 'available',
     scenarioId: 'overcooked-complaint',
     learn: [
       { type: 'intro', text: 'A complaint handled perfectly creates more loyalty than a meal that went right the first time. Guests don\'t expect perfection — they expect honesty and action. Most complaints are not about the mistake. They\'re about whether you cared enough to fix it.' },
-      { type: 'steps', title: 'The 4-step complaint protocol', items: [
-        { num: 1, title: 'Listen — without interrupting or defending', body: 'Let the guest finish completely. Don\'t justify, don\'t explain, don\'t pre-empt. This takes discipline — especially when you know the kitchen was slammed. Do it anyway.', badge: 'Always first' },
-        { num: 2, title: 'Acknowledge — genuinely', body: '"I completely understand, and I\'m sorry this happened." Not "I\'m sorry you feel that way." Not "I understand but..." The but cancels everything before it.', badge: 'No buts' },
-        { num: 3, title: 'Resolve — with a concrete offer, immediately', body: '"Let me replace that for you right away." Specific. Fast. No checking-in — act. A beverage while they wait is the minimum gesture.', badge: 'Act now' },
-        { num: 4, title: 'Follow up — to confirm it landed', body: 'Check back after the fix. "Is the new dish exactly what you were expecting?" This turns the resolution into a recovery — and shows you cared beyond the transaction.', badge: 'Close the loop' },
-      ]},
+      { type: 'callout', tone: 'tip', label: 'The protocol lives in one place', text: 'The recovery framework itself is the LEARN model — Listen, Empathize, Apologize, Resolve, Notify — taught in "The LEARN Protocol" in Handling Difficult Situations. Learn the steps there. This lesson is about the words you use inside them, because the same protocol succeeds or fails on how it is said.' },
       { type: 'callout', tone: 'warn', label: 'Prohibited in complaint handling', text: '"The kitchen was very busy tonight." / "Are you sure you ordered medium-rare?" / "That\'s never happened before." / "That\'s not my fault." / "I\'m sorry but..." — These phrases end the relationship. Every single one.' },
       { type: 'do-dont', title: 'Difficult scenarios — correct responses', items: [
         { dont: '"The kitchen was really backed up tonight — that\'s why it took so long."', do: '"I sincerely apologize for the wait. Let me check on that right now and I\'ll be back with you in two minutes."' },
@@ -941,16 +909,16 @@ const languageLessons: Lesson[] = [
       { type: 'tip-list', title: 'What guests actually want when they complain', items: [
         'To be heard — this is the most important thing. Let them finish.',
         'To be believed — never question their experience.',
-        'A real solution, fast — not a process, not an escalation.',
+        'A real solution, fast — never a process. Escalate only after your own best effort has not landed.',
         'To feel valued, not like a burden or a problem to be managed.',
       ]},
     ],
     quiz: [
-      { q: 'A guest says "This is overcooked." You say:', options: ['"Are you sure? Medium-rare can look more done than expected."', '"I\'m so sorry — the kitchen has been really busy tonight."', '"You\'re absolutely right, and I\'m sorry. Let me get that replaced for you right away."', '"I\'ll mention it to the chef."'], correct: 2, explain: 'Own it immediately. No excuses, no deflection. "You\'re right, I\'m sorry, I\'ll fix it" is the entire protocol compressed into one sentence.' },
-      { q: 'A guest says "We\'ve been waiting 30 minutes." You say:', options: ['"I\'m sorry but the kitchen is backed up tonight."', '"30 minutes isn\'t unusual on a busy night."', '"I sincerely apologize for the wait. Let me check on that right now and I\'ll be back in two minutes."', '"Did you let anyone know you were waiting?"'], correct: 2, explain: 'Acknowledge the wait with a genuine apology, then act immediately with a specific time you\'ll return. Never explain or justify — that\'s your problem, not theirs.' },
+      { q: 'Why does "I\'m sorry but..." fail as an apology?', options: ['It is too informal a register for a complaint.', 'It is too brief to read as genuinely sincere.', 'The "but" cancels the apology and turns it into a defence.', 'Nothing fails — it works perfectly well if you say it warmly enough.'], correct: 2, explain: '"But" undoes everything in front of it. The guest hears the justification, not the apology — which is why the phrase sits on the prohibited list next to "that\'s never happened before."' },
+      { q: 'What makes "I\'ll be back with you in two minutes" stronger than "I\'ll look into it"?', options: ['It commits to a specific action and a specific time.', 'It sounds more formal and therefore more professional.', 'It gives you a deadline that the kitchen has agreed to.', 'It avoids admitting that anything actually went wrong.'], correct: 0, explain: 'Vague reassurance asks the guest to keep waiting on trust alone. A named action and a named time give them something concrete to hold — the difference between a guest who settles and one who keeps watching the door.' },
       { q: 'Which response is prohibited in complaint handling?', options: ['Offering a concrete solution immediately', '"The kitchen was backed up — that\'s why it happened."', 'Checking back after the fix', 'Acknowledging the guest\'s frustration'], correct: 1, explain: 'Blaming the kitchen — or any circumstance — shifts responsibility away from you and makes the guest feel like a problem. Never deflect. Own it entirely.' },
       { q: 'A guest receives the wrong order. The correct response is:', options: ['"The ticket showed [X] — let me show you."', '"That sometimes happens with our system."', '"I\'m so sorry about that. Let me fix this for you immediately."', '"Which server took your order?"'], correct: 2, explain: 'It doesn\'t matter how it happened — only how you fix it. Defending the process or questioning the guest signals that you value being right over their experience.' },
-      { q: 'After resolving a complaint, you should:', options: ['Leave them alone — they\'ve had enough interaction.', 'Offer a discount on the bill immediately.', 'Check back after the fix to confirm they\'re satisfied.', 'Ask them to fill out a feedback form.'], correct: 2, explain: 'The follow-up is Step 4 — and often the most powerful. Checking back shows you cared beyond the fix. It turns a recovery into a loyalty moment.' },
+      { q: 'Which phrase tells a guest you do not believe them?', options: ['"Let me get that sorted for you right now."', '"I completely understand, and I\'m sorry this happened."', '"Can I bring you something while you wait?"', '"Are you sure? That\'s never happened before."'], correct: 3, explain: 'Questioning a guest\'s account is the fastest way to lose them. "Are you sure?" and "that\'s never happened before" say the same thing — that you think they are mistaken. Guests want to be believed long before they want to be compensated.' },
     ],
   },
 ];
@@ -1005,7 +973,7 @@ const complaintsLessons: Lesson[] = [
         { num: 2, title: 'E — EMPATHIZE', body: 'Acknowledge what they felt, not just what happened. Not: "I understand there was an issue." But: "I completely understand — that\'s genuinely frustrating and I\'m sorry." Guests need to feel understood before they can accept a solution.', badge: 'Feelings first' },
         { num: 3, title: 'A — APOLOGIZE', body: 'A genuine, direct apology. No excuses. Say: "I\'m sorry this happened." Not: "I\'m sorry you feel that way." Not: "I\'m sorry but the kitchen was busy." The apology must be unconditional.', badge: 'No excuses' },
         { num: 4, title: 'R — RESOLVE', body: 'Offer a concrete solution immediately. Don\'t say "let me see what I can do." Say "Here\'s what I\'m going to do right now." Always tell them WHAT and WHEN. "I\'m going to the kitchen right now and I\'ll be back in 3 minutes."', badge: 'Act now' },
-        { num: 5, title: 'N — NOTIFY', body: 'Follow up. Always. Check back after the resolution. "Is everything better now? Is there anything else I can do?" Most staff resolve and disappear. The follow-up is what turns a recovered guest into a loyal one.', badge: 'Close the loop' },
+        { num: 5, title: 'N — NOTIFY', body: 'Follow up. Always. Check back after the resolution. "How is the new dish? Is there anything else I can bring you?" Most staff resolve and disappear. The follow-up is what turns a recovered guest into a loyal one.', badge: 'Close the loop' },
       ]},
       { type: 'callout', tone: 'warn', label: 'The Most Common Failure', text: 'Jumping to a solution before the guest finishes speaking. This makes them feel unheard — and more frustrated. Let them finish. Every time.' },
       { type: 'do-dont', title: 'In practice', items: [
@@ -1019,7 +987,7 @@ const complaintsLessons: Lesson[] = [
       { q: 'What\'s the difference between empathy and sympathy in complaint handling?', options: ['Nothing — they mean the same thing', 'Empathy acknowledges their feelings; sympathy just acknowledges the facts', 'Sympathy is more professional', 'Empathy is only for serious complaints'], correct: 1, explain: '"I understand there was a problem" is sympathy — facts only. "I understand how frustrating that must have been" is empathy — feelings first. Guests need to feel understood, not just processed.' },
       { q: 'A guest complains their food was cold. Which apology is correct?', options: ['"I\'m sorry you feel that way"', '"I\'m sorry but we\'ve been very busy tonight"', '"I\'m sorry — that\'s not acceptable and I\'m going to fix it right now"', '"I apologize but it was hot when it left the kitchen"'], correct: 2, explain: 'The apology must be direct and unconditional. No excuses, no blame-shifting. "I\'m sorry you feel that way" is not an apology — it dismisses their experience.' },
       { q: 'After resolving a complaint, what must you always do?', options: ['Thank the guest for their patience and move on', 'Follow up to confirm they\'re satisfied', 'Let them enjoy their meal without further interruption', 'Inform the manager immediately'], correct: 1, explain: 'The N in LEARN is Notify — always follow up. Most staff resolve and disappear. The follow-up is what converts a recovered guest into a loyal one.' },
-      { q: 'A guest is still unhappy after your resolution attempt. What now?', options: ['Apologize again and walk away', 'Escalate to a manager immediately — some situations require more authority', 'Offer more and more compensation until they\'re happy', 'Explain the situation more clearly'], correct: 1, explain: 'Know when to escalate. You are empowered to resolve most situations — but if a guest remains upset after your best effort, a manager must step in. Escalation is not failure — it\'s professionalism.' },
+      { q: 'A guest is still unhappy after your resolution attempt. What now?', options: ['Apologize again and walk away', 'Escalate to a manager — some situations need more authority than you hold', 'Offer more and more compensation until they\'re happy', 'Explain the situation more clearly'], correct: 1, explain: 'Know when to escalate. You are empowered to resolve most situations — but if a guest remains upset after your best effort, a manager must step in. Escalation is not failure — it\'s professionalism.' },
     ],
   },
   {
@@ -1382,19 +1350,12 @@ const casualDiningStandardLessons: Lesson[] = [
         'Everything else — side work, restocking, resetting. Important, but it never comes before a guest.',
       ]},
       { type: 'intro', text: 'Attention to detail is a speed multiplier, not the opposite of speed. The servers who seem effortlessly fast aren\'t running harder — they\'re seeing more. They catch the nearly empty glass before it\'s empty, notice the guest scanning the room before they have to wave, spot the table that\'s ready for the bill before they ask. Each thing caught early means one fewer interruption, one fewer return trip, one fewer guest left waiting. Sloppy attention creates extra work: forgotten refills, missed signals, double-backs. Sharp attention removes work before it appears. That\'s how you move fast without ever looking rushed.' },
-      { type: 'tip-list', title: '5 habits of efficient servers', items: [
-        'Pre-bussing — clear empty plates and glasses as you pass, so tables never pile up and the final clear is quick.',
-        'Carrying more in one trip — never make two trips when one will do; bring the refill and clear the plate together.',
-        'Anticipating refills before they\'re asked — watch the glass line, not the raised hand.',
-        'Knowing which tables are next in the sequence — hold the whole floor in your head so nothing surprises you.',
-        'Never walking the floor empty-handed — every trip out carries something, every trip back brings something.',
-      ]},
     ],
     quiz: [
       { q: 'What\'s the difference between being fast and making a guest feel rushed?', options: ['There is no difference — fast always feels rushed.', 'Efficiency done right is invisible; the guest feels relaxed even while you move at double speed.', 'Rushing is good when the restaurant is busy.', 'Feeling rushed means the server is working hard, which guests appreciate.'], correct: 1, explain: 'Great efficiency is invisible to the guest. They should feel unhurried and cared for, never like you\'re trying to turn their table.' },
       { q: 'During a rush, what sits at the top of the priority ladder?', options: ['Restocking and side work.', 'Clearing finished plates from every table.', 'Hot food that\'s ready in the kitchen.', 'Resetting empty tables for the next guests.'], correct: 2, explain: 'Ready food is the top priority — hot plates die under the heat lamp. Run them first, then refills, check-ins, clearing, and everything else.' },
       { q: 'How is attention to detail a "speed multiplier"?', options: ['It isn\'t — paying attention slows you down.', 'Catching things early means fewer interruptions, fewer return trips, and fewer waiting guests.', 'It only matters in fine dining, not casual.', 'It just makes managers happy during reviews.'], correct: 1, explain: 'Seeing the near-empty glass or the searching guest before they signal removes work before it appears — that\'s what makes sharp servers seem effortlessly fast.' },
-      { q: 'Which of these is a core habit of an efficient server?', options: ['Walking the floor empty-handed to move faster.', 'Making two trips so you never carry too much.', 'Pre-bussing and never walking the floor empty-handed.', 'Waiting for the raised hand before refilling drinks.'], correct: 2, explain: 'Pre-bussing and always carrying something each direction cut down trips and keep tables clean — hallmarks of efficiency.' },
+      { q: 'The pass is clear and no food is waiting. What comes next on the priority ladder?', options: ['Drink refills — an empty glass is the clearest sign of neglect.', 'Side work and restocking, while you have a quiet moment to do it.', 'Resetting the empty tables so the next seating can be sat down.', 'Whichever table happens to be nearest to where you are standing.'], correct: 0, explain: 'The ladder runs: ready food, then refills, then check-ins on tables that have been waiting, then clearing, and side work last. Side work matters, but it never comes before a guest.' },
       { q: 'A guest at your table keeps glancing around the room. What does an attentive server read from this?', options: ['Nothing — they\'re just looking at the décor.', 'They need something and shouldn\'t have to wave you down — go check in.', 'They\'re bored and will leave soon.', 'They want the bill, so bring it without asking.'], correct: 1, explain: 'A guest scanning the room is a signal you catch before they have to flag you. Anticipating it is exactly how you stay ahead and avoid the wave.' },
     ],
   },
@@ -1486,7 +1447,7 @@ const casualDiningFloorLessons: Lesson[] = [
       { type: 'tip-list', title: 'Reading the natural pacing signals', items: [
         'Plates pushed toward the edge or stacked — they\'re finished; clear promptly to open the next phase.',
         'Conversation winding down, glances around the room — the meal is closing; this is your window to offer dessert or the bill.',
-        'Cutlery laid together on the plate — the universal "I\'m done" signal; don\'t leave it sitting.',
+        'Cutlery laid together on the plate — the universal "I\'m done" signal. Once the last guest at the table shows it, clear together in the next natural pause.',
         'Cards or wallet appearing on the table — they want the bill now; don\'t make them ask.',
         'Settling back in, ordering another round, leaning into conversation — they\'re staying; give them space, don\'t force the close.',
       ]},
@@ -1502,7 +1463,7 @@ const casualDiningFloorLessons: Lesson[] = [
     ],
     quiz: [
       { q: 'What\'s the difference between turning a table and rushing a guest?', options: ['They\'re the same thing — both just mean getting guests to leave faster.', 'Turning moves a table smoothly through the sequence so it\'s ready when guests naturally are; rushing makes them feel pushed out before they\'re ready.', 'Turning only happens at busy times; rushing happens when it\'s slow.', 'Turning is for big tables, rushing is for small ones.'], correct: 1, explain: 'Turning protects both revenue and experience by pacing well. Rushing sacrifices the experience for a few minutes — and costs the return visit and the tip.' },
-      { q: 'A guest lays their cutlery together on the plate. What does this signal?', options: ['They want more food.', 'They\'re finished with the course — clear it promptly.', 'They\'re unhappy with the dish.', 'They want to be left alone.'], correct: 1, explain: 'Cutlery laid together is the universal "I\'m done" signal. Clearing promptly opens the next phase and keeps the table from stalling.' },
+      { q: 'A guest lays their cutlery together on the plate. What does this signal?', options: ['They want more food.', 'They\'re finished with the course — clear the table together once the last guest signals.', 'They\'re unhappy with the dish.', 'They want to be left alone.'], correct: 1, explain: 'Cutlery laid together is the universal "I\'m done" signal. Wait for the last guest at the table to show it, then clear all the plates together in the next natural pause — never while someone is still eating.' },
       { q: 'What\'s the right way to present the bill when a table is winding down?', options: ['Drop it silently and walk away fast.', 'Wait until they explicitly ask for it.', 'Present it warmly with no pressure — "whenever you\'re ready, no rush at all."', 'Tell them you need the table for the next party.'], correct: 2, explain: 'Present at the natural lull, framed with zero pressure. It nudges the table toward its close without a single word that sounds like "hurry up."' },
       { q: 'Which of these rushes a guest the loudest — even without words?', options: ['Pre-bussing empty plates as you pass.', 'Offering dessert at a natural lull.', 'Hovering nearby, sighing, or stacking chairs close to the table.', 'Closing with a warm invitation back.'], correct: 2, explain: 'Body language rushes guests louder than words. Hovering, sighing, and stacking chairs nearby all scream "hurry up" even if you never say it.' },
       { q: 'A table genuinely wants to linger and the floor isn\'t under pressure. What\'s the smart call?', options: ['Force the turn anyway — every table must turn on schedule.', 'Let them linger — a forced turn that sours a regular costs more than the table.', 'Present the bill repeatedly until they leave.', 'Start clearing everything to signal they should go.'], correct: 1, explain: 'When the floor allows it, let a table linger. A great wrap-up makes the next visit; a forced turn that sours a guest costs far more than a few minutes.' },
@@ -1517,14 +1478,6 @@ const casualDiningFloorLessons: Lesson[] = [
     status: 'available',
     scenarioId: 'casual-dining-efficiency',
     learn: [
-      { type: 'intro', text: 'The best servers don\'t look like they\'re working harder than everyone else — they look like they\'re working less, because everything is handled before it becomes a problem. That\'s the difference between proactive and reactive service. Reactive service waits for the raised hand, the empty glass, the request; it\'s always one step behind, always apologizing for a thing that was already too late. Proactive service sees the need forming and meets it before the guest even registers it. The refill arrives before they reach for the glass. The plate is cleared before they push it away. Nothing is ever asked for, because nothing is ever missed. That\'s what "seamless" actually means — and it\'s built entirely on attention to detail.' },
-      { type: 'tip-list', title: 'Proactive vs reactive — the shift', items: [
-        'Reactive waits for the empty glass; proactive watches the glass line and refills before it\'s empty.',
-        'Reactive waits to be flagged; proactive catches the guest scanning the room and is already on the way.',
-        'Reactive clears when asked; proactive clears the finished plate the moment cutlery goes down.',
-        'Reactive brings the bill when requested; proactive reads the close and has it ready at the right moment.',
-        'Reactive apologizes for the miss; proactive never creates the miss in the first place.',
-      ]},
       { type: 'intro', text: 'Two habits turn attention into efficiency. The first is the scan: every single time you pass through your section, your eyes do a quick sweep — glass levels, plate states, faces, body language. One pass, the whole picture updated, every time. The servers who seem to have eyes everywhere aren\'t gifted; they\'ve just made scanning automatic. The second is the one-trip rule, sometimes called never walking empty-handed: every trip out of the kitchen carries something to the floor, and every trip back brings something with it. A dropped plate cleared on the way past, a refill delivered en route, a condiment grabbed because you noticed it was needed two tables ago. Small details compound: catch ten tiny things early and you\'ve erased ten interruptions, ten return trips, ten moments a guest might have felt overlooked. That compounding is what an exceptional experience is actually made of.' },
       { type: 'tip-list', title: '6 efficiency habits every floor server should build', items: [
         'Scan your section every single time you pass — one sweep, glasses and plates and faces, picture updated.',
@@ -1537,7 +1490,7 @@ const casualDiningFloorLessons: Lesson[] = [
       { type: 'intro', text: 'The observant regular is the ultimate test of all of this. They\'ve been in enough times to know exactly how good service feels, and they read your section the way you should be reading it — they see the glass you didn\'t refill, the plate you left sitting, the moment you waited to be told. You can\'t charm your way past that guest; you can only out-attention them. Catch the near-empty glass before they touch it, clear the finished plate without being asked, anticipate the next thing they\'ll want and have it ready — and do all of it smoothly, in one pass, without making a performance of it. Get there and the regular stops noticing the service at all, which is the highest compliment there is: it just feels effortless, because you did all the work where they couldn\'t see it.' },
     ],
     quiz: [
-      { q: 'What\'s the core difference between proactive and reactive service?', options: ['Proactive is faster; reactive is slower.', 'Proactive sees the need forming and meets it before the guest registers it; reactive waits for the raised hand and is always a step behind.', 'Proactive is for regulars; reactive is for new guests.', 'There is no real difference — both get the job done.'], correct: 1, explain: 'Reactive waits for the request and apologizes for the miss. Proactive meets the need before it\'s voiced, so nothing is ever asked for because nothing is ever missed.' },
+      { q: 'Service goes quiet for ten minutes. What does an efficient server do with the lull?', options: ['Take the break — the floor will get busy again soon enough.', 'Start a deep clean that will have to be abandoned when it fills up.', 'Reset and restock so the next rush cannot catch you short.', 'Check on every table again to show attentiveness during the quiet.'], correct: 2, explain: 'Lulls are stock time. A station reset in the quiet is the reason a rush never has you running for napkins — and re-checking tables that need nothing is just hovering.' },
       { q: 'What is the "scan," and how often should you do it?', options: ['A quick check of your phone between tables.', 'A sweep of your whole section — glasses, plates, faces — done every single time you pass through it.', 'A once-per-shift review with your manager.', 'A check you do only when a table flags you.'], correct: 1, explain: 'The scan is a one-pass sweep of glass levels, plate states, and body language, done every time you cross your section. Making it automatic is how great servers seem to have eyes everywhere.' },
       { q: 'What does the "one-trip rule" (never walking empty-handed) mean?', options: ['Only make one trip to each table per visit.', 'Every trip out of the kitchen carries something to the floor, and every trip back brings something with it.', 'Never carry more than one plate at a time for safety.', 'Limit yourself to one lap of the floor between orders.'], correct: 1, explain: 'Never walking empty-handed means each trip in either direction is doing work — delivering, clearing, or grabbing what you spotted was needed. It erases return trips.' },
       { q: 'How do small details "compound" into an exceptional experience?', options: ['They don\'t — only big gestures matter to guests.', 'Catching ten tiny things early erases ten interruptions, ten return trips, and ten moments a guest might feel overlooked.', 'They add up to a bigger tip at the end of one meal.', 'They mainly impress the manager, not the guest.'], correct: 1, explain: 'Each detail caught early removes work and a potential miss before it appears. Stacked up across a meal, that\'s exactly what makes service feel seamless and exceptional.' },
