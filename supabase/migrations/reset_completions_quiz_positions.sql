@@ -171,6 +171,12 @@ COMMIT;
 --                excluded on purpose above
 --   untouched  : phase_completions 2, roleplay_sessions 22
 --
---   STILL OWED: this ran before the content deploy. Once the curriculum commit
---   is live, re-run the SELECT above — any practice row with a completed_at
---   later than this reset attests the OLD answer positions and must be deleted.
+--   DEPLOY-GAP CHECK — CLOSED, 2026-08-24, after 41d61e0 went live.
+--   This reset ran BEFORE the content deploy, inverting the Step 1 order, so
+--   any practice row written in the gap would have attested the OLD answer
+--   positions and needed deleting again. Re-checked once the deploy was live:
+--     practice rows for the 63 curriculum lessons ...... 0
+--     lesson_completions rows written since the reset .. 0 (any phase, > 21:52Z)
+--     totals unchanged ................................. 417 (226 / 9 / 182)
+--   Nothing was written in the gap. No second DELETE was needed and none ran.
+--   Nothing further is owed on this reset.
